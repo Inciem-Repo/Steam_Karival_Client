@@ -105,13 +105,15 @@ function Home() {
                 >
                   Go to Profile
                 </button>
-              ) : (
+              ) : quizID ? (
                 <button
                   className="flex flex-col w-full btn"
                   onClick={startCountdown}
                 >
                   Start Quiz
                 </button>
+              ) : (
+                "No Quiz Available Right Now"
               )}
             </>
           )}

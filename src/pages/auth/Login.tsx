@@ -93,7 +93,7 @@ function Login() {
       await login(result.data.username, result.data.password);
       toast.success("Login successful!");
       user && user?.role == roleName.admin
-        ? navigate("/dashboard")
+        ? navigate("/admin/dashboard")
         : navigate("/");
     } catch (err) {
     } finally {

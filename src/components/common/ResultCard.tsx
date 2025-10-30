@@ -27,11 +27,11 @@ const ResultCard: React.FC<ResultCardProps> = ({
 
           <div className="flex gap-10 font-body-semibold text-black">
             <div className="flex flex-col items-center">
-              <span className="font-h2-medium">{correctCount}</span>
+              <span className="font-h2-medium">{correctCount || 0}</span>
               <span className="font-h2-medium">Correct</span>
             </div>
             <div className="flex flex-col items-center">
-              <span className="font-h2-medium">{wrongCount}</span>
+              <span className="font-h2-medium">{wrongCount || 0}</span>
               <span className="font-h2-medium">Wrong</span>
             </div>
           </div>

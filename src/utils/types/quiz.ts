@@ -19,3 +19,19 @@ export interface QuizResponse {
   quiz: Quiz;
   status: boolean;
 }
+export type IQuestion = {
+  question_id: string;
+  question: string;
+  options: string[];
+  correct_answer: string;
+};
+
+export type QuizData = {
+  title: string;
+  questions: IQuestion[];
+};
+
+export type UpdateQuizPayload = {
+  title: string;
+  questions: Omit<IQuestion, "question_id">[]; 
+};

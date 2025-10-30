@@ -121,7 +121,7 @@ const Register = () => {
     try {
       await callApi(userData);
       toast.success("Registration successful!");
-      navigate("/register");
+      navigate("/login");
     } catch {
       // Error is already handled by showError inside useApi
     }

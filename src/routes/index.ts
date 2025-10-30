@@ -1,4 +1,10 @@
-import DashBoard from "../pages/admin/DashBoard";
+// src/routes/index.ts
+import AdminLayout from "../components/admin/AdminLayout";
+import Dashboard from "../pages/admin/DashBoard";
+import LeaderBoard from "../pages/admin/LeaderBoard";
+import QuizManager from "../pages/admin/QuizManager";
+import UserList from "../pages/admin/UserList";
+import UsersProfile from "../pages/admin/UsersProfile";
 import Login from "../pages/auth/Login";
 import Register from "../pages/auth/Register";
 import NotFound from "../pages/commen/NotFound";
@@ -11,19 +17,29 @@ import { roleName } from "../utils/constants/env";
 export type AppRoute = {
   id: string;
   path: string;
-  component: React.FC;
+  component?: React.FC;
   protected?: boolean;
   roles?: string[];
+  layout?: React.ComponentType<{ children: React.ReactNode }>;
+  children?: AppRoute[];
 };
 
 export const routes: AppRoute[] = [
   {
-    id: "dashboard",
-    path: "/dashboard",
-    component: DashBoard,
+    id: "admin",
+    path: "/admin",
     protected: true,
     roles: [roleName.admin],
+    layout: AdminLayout,
+    children: [
+      { id: "dashboard", path: "dashboard", component: Dashboard },
+      { id: "leaderboard", path: "leaderboard", component: LeaderBoard },
+      { id: "quizz-manger", path: "quizz-manger", component: QuizManager },
+      { id: "users", path: "users", component: UserList },
+      { id: "profile", path: "profile/user/:id", component: UsersProfile },
+    ],
   },
+
   {
     id: "home",
     path: "/",
@@ -52,19 +68,7 @@ export const routes: AppRoute[] = [
     protected: true,
     roles: [roleName.user],
   },
-  {
-    id: "login",
-    path: "/login",
-    component: Login,
-  },
-  {
-    id: "register",
-    path: "/register",
-    component: Register,
-  },
-  {
-    id: "not-found",
-    path: "*",
-    component: NotFound,
-  },
+  { id: "login", path: "/login", component: Login },
+  { id: "register", path: "/register", component: Register },
+  { id: "not-found", path: "*", component: NotFound },
 ];

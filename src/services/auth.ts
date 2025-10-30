@@ -14,3 +14,11 @@ export const getProfileService = async (userId: string) => {
   const res = await apiClient.get(api.user.getProfile(userId));
   return res.data;
 };
+export const getAllUser = async (page: number, limit: number) => {
+  const res = await apiClient.get(api.user.getAllUser(page, limit));
+  return res.data;
+};
+export const getUserQuizInfo = async (userID: string) => {
+  const res = await apiClient.get(api.user.getUserQuizInfo(userID));
+  return res.data;
+};
