@@ -18,9 +18,7 @@ export function Sidebar() {
       const mobile = window.innerWidth < 768;
       setIsMobile(mobile);
       if (mobile) {
-        setIsCollapsed(true);
-        setIsMobileOpen(false);
-      } else {
+        setIsCollapsed(false);
         setIsMobileOpen(false);
       }
     };
@@ -31,72 +29,85 @@ export function Sidebar() {
   }, []);
 
   const toggleSidebar = () => {
-    if (isMobile) setIsMobileOpen(!isMobileOpen);
-    else setIsCollapsed(!isCollapsed);
+    if (isMobile) {
+      setIsMobileOpen(!isMobileOpen);
+    } else {
+      setIsCollapsed(!isCollapsed);
+    }
   };
 
-  const closeMobileSidebar = () => {
-    setIsMobileOpen(false);
-  };
-
-  const handleNavClick = () => {
-    if (isMobile) setIsMobileOpen(false);
+  const closeSidebar = () => {
+    if (isMobile) {
+      setIsMobileOpen(false);
+    }
   };
 
   const handleLogout = () => {
     logout();
+    closeSidebar();
   };
 
   const SidebarContent = () => (
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-        {!isCollapsed && (
+        {(!isCollapsed || isMobile) && (
           <img src={logo} alt="Steam Karnival" className="w-30 h-20" />
         )}
         <button
-          onClick={toggleSidebar}
-          className="p-1 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+          onClick={closeSidebar}
+          className="p-1 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors md:hidden"
         >
-          {isMobile ? <X /> : <PanelLeft />}
+          <X className="h-5 w-5" />
         </button>
+        {!isMobile && (
+          <button
+            onClick={toggleSidebar}
+            className="p-1 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors hidden md:block"
+          >
+            <PanelLeft className="h-5 w-5" />
+          </button>
+        )}
       </div>
-      <div className="flex-1 p-4">
+      <div className={`flex-1 ${isCollapsed ? "p-2" : "p-4"}`}>
         <nav className="space-y-2">
           {items.map((item) => (
             <NavLink
               key={item.title}
               to={item.url}
               end={item.url === "/"}
-              onClick={handleNavClick}
+              onClick={closeSidebar}
               className={({ isActive }) => `
                 flex items-center gap-3 px-3 py-3 rounded-md text-sm font-medium transition-colors
-                ${isCollapsed && !isMobile ? "justify-center" : ""}
+                ${isCollapsed && !isMobile ? "justify-center px-0" : ""}
                 ${
                   isActive
-                    ? "bg-primary-light text-white font-semibold"
+                    ? "bg-gray-200 text-black font-semibold"
                     : "text-gray-700 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-700"
                 }
               `}
             >
               <item.icon className="h-5 w-5 flex-shrink-0" />
-              <span
-                className={`transition-opacity whitespace-nowrap ${
-                  isCollapsed && !isMobile ? "opacity-0 w-0" : "opacity-100"
-                }`}
-              >
-                {item.title}
-              </span>
+              {!isCollapsed && (
+                <span
+                  className={`transition-all duration-500 whitespace-nowrap ${
+                    isCollapsed && !isMobile ? "opacity-0 w-0" : "opacity-100"
+                  }`}
+                >
+                  {item.title}
+                </span>
+              )}
             </NavLink>
           ))}
         </nav>
       </div>
-      <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+
+      <div className="py-4 px-2 border-t border-gray-200 dark:border-gray-700">
         <button
           onClick={() => setShowLogoutConfirm(true)}
           className="flex items-center gap-3 text-red-500 hover:bg-red-100 dark:hover:bg-red-900 w-full px-3 py-2 rounded-md transition-colors"
         >
           <LogOut className="h-5 w-5" />
-          {!isCollapsed && <span>Logout</span>}
+          {(isMobile || !isCollapsed) && <span>Logout</span>}
         </button>
       </div>
     </div>
@@ -104,24 +115,37 @@ export function Sidebar() {
 
   return (
     <>
+      {isMobile && !isMobileOpen && (
+        <button
+          onClick={toggleSidebar}
+          className="fixed top-4 left-4 z-50 p-2 bg-primary text-white rounded-md shadow-lg md:hidden"
+        >
+          <PanelLeft className="h-5 w-5" />
+        </button>
+      )}
+
       {isMobile && isMobileOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
-          onClick={closeMobileSidebar}
+          onClick={closeSidebar}
         />
       )}
+
       <div
-        className={`flex flex-col h-screen bg-primary border-r transition-all duration-300
-        fixed md:relative z-50
-        ${
-          isMobile
-            ? `transform transition-transform duration-300 ${
-                isMobileOpen ? "translate-x-0" : "-translate-x-full"
-              } w-64`
-            : isCollapsed
-            ? "w-16"
-            : "w-64"
-        }`}
+        className={`
+          flex flex-col h-screen bg-primary dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700
+          transition-all duration-300 ease-in-out
+          fixed md:relative z-50
+          ${
+            isMobile
+              ? `w-64 transform transition-transform duration-300 ${
+                  isMobileOpen ? "translate-x-0" : "-translate-x-full"
+                }`
+              : isCollapsed
+              ? "w-16"
+              : "w-64"
+          }
+        `}
       >
         <SidebarContent />
       </div>

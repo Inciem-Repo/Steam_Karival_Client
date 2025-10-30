@@ -25,7 +25,7 @@ interface AuthContextType {
   user: User | null;
   token: string | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<User | null>;
   logout: () => void;
 }
 
@@ -43,7 +43,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (savedToken) {
       setToken(savedToken);
       const decoded = getAuthDetails();
-
       if (decoded) {
         const userFromToken: User = {
           id: decoded.user_id,
@@ -65,31 +64,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async (email: string, password: string) => {
     try {
       const data = await loginService({ email, password });
-
       if (!data?.token) {
         throw new Error("Invalid login");
       }
 
       localStorage.setItem("token", data.token);
       setToken(data.token);
-      const userInfo =
-        data.user ??
-        (() => {
-          const decoded = getAuthDetails();
-          return decoded
-            ? {
-                id: decoded.user_id,
-                name: decoded.name,
-                email: decoded.email,
-                role: decoded.role,
-                phone: decoded.phone,
-                school: decoded.school,
-                username: decoded.name,
-              }
-            : null;
-        })();
+      const userInfo = {
+        id: data.user.user_id,
+        name: data.user.name,
+        email: data.user.email,
+        role: data.user.role,
+        phone: data.user.phone,
+        school: data.user.school,
+        username: data.user.name,
+      };
 
       if (userInfo) setUser(userInfo);
+      return userInfo;
     } catch (err) {
       showError(err);
       throw err;

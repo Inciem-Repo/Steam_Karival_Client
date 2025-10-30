@@ -93,7 +93,6 @@ const UserList = () => {
   const [pagination, setPagination] = useState<PaginationInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const { callApi: callGetAllUser } = useApi(getAllUser);
-  
 
   useEffect(() => {
     const fetchGetAllUser = async () => {
@@ -216,7 +215,7 @@ const UserList = () => {
   }
 
   return (
-    <div className="h-screen overflow-scroll p-6">
+    <div className="h-screen overflow-auto p-6">
       <div className="space-y-8">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Users</h1>
@@ -298,10 +297,10 @@ const UserList = () => {
                         onClick={() =>
                           navigate(`/admin/profile/user/${user._id}`)
                         }
-                        className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors"
+                        className="flex items-center gap-2 text-black hover:text-primary/80 transition-colors"
                       >
                         <Eye className="h-4 w-4" />
-                        View
+                        view
                       </button>
                     </CustomTableCell>
                   </CustomTableRow>

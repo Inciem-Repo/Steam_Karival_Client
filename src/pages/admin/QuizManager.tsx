@@ -379,7 +379,7 @@ const QuizManager = () => {
   }, [isQuizDeleted]);
 
   return (
-    <div className="h-screen overflow-scroll p-6">
+    <div className="h-screen overflow-auto p-6">
       <div className="space-y-8 p-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Quiz Manager</h1>

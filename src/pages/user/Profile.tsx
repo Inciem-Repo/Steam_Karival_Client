@@ -35,8 +35,6 @@ export const Profile = (): JSX.Element => {
   useEffect(() => {
     const fetchProfile = async () => {
       const response = await callGetProfile(user?.id);
-      console.log(response);
-
       if (response?.status && response.user) {
         setUserProfile(response.user);
         const { total_correct, total_questions } = response.user.score;

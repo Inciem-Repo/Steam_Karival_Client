@@ -13,25 +13,49 @@ function Home() {
   const { callApi: callGetAllQuiz } = useApi(getAllQuiz);
   const { callApi: callGetProfile } = useApi(getProfileService);
   const { callApi: callGetQuizInfoByID } = useApi(getQuizInfoByID);
-  const { user } = useAuth();
-  const [isUserAttentedQuiz, setIsUserAttetedQuiz] = useState<boolean>(false);
+  const { user, loading: authLoading } = useAuth();
+  const [isUserAttendedQuiz, setIsUserAttendedQuiz] = useState<boolean>(false);
   const [quizID, setQuizID] = useState<string>("");
+  const [dataLoading, setDataLoading] = useState<boolean>(true);
   const { setQuiz } = useQuiz();
 
   useEffect(() => {
     const fetchData = async () => {
+      if (!user?.id) return;
+
       try {
-        const quizResponse = await callGetAllQuiz();
-        const profileResponse = await callGetProfile(user?.id);
-        setIsUserAttetedQuiz(profileResponse?.user?.is_quiz_attempted);
-        setQuizID(quizResponse?.quizzes[0]._id);
-      } catch (err) {}
+        setDataLoading(true);
+        const [profileResponse, quizResponse] = await Promise.all([
+          callGetProfile(user.id),
+          callGetAllQuiz(),
+        ]);
+
+        setIsUserAttendedQuiz(
+          profileResponse?.user?.is_quiz_attempted || false
+        );
+        if (quizResponse?.quizzes?.length > 0) {
+          setQuizID(quizResponse.quizzes[0]._id);
+        } else {
+          setQuizID("");
+        }
+      } catch (err) {
+        console.error("Error fetching data");
+        setIsUserAttendedQuiz(false);
+        setQuizID("");
+      } finally {
+        setDataLoading(false);
+      }
     };
-    fetchData();
-  }, []);
+
+    if (!authLoading && user?.id) {
+      fetchData();
+    }
+  }, [user, authLoading]);
 
   const startCountdown = async () => {
     try {
+      if (!quizID) return;
+
       const quizData = await callGetQuizInfoByID(quizID);
 
       if (quizData?.quiz) {
@@ -41,6 +65,7 @@ function Home() {
         navigate("/");
       }
     } catch (err) {
+      console.error("Error starting quiz:");
       navigate("/");
     }
   };
@@ -59,6 +84,13 @@ function Home() {
 
     return () => clearTimeout(timer);
   }, [countdown, navigate]);
+  if (authLoading) {
+    return (
+      <div className="w-full min-h-screen flex items-center justify-center">
+        <p>Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full min-h-screen flex items-center justify-center">
@@ -85,7 +117,7 @@ function Home() {
                   <br />
                   Stream Karnival
                 </h1>
-                {isUserAttentedQuiz ? (
+                {isUserAttendedQuiz ? (
                   <p className="relative flex items-center justify-center self-stretch font-body-regular text-xs text-center tracking-[0] leading-[16px] px-4">
                     Congratulations on completing your quiz. Consistent practice
                     helps you grow — keep going to achieve excellence.
@@ -98,7 +130,7 @@ function Home() {
                   </p>
                 )}
               </div>
-              {isUserAttentedQuiz ? (
+              {isUserAttendedQuiz ? (
                 <button
                   className="flex flex-col w-full btn"
                   onClick={() => navigate("/profile")}
@@ -113,7 +145,9 @@ function Home() {
                   Start Quiz
                 </button>
               ) : (
-                "No Quiz Available Right Now"
+                <div className="text-center text-gray-500 py-4">
+                  No Quiz Available Right Now
+                </div>
               )}
             </>
           )}

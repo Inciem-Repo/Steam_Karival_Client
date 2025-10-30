@@ -59,7 +59,6 @@ function AppRoutes() {
             );
           }
 
-          // Normal route
           if (Component) {
             const element = Layout ? (
               <Layout>

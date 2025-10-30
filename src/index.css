@@ -6,10 +6,15 @@
 @layer base {
   :root {
     /* Colors */
-    --background: linear-gradient(360deg, #ffffff 0%, #fff7c7 100%);
+    --background: linear-gradient(
+      180deg,
+      #b8eaff 0%,
+      #ffffff 41.35%,
+      #ffffff 99.04%
+    );
     --foreground: 222.2 47.4% 11.2%;
-    --primary: #ffcc00;
-    --primary-light: #ffcc0033;
+    --primary: #8ddef9;
+    --primary-light: #4bd0fd33;
     --primary-foreground: #000000;
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
@@ -125,7 +130,7 @@
 body {
   background: var(--background);
   font-family: var(--body-1-regular-font-family);
-  scrollbar-width: thin; 
+  scrollbar-width: thin;
   scrollbar-color: var(--primary) var(--background);
 }
 

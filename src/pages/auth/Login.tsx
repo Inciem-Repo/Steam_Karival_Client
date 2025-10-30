@@ -33,7 +33,7 @@ function Login() {
   const [touched, setTouched] = useState<
     Partial<Record<keyof LoginFormData, boolean>>
   >({});
-  const { login, user } = useAuth();
+  const { login } = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -70,7 +70,6 @@ function Login() {
       setErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const result = loginSchema.safeParse(formData);
@@ -87,14 +86,21 @@ function Login() {
       });
       return;
     }
+
     setErrors({});
     setLoading(true);
+
     try {
-      await login(result.data.username, result.data.password);
+      const loggedInUser = await login(
+        result.data.username,
+        result.data.password
+      );
       toast.success("Login successful!");
-      user && user?.role == roleName.admin
-        ? navigate("/admin/dashboard")
-        : navigate("/");
+      if (loggedInUser && loggedInUser.role === roleName.admin) {
+        navigate("/admin/dashboard");
+      } else {
+        navigate("/");
+      }
     } catch (err) {
     } finally {
       setLoading(false);

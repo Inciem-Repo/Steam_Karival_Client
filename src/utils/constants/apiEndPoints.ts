@@ -18,4 +18,9 @@ export const api = {
     deleteQusInQuiz: (quizID: string, qusID: string) =>
       `quiz/${quizID}/question/${qusID}`,
   },
+  admin: {
+    getDashboardInfo: "/dashboard",
+    getLeaderboard: (page: number, limit: number) =>
+      `/leaderboard?${page}&${limit}`,
+  },
 };

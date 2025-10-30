@@ -12,248 +12,348 @@ import {
   School,
 } from "lucide-react";
 import { useApi } from "../../hooks/useApi";
-import { getUserQuizInfo } from "../../services/auth";
+import { getProfileService, getUserQuizInfo } from "../../services/auth";
 
-// Mock data - replace with real data from your backend
-const userData = {
-  id: 1,
-  email: "hr@incoiem.com",
-  name: "JHHhn Doe",
-  phone: "+91-1289188879",
-  school: "ABC High School",
-  overallStats: {
-    totalQuizzes: 5,
-    attemptedQuizzes: 3,
-    averageScore: 85,
-    totalTimeSpent: "2h 30m",
-    rank: 7,
-  },
-  quizAttempts: [
-    {
-      quizId: "quiz1",
-      quizTitle: "Science Fundamentals",
-      attempted: true,
-      score: 92,
-      totalQuestions: 10,
-      correctAnswers: 9,
-      timeTaken: "25m 30s",
-      dateAttempted: "2024-01-15T10:30:00Z",
-      rank: 3,
-      questions: [
-        {
-          questionId: "q1",
-          question: "What is the chemical symbol for water?",
-          userAnswer: "H2O",
-          correctAnswer: "H2O",
-          isCorrect: true,
-          options: ["CO2", "H2O", "O2", "NaCl"],
-        },
-        {
-          questionId: "q2",
-          question: "Which planet is known as the Red Planet?",
-          userAnswer: "Mars",
-          correctAnswer: "Mars",
-          isCorrect: true,
-          options: ["Venus", "Mars", "Jupiter", "Saturn"],
-        },
-        {
-          questionId: "q3",
-          question: "What is the speed of light?",
-          userAnswer: "299,792 km/s",
-          correctAnswer: "299,792 km/s",
-          isCorrect: true,
-          options: [
-            "299,792 km/s",
-            "300,000 km/s",
-            "150,000 km/s",
-            "1,080 km/h",
-          ],
-        },
-      ],
-    },
-  ],
-};
+interface Question {
+  question_id: string;
+  question?: string;
+  correct_answer: string;
+  user_answer: string;
+  is_correct: boolean;
+  options: string[];
+}
+
+interface Quiz {
+  quiz_id: string;
+  quiz_title: string;
+  quiz_description: string;
+  total_questions: number;
+  correct_answers: number;
+  score_percentage: number;
+  time_taken: number;
+  submitted_at: string;
+  questions: Question[];
+}
+
+interface UserInfo {
+  user_id: string;
+  name: string;
+  email: string;
+  total_quizzes_attempted: number;
+}
+
+interface QuizResponse {
+  status: boolean;
+  message: string;
+  quizzes: Quiz[];
+  user_info: UserInfo;
+}
+
+interface ProfileUser {
+  _id: string;
+  name: string;
+  email: string;
+  phone: string;
+  school: string;
+  role: string;
+  is_quiz_attempted: boolean;
+  rank?: number;
+  total_questions?: number;
+  total_questions_attempted?: number;
+  time_taken?: number;
+  score?: {
+    total_correct: number;
+    total_questions: number;
+  };
+}
+
+interface ProfileResponse {
+  status: boolean;
+  user: ProfileUser;
+}
 
 const UserProfile = () => {
   const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
   const [expandedQuiz, setExpandedQuiz] = useState<string | null>(null);
   const { callApi: callGetUserQuizInfo } = useApi(getUserQuizInfo);
-  
+  const { callApi: callGetProfile } = useApi(getProfileService);
+
   const [loading, setLoading] = useState(true);
-  const { id } = useParams<{ id: string }>();
+  const [quizData, setQuizData] = useState<QuizResponse | null>(null);
+  const [profileData, setProfileData] = useState<ProfileResponse | null>(null);
 
   const toggleQuizDetails = (quizId: string) => {
     setExpandedQuiz(expandedQuiz === quizId ? null : quizId);
   };
 
-  const attemptedQuizzes = userData.quizAttempts.filter(
-    (quiz) => quiz.attempted
-  );
-  const notAttemptedQuizzes = userData.quizAttempts.filter(
-    (quiz) => !quiz.attempted
-  );
-
   useEffect(() => {
-    const fetchGetAllUser = async () => {
-      const response = await callGetUserQuizInfo(id);
-      console.log(response);
+    const fetchUserData = async () => {
+      try {
+        setLoading(true);
+        const [userQuizInfo, userProfileInfo] = await Promise.all([
+          callGetUserQuizInfo(id) as Promise<QuizResponse>,
+          callGetProfile(id) as Promise<ProfileResponse>,
+        ]);
 
-      // if (response.status && response.users) {
-      //   setUsers(response.users);
-      //   setPagination(response.pagination);
-      // }
+        setQuizData(userQuizInfo);
+        setProfileData(userProfileInfo);
+      } catch (error) {
+        console.error("Error fetching user data");
+      } finally {
+        setLoading(false);
+      }
     };
 
-    fetchGetAllUser();
+    if (id) {
+      fetchUserData();
+    }
   }, [id]);
 
+  const formatTime = (seconds: number) => {
+    if (!seconds) return "0s";
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+
+    if (minutes === 0) {
+      return `${remainingSeconds}s`;
+    }
+    return `${minutes}m ${remainingSeconds}s`;
+  };
+
+  // Calculate overall statistics
+  const calculateOverallStats = () => {
+    if (!quizData || !profileData) return null;
+
+    const totalQuizzes = quizData.user_info.total_quizzes_attempted;
+    const attemptedQuizzes = totalQuizzes;
+    const averageScore =
+      quizData.quizzes.length > 0
+        ? quizData.quizzes.reduce(
+            (sum, quiz) => sum + quiz.score_percentage,
+            0
+          ) / quizData.quizzes.length
+        : 0;
+
+    const totalTimeSpent = quizData.quizzes.reduce(
+      (sum, quiz) => sum + quiz.time_taken,
+      0
+    );
+
+    return {
+      totalQuizzes,
+      attemptedQuizzes,
+      averageScore: Math.round(averageScore),
+      totalTimeSpent: formatTime(totalTimeSpent),
+      rank: profileData.user.rank || 0,
+    };
+  };
+
+  const overallStats = calculateOverallStats();
+
+  if (loading) {
+    return (
+      <div className="h-screen overflow-scroll p-6 flex items-center justify-center">
+        <div className="text-lg">Loading user profile...</div>
+      </div>
+    );
+  }
+
+  if (!profileData || !quizData) {
+    return (
+      <div className="h-screen overflow-scroll p-6 flex items-center justify-center">
+        <div className="text-lg text-red-600">Failed to load user profile</div>
+      </div>
+    );
+  }
+
+  const user = profileData.user;
+
   return (
-    <div className="h-screen overflow-scroll p-6">
+    <div className="h-screen overflow-auto p-6">
       <div className="space-y-8 p-6">
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors mb-4"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to Users
+        </button>
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Personal Information */}
           <div className="rounded-lg bg-primary-light border bg-card p-6">
             <h2 className="text-2xl font-bold mb-4">Personal Information</h2>
             <div className="space-y-4">
               <div className="flex items-center gap-3">
                 <div className="h-12 w-12 rounded-full bg-primary flex items-center justify-center">
-                  <span className="text-lg font-semibold">
-                    {userData.name
+                  <span className="text-lg font-semibold text-white">
+                    {user.name
                       .split(" ")
                       .map((n) => n[0])
                       .join("")}
                   </span>
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold">{userData.name}</h3>
+                  <h3 className="text-xl font-semibold">{user.name}</h3>
+                  <p className="text-sm text-muted-foreground">
+                    User ID: {user._id}
+                  </p>
                 </div>
               </div>
 
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
                   <Mail className="h-4 w-4 text-muted-foreground" />
-                  <span>{userData.email}</span>
+                  <span>{user.email}</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <Phone className="h-4 w-4 text-muted-foreground" />
-                  <span>{userData.phone}</span>
+                  <span>{user.phone}</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <School className="h-4 w-4 text-muted-foreground" />
-                  <span>{userData.school}</span>
+                  <span>{user.school}</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <CheckCircle
+                    className={`h-4 w-4 ${
+                      user.is_quiz_attempted
+                        ? "text-green-600"
+                        : "text-gray-400"
+                    }`}
+                  />
+                  <span
+                    className={
+                      user.is_quiz_attempted
+                        ? "text-green-600"
+                        : "text-gray-600"
+                    }
+                  >
+                    {user.is_quiz_attempted
+                      ? "Quiz Attempted"
+                      : "Not Attempted Quiz"}
+                  </span>
                 </div>
               </div>
             </div>
           </div>
+
+          {/* Overall Statistics */}
           <div className="rounded-lg border bg-primary-light bg-card p-6">
             <h2 className="text-2xl font-bold mb-4">Overall Statistics</h2>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <BookOpen className="h-4 w-4 text-blue-600" />
-                  <span className="text-sm text-muted-foreground">
-                    Total Quizzes
-                  </span>
+            {overallStats ? (
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <BookOpen className="h-4 w-4 text-blue-600" />
+                    <span className="text-sm text-muted-foreground">
+                      Total Quizzes
+                    </span>
+                  </div>
+                  <p className="text-2xl font-bold">
+                    {overallStats.totalQuizzes}
+                  </p>
                 </div>
-                <p className="text-2xl font-bold">
-                  {userData.overallStats.totalQuizzes}
-                </p>
-              </div>
 
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
-                  <span className="text-sm text-muted-foreground">
-                    Attempted
-                  </span>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <span className="text-sm text-muted-foreground">
+                      Attempted
+                    </span>
+                  </div>
+                  <p className="text-2xl font-bold">
+                    {overallStats.attemptedQuizzes}
+                  </p>
                 </div>
-                <p className="text-2xl font-bold">
-                  {userData.overallStats.attemptedQuizzes}
-                </p>
-              </div>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-purple-600" />
+                    <span className="text-sm text-muted-foreground">
+                      Total Time
+                    </span>
+                  </div>
+                  <p className="text-2xl font-bold">
+                    {overallStats.totalTimeSpent}
+                  </p>
+                </div>
 
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Award className="h-4 w-4 text-yellow-600" />
-                  <span className="text-sm text-muted-foreground">
-                    Overall Rank
-                  </span>
-                </div>
-                <p className="text-2xl font-bold">
-                  #{userData.overallStats.rank}
-                </p>
+                {overallStats.rank > 0 && (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Award className="h-4 w-4 text-yellow-600" />
+                      <span className="text-sm text-muted-foreground">
+                        Overall Rank
+                      </span>
+                    </div>
+                    <p className="text-2xl font-bold">#{overallStats.rank}</p>
+                  </div>
+                )}
               </div>
-
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-purple-600" />
-                  <span className="text-sm text-muted-foreground">
-                    Time Spent
-                  </span>
-                </div>
-                <p className="text-2xl font-bold">
-                  {userData.overallStats.totalTimeSpent}
-                </p>
+            ) : (
+              <div className="text-center py-4 text-muted-foreground">
+                No statistics available
               </div>
-            </div>
+            )}
           </div>
         </div>
+
+        {/* Quiz Attempts */}
         <div className="space-y-6">
           <h2 className="text-2xl font-bold">Quiz Attempts</h2>
-          {attemptedQuizzes.length > 0 && (
+
+          {quizData.quizzes.length > 0 ? (
             <div className="space-y-4">
               <h3 className="text-xl font-semibold text-green-600 flex items-center gap-2">
                 <CheckCircle className="h-5 w-5" />
-                Attempted Quizzes ({attemptedQuizzes.length})
+                Attempted Quizzes ({quizData.quizzes.length})
               </h3>
 
-              {attemptedQuizzes.map((quiz) => (
-                <div key={quiz.quizId} className="rounded-lg border bg-card">
+              {quizData.quizzes.map((quiz) => (
+                <div key={quiz.quiz_id} className="rounded-lg border bg-card">
                   {/* Quiz Header */}
                   <div className="p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
                         <h4 className="text-lg font-semibold">
-                          {quiz.quizTitle}
+                          {quiz.quiz_title}
                         </h4>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          {quiz.quiz_description}
+                        </p>
                         <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
                           <span>
                             Score:{" "}
                             <strong className="text-foreground">
-                              {quiz.score}%
+                              {quiz.score_percentage}%
                             </strong>
                           </span>
                           <span>
                             Correct:{" "}
                             <strong className="text-foreground">
-                              {quiz.correctAnswers}/{quiz.totalQuestions}
+                              {quiz.correct_answers}/{quiz.total_questions}
                             </strong>
                           </span>
                           <span>
                             Time:{" "}
                             <strong className="text-foreground">
-                              {quiz.timeTaken}
-                            </strong>
-                          </span>
-                          <span>
-                            Rank:{" "}
-                            <strong className="text-foreground">
-                              #{quiz.rank}
+                              {formatTime(quiz.time_taken)}
                             </strong>
                           </span>
                           <span>
                             Date:{" "}
                             <strong className="text-foreground">
-                              {quiz.dateAttempted
-                                ? new Date(
-                                    quiz.dateAttempted
-                                  ).toLocaleDateString()
-                                : "Not attempted"}
+                              {new Date(quiz.submitted_at).toLocaleDateString()}
                             </strong>
                           </span>
                         </div>
                       </div>
-                      <button onClick={() => toggleQuizDetails(quiz.quizId)}>
-                        {expandedQuiz === quiz.quizId
+                      <button
+                        onClick={() => toggleQuizDetails(quiz.quiz_id)}
+                        className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+                      >
+                        {expandedQuiz === quiz.quiz_id
                           ? "Hide Details"
                           : "View Details"}
                       </button>
@@ -261,7 +361,7 @@ const UserProfile = () => {
                   </div>
 
                   {/* Expanded Questions Details */}
-                  {expandedQuiz === quiz.quizId &&
+                  {expandedQuiz === quiz.quiz_id &&
                     quiz.questions.length > 0 && (
                       <div className="border-t p-4 bg-muted/50">
                         <h5 className="font-semibold mb-3">
@@ -270,13 +370,13 @@ const UserProfile = () => {
                         <div className="space-y-3">
                           {quiz.questions.map((question, qIndex) => (
                             <div
-                              key={question.questionId}
+                              key={question.question_id}
                               className="p-3 border rounded-lg bg-background"
                             >
                               <div className="flex items-start gap-3">
                                 <div
                                   className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold ${
-                                    question.isCorrect
+                                    question.is_correct
                                       ? "bg-green-100 text-green-800"
                                       : "bg-red-100 text-red-800"
                                   }`}
@@ -285,7 +385,8 @@ const UserProfile = () => {
                                 </div>
                                 <div className="flex-1">
                                   <p className="font-medium mb-2">
-                                    {question.question}
+                                    {question.question ||
+                                      `Question ${qIndex + 1}`}
                                   </p>
                                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
                                     {question.options.map(
@@ -293,11 +394,11 @@ const UserProfile = () => {
                                         <div
                                           key={optIndex}
                                           className={`p-2 rounded border ${
-                                            option === question.correctAnswer
+                                            option === question.correct_answer
                                               ? "bg-green-100 border-green-300 text-green-800"
                                               : option ===
-                                                  question.userAnswer &&
-                                                !question.isCorrect
+                                                  question.user_answer &&
+                                                !question.is_correct
                                               ? "bg-red-100 border-red-300 text-red-800"
                                               : "bg-gray-50 border-gray-200"
                                           }`}
@@ -307,21 +408,21 @@ const UserProfile = () => {
                                             . {option}
                                           </span>
                                           {option ===
-                                            question.correctAnswer && (
+                                            question.correct_answer && (
                                             <span className="ml-2 text-xs bg-green-200 text-green-800 px-2 py-1 rounded">
                                               Correct Answer
                                             </span>
                                           )}
-                                          {option === question.userAnswer &&
-                                            !question.isCorrect && (
+                                          {option === question.user_answer &&
+                                            !question.is_correct && (
                                               <span className="ml-2 text-xs bg-red-200 text-red-800 px-2 py-1 rounded">
-                                                Your Answer
+                                                Selected Answer
                                               </span>
                                             )}
-                                          {option === question.userAnswer &&
-                                            question.isCorrect && (
+                                          {option === question.user_answer &&
+                                            question.is_correct && (
                                               <span className="ml-2 text-xs bg-green-200 text-green-800 px-2 py-1 rounded">
-                                                Your Correct Answer
+                                                Selected Answer
                                               </span>
                                             )}
                                         </div>
@@ -338,34 +439,15 @@ const UserProfile = () => {
                 </div>
               ))}
             </div>
-          )}
-
-          {/* Not Attempted Quizzes */}
-          {notAttemptedQuizzes.length > 0 && (
-            <div className="space-y-4">
-              <h3 className="text-xl font-semibold text-gray-600 flex items-center gap-2">
-                <XCircle className="h-5 w-5" />
-                Not Attempted Quizzes ({notAttemptedQuizzes.length})
+          ) : (
+            <div className="rounded-lg border bg-gray-50 p-6 text-center">
+              <XCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-gray-600 mb-2">
+                No Quiz Attempts
               </h3>
-
-              {notAttemptedQuizzes.map((quiz) => (
-                <div
-                  key={quiz.quizId}
-                  className="rounded-lg border bg-gray-50 p-4"
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="text-lg font-semibold text-gray-600">
-                        {quiz.quizTitle}
-                      </h4>
-                      <p className="text-sm text-gray-500 mt-1">
-                        {quiz.totalQuestions} questions • Not attempted
-                      </p>
-                    </div>
-                    <button disabled>Not Attempted</button>
-                  </div>
-                </div>
-              ))}
+              <p className="text-gray-500">
+                This user hasn't attempted any quizzes yet.
+              </p>
             </div>
           )}
         </div>
