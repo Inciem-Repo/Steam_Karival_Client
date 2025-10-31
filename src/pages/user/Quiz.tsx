@@ -4,6 +4,8 @@ import { submitQuiz } from "../../services/quiz";
 import { useApi } from "../../hooks/useApi";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { getProfileService } from "../../services/auth";
+import { useAuth } from "../../context/AuthContext";
 
 interface QuestionResponse {
   questionId: string;
@@ -27,10 +29,12 @@ export const Quiz = (): JSX.Element => {
   const [responses, setResponses] = useState<QuestionResponse[]>([]);
   const [timeLeft, setTimeLeft] = useState(QUESTION_TIME);
   const [startTime, setStartTime] = useState<number>(Date.now());
-//   const [totalTime, setTotalTime] = useState<number>(0);
   const { quiz } = useQuiz();
   const { callApi: callsubmitQuiz } = useApi(submitQuiz);
   const navigate = useNavigate();
+  const [isUserAttendedQuiz, setIsUserAttendedQuiz] = useState<boolean>(false);
+  const { user } = useAuth();
+  const { callApi: callGetProfile } = useApi(getProfileService);
 
   const TOTAL_QUESTIONS = quiz?.questions?.length || 0;
 
@@ -49,6 +53,16 @@ export const Quiz = (): JSX.Element => {
       setStartTime(Date.now());
     }
   }, [TOTAL_QUESTIONS, responses.length, quiz]);
+  useEffect(() => {
+    const checkQuizAccess = async () => {
+      const profileResponse = await callGetProfile(user?.id);
+      const hasAttempted = profileResponse?.user?.is_quiz_attempted || false;
+      if (hasAttempted) {
+        navigate("/");
+      }
+    };
+    checkQuizAccess();
+  }, [user, navigate, callGetProfile]);
 
   useEffect(() => {
     const savedState = localStorage.getItem("quizState");
@@ -89,7 +103,7 @@ export const Quiz = (): JSX.Element => {
 
   const handleOptionSelect = (optionIndex: number) => {
     setSelectedOption(optionIndex);
-    const currentQuestionData = quiz?.questions?.[currentQuestion];
+    const currentQuestionData: any = quiz?.questions?.[currentQuestion];
     const selectedOptionText =
       currentQuestionData?.options[optionIndex] || null;
     const newResponses = [...responses];
@@ -97,6 +111,11 @@ export const Quiz = (): JSX.Element => {
 
     newResponses[currentQuestion] = {
       ...newResponses[currentQuestion],
+      questionId:
+        newResponses[currentQuestion]?.questionId ||
+        currentQuestionData?._id ||
+        currentQuestionData?.question_id ||
+        `question-${currentQuestion}`,
       selectedOption: selectedOptionText,
       selectedOptionIndex: optionIndex,
       timeTaken: timeSpentOnQuestion,
@@ -108,10 +127,15 @@ export const Quiz = (): JSX.Element => {
   const handleNext = async () => {
     const timeSpentOnQuestion = QUESTION_TIME - timeLeft;
     const updatedResponses = [...responses];
-    const currentQuestionData = quiz?.questions?.[currentQuestion];
+    const currentQuestionData: any = quiz?.questions?.[currentQuestion];
 
     updatedResponses[currentQuestion] = {
       ...updatedResponses[currentQuestion],
+      questionId:
+        updatedResponses[currentQuestion]?.questionId ||
+        currentQuestionData?._id ||
+        currentQuestionData?.question_id ||
+        "",
       timeTaken: timeSpentOnQuestion,
       selectedOption:
         updatedResponses[currentQuestion]?.selectedOption ||
@@ -135,7 +159,6 @@ export const Quiz = (): JSX.Element => {
     } else {
       const endTime = Date.now();
       const totalTimeTaken = Math.round((endTime - startTime) / 1000);
-    //   setTotalTime(totalTimeTaken);
 
       const quizResults = {
         responses: updatedResponses,
@@ -154,6 +177,7 @@ export const Quiz = (): JSX.Element => {
 
       localStorage.setItem("quizResults", JSON.stringify(quizResults));
       localStorage.removeItem("quizState");
+
       const apiRequestData = {
         title: quiz?.title?.toLowerCase() || "science",
         questions: updatedResponses.map((response) => ({
@@ -166,8 +190,7 @@ export const Quiz = (): JSX.Element => {
       const response = await callsubmitQuiz(quiz?._id, apiRequestData);
       if (response.status) {
         toast.success(response.message);
-        navigate("/profile");
-        localStorage.removeItem("quizResults");
+        navigate("/results");
       }
     }
   };

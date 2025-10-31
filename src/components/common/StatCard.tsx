@@ -23,7 +23,7 @@ export function StatCard({
           <Icon className="h-4 w-4 text-muted-foreground" />
         </div>
         <div className="p-0 pt-0">
-          <div className="text-2xl font-bold">{value}</div>
+          <div className="text-2xl font-bold">{value || 0}</div>
           {description && (
             <p className="text-xs text-muted-foreground mt-1">{description}</p>
           )}

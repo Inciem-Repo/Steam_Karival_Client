@@ -154,7 +154,7 @@ export const Profile = (): JSX.Element => {
 
           <ResultCard
             score={userProfile?.score?.total_correct || score}
-            total={userProfile?.score?.total_questions || 20}
+            total={userProfile?.score?.total_questions || 0}
             correctCount={userProfile?.score?.total_correct || correctCount}
             wrongCount={
               userProfile
@@ -237,6 +237,7 @@ export const Profile = (): JSX.Element => {
       </main>
       {showLogoutConfirm && (
         <ConfirmModal
+          title="Confirm Logout"
           message="Are you sure you want to log out?"
           btnName="Logout"
           onConfirm={() => logout()}

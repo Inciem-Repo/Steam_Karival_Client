@@ -246,22 +246,24 @@ const UserList = () => {
         </div>
 
         <div className="rounded-lg border bg-card">
-          <CustomTable>
-            <CustomTableHeader>
-              <CustomTableRow>
-                <CustomTableHead className="w-[80px]">SL.No</CustomTableHead>
-                <CustomTableHead>Name</CustomTableHead>
-                <CustomTableHead>Email</CustomTableHead>
-                <CustomTableHead>Phone</CustomTableHead>
-                <CustomTableHead>School</CustomTableHead>
-                <CustomTableHead>Joined Date</CustomTableHead>
-                <CustomTableHead>Attempted Quiz</CustomTableHead>
-                <CustomTableHead className="w-[140px]">Action</CustomTableHead>
-              </CustomTableRow>
-            </CustomTableHeader>
-            <CustomTableBody>
-              {users.length > 0 ? (
-                users.map((user, index) => (
+        {users.length > 0 ? (
+            <CustomTable>
+              <CustomTableHeader>
+                <CustomTableRow>
+                  <CustomTableHead className="w-[80px]">SL.No</CustomTableHead>
+                  <CustomTableHead>Name</CustomTableHead>
+                  <CustomTableHead>Email</CustomTableHead>
+                  <CustomTableHead>Phone</CustomTableHead>
+                  <CustomTableHead>School</CustomTableHead>
+                  <CustomTableHead>Joined Date</CustomTableHead>
+                  <CustomTableHead>Attempted Quiz</CustomTableHead>
+                  <CustomTableHead className="w-[140px]">
+                    Action
+                  </CustomTableHead>
+                </CustomTableRow>
+              </CustomTableHeader>
+              <CustomTableBody>
+                {users.map((user, index) => (
                   <CustomTableRow key={user._id}>
                     <CustomTableCell className="font-medium">
                       {startIndex + index}
@@ -304,16 +306,14 @@ const UserList = () => {
                       </button>
                     </CustomTableCell>
                   </CustomTableRow>
-                ))
-              ) : (
-                <CustomTableRow>
-                  <CustomTableCell className="text-center py-8 text-muted-foreground">
-                    No users found
-                  </CustomTableCell>
-                </CustomTableRow>
-              )}
-            </CustomTableBody>
-          </CustomTable>
+                ))}
+              </CustomTableBody>
+            </CustomTable>
+          ) : (
+            <div className="flex items-center justify-center py-4">
+              <p>No User data available</p>
+            </div>
+          )}
         </div>
 
         {pagination && pagination.total_pages > 1 && (

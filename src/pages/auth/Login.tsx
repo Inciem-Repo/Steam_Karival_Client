@@ -12,10 +12,7 @@ const loginSchema = z.object({
     .string()
     .min(1, "Username is required")
     .min(2, "Username must be at least 2 characters"),
-  password: z
-    .string()
-    .min(1, "Password is required")
-    .min(6, "Password must be at least 6 characters"),
+  password: z.string().min(1, "Password is required"),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
@@ -118,13 +115,13 @@ function Login() {
         <form className="space-y-4" onSubmit={handleSubmit} noValidate>
           <div>
             <label htmlFor="username" className="block mb-2 font-body-semibold">
-              Username
+              Email
             </label>
             <input
               id="username"
               name="username"
               type="text"
-              placeholder="Enter Your Name"
+              placeholder="Enter Your email"
               className={`w-full input ${
                 errors.username && touched.username ? "border-red-500" : ""
               }`}

@@ -12,17 +12,20 @@ function Home() {
   const navigate = useNavigate();
   const { callApi: callGetAllQuiz } = useApi(getAllQuiz);
   const { callApi: callGetProfile } = useApi(getProfileService);
-  const { callApi: callGetQuizInfoByID } = useApi(getQuizInfoByID);
+  const { callApi: callGetQuizInfoByID, loading: loadingQuizInfo } =
+    useApi(getQuizInfoByID);
   const { user, loading: authLoading } = useAuth();
   const [isUserAttendedQuiz, setIsUserAttendedQuiz] = useState<boolean>(false);
   const [quizID, setQuizID] = useState<string>("");
   const { setQuiz } = useQuiz();
+  const [dataLoading, setDataLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchData = async () => {
       if (!user?.id) return;
 
       try {
+        setDataLoading(true);
         const [profileResponse, quizResponse] = await Promise.all([
           callGetProfile(user.id),
           callGetAllQuiz(),
@@ -41,11 +44,14 @@ function Home() {
         setIsUserAttendedQuiz(false);
         setQuizID("");
       } finally {
+        setDataLoading(false);
       }
     };
 
     if (!authLoading && user?.id) {
       fetchData();
+    } else if (!authLoading) {
+      setDataLoading(false);
     }
   }, [user, authLoading]);
 
@@ -81,10 +87,21 @@ function Home() {
 
     return () => clearTimeout(timer);
   }, [countdown, navigate]);
-  if (authLoading) {
+
+  // Show loading during initial auth check or data fetching
+  if (authLoading || dataLoading) {
     return (
       <div className="w-full min-h-screen flex items-center justify-center">
         <p>Loading...</p>
+      </div>
+    );
+  }
+
+  // Show loading when starting quiz countdown
+  if (loadingQuizInfo && countdown === null) {
+    return (
+      <div className="w-full min-h-screen flex items-center justify-center">
+        <p>Preparing your quiz...</p>
       </div>
     );
   }
@@ -138,8 +155,9 @@ function Home() {
                 <button
                   className="flex flex-col w-full btn"
                   onClick={startCountdown}
+                  disabled={loadingQuizInfo}
                 >
-                  Start Quiz
+                  {loadingQuizInfo ? "Loading..." : "Start Quiz"}
                 </button>
               ) : (
                 <div className="text-center text-gray-500 py-4">

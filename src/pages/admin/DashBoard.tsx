@@ -127,7 +127,7 @@ const Dashboard = () => {
           />
           <StatCard
             title="Quiz Completions"
-            value={`${calculateCompletionRate()}%`}
+            value={`${calculateCompletionRate() || 0}%`}
             icon={CheckCircle}
             description="Completion rate"
           />

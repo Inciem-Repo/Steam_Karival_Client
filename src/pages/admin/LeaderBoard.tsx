@@ -241,22 +241,24 @@ const LeaderBoard = () => {
         </div>
 
         <div className="rounded-lg border bg-card">
-          <CustomTable>
-            <CustomTableHeader>
-              <CustomTableRow>
-                <CustomTableHead className="w-[80px]">Rank</CustomTableHead>
-                <CustomTableHead>Name</CustomTableHead>
-                <CustomTableHead>Email</CustomTableHead>
-                <CustomTableHead>Questions Attempted</CustomTableHead>
-                <CustomTableHead>Correct Answers</CustomTableHead>
-                <CustomTableHead>Time Taken</CustomTableHead>
-                <CustomTableHead>Score</CustomTableHead>
-                <CustomTableHead className="w-[100px]">Action</CustomTableHead>
-              </CustomTableRow>
-            </CustomTableHeader>
-            <CustomTableBody>
-              {leaderboardData.length > 0 ? (
-                leaderboardData.map((user) => {
+          {leaderboardData.length > 0 ? (
+            <CustomTable>
+              <CustomTableHeader>
+                <CustomTableRow>
+                  <CustomTableHead className="w-[80px]">Rank</CustomTableHead>
+                  <CustomTableHead>Name</CustomTableHead>
+                  <CustomTableHead>Email</CustomTableHead>
+                  <CustomTableHead>Questions Attempted</CustomTableHead>
+                  <CustomTableHead>Correct Answers</CustomTableHead>
+                  <CustomTableHead>Time Taken</CustomTableHead>
+                  <CustomTableHead>Score</CustomTableHead>
+                  <CustomTableHead className="w-[100px]">
+                    Action
+                  </CustomTableHead>
+                </CustomTableRow>
+              </CustomTableHeader>
+              <CustomTableBody>
+                {leaderboardData.map((user) => {
                   const scorePercentage = calculateScorePercentage(
                     user.total_correct,
                     user.total_questions
@@ -347,16 +349,14 @@ const LeaderBoard = () => {
                       </CustomTableCell>
                     </CustomTableRow>
                   );
-                })
-              ) : (
-                <CustomTableRow>
-                  <CustomTableCell className="text-center py-8 text-muted-foreground">
-                    No leaderboard data available
-                  </CustomTableCell>
-                </CustomTableRow>
-              )}
-            </CustomTableBody>
-          </CustomTable>
+                })}
+              </CustomTableBody>
+            </CustomTable>
+          ) : (
+            <div className="flex items-center justify-center py-4">
+              <p>No leaderboard data available</p>
+            </div>
+          )}
         </div>
 
         {pagination && pagination.total_pages > 1 && (

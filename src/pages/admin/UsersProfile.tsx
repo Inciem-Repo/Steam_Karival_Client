@@ -174,9 +174,9 @@ const UserProfile = () => {
       <div className="space-y-8 p-6">
         <button
           onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors mb-4"
+          className="flex items-center gap-2 text-black hover:text-primary/80 transition-colors mb-4"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="h-4 w-4 " />
           Back to Users
         </button>
 

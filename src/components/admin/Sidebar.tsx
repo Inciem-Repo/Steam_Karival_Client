@@ -151,6 +151,7 @@ export function Sidebar() {
       </div>
       {showLogoutConfirm && (
         <ConfirmModal
+          title="Confirm Log Out"
           message="Are you sure you want to log out?"
           btnName="Logout"
           onConfirm={handleLogout}
