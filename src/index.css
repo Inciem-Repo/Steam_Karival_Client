@@ -1,0 +1,159 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Root theme variables */
+@layer base {
+  :root {
+    /* Colors */
+    --background: linear-gradient(
+      180deg,
+      #b8eaff 0%,
+      #ffffff 41.35%,
+      #ffffff 99.04%
+    );
+    --foreground: 222.2 47.4% 11.2%;
+    --primary: #8ddef9;
+    --primary-light: #4bd0fd33;
+    --primary-foreground: #000000;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 100% 50%;
+    --destructive-foreground: 210 40% 98%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 47.4% 11.2%;
+
+    /* Fonts */
+    --body-1-regular-font-family: "Manrope", Helvetica;
+    --body-1-semibold-font-family: "Manrope", Helvetica;
+    --body-2-regular-font-family: "Manrope", Helvetica;
+    --body-2-semibold-font-family: "Manrope", Helvetica;
+    --h1-bold-font-family: "Manrope", Helvetica;
+    --h2-medium-font-family: "Manrope", Helvetica;
+  }
+}
+
+/* Custom Components */
+@layer components {
+  /* Reset utility */
+  .all-\[unset\] {
+    all: unset;
+  }
+  .font-body-regular {
+    font-family: var(--body-2-regular-font-family);
+    font-weight: 400;
+    font-style: normal;
+    font-size: 14px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    vertical-align: middle;
+  }
+
+  .font-body-semibold {
+    font-family: var(--body-2-semibold-font-family);
+    font-weight: 600;
+    font-style: normal;
+    font-size: 14px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    vertical-align: middle;
+  }
+
+  .font-h1-bold {
+    font-family: var(--h1-bold-font-family);
+    font-weight: 700;
+    font-style: normal;
+    font-size: 24px;
+    line-height: 100%;
+    letter-spacing: 0%;
+  }
+
+  .font-h2-medium {
+    font-family: var(--h2-medium-font-family);
+    font-weight: 500;
+    font-style: normal;
+    font-size: 16px;
+    line-height: 27px;
+    letter-spacing: 0%;
+    vertical-align: middle;
+  }
+
+  .btn {
+    @apply px-4 py-4 rounded-lg transition-colors duration-200 font-body-semibold;
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+    border: 0.5px solid var(--primary-foreground);
+  }
+  .btn-outline {
+    @apply px-4 py-4 rounded-lg transition-colors duration-200 font-body-semibold;
+    background-color: transparent;
+    color: var(--primary-foregroundy);
+    border: 0.5px solid var(--primary-foreground);
+  }
+  .btn:hover {
+    filter: brightness(0.9);
+  }
+  .btn:focus {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+  .input {
+    @apply font-body-regular;
+    background-color: transparent;
+    color: black;
+    padding: 0.8rem;
+    border-radius: 0.5rem;
+    border: 0.5px solid var(--primary-foreground);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .input:focus {
+    border-color: var(--primary);
+  }
+}
+
+/* Future dark theme scope
+@layer base {
+  .dark {
+    --background: 224 71% 4%;
+    --foreground: 213 31% 91%;
+    --etc
+  }
+} */
+
+/* Base body style */
+body {
+  background: var(--background);
+  font-family: var(--body-1-regular-font-family);
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary) var(--background);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--primary);
+  border-radius: 10px;
+  border: 2px solid var(--background);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--primary-dark, #e6b800);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary) var(--background);
+}
