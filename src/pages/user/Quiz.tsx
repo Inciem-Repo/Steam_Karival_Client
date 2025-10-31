@@ -32,7 +32,6 @@ export const Quiz = (): JSX.Element => {
   const { quiz } = useQuiz();
   const { callApi: callsubmitQuiz } = useApi(submitQuiz);
   const navigate = useNavigate();
-  const [isUserAttendedQuiz, setIsUserAttendedQuiz] = useState<boolean>(false);
   const { user } = useAuth();
   const { callApi: callGetProfile } = useApi(getProfileService);
 
