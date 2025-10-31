@@ -2,10 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Root theme variables */
 @layer base {
   :root {
-    /* Colors */
     --background: linear-gradient(
       180deg,
       #b8eaff 0%,
