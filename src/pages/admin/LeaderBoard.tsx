@@ -7,8 +7,8 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { getLeaderboard } from "../../services/admin";
 import { useApi } from "../../hooks/useApi";
+import { getLeaderboard } from "../../services/admin";
 
 interface LeaderboardUser {
   user_id: string;
@@ -191,7 +191,7 @@ const LeaderBoard = () => {
         key={index}
         onClick={() => typeof page === "number" && goToPage(page)}
         disabled={typeof page !== "number"}
-        className={`w-8 h-8 p-0 flex items-center justify-center rounded ${
+        className={`w-7 h-7 sm:w-8 sm:h-8 p-0 flex items-center justify-center rounded text-xs sm:text-sm ${
           currentPage === page
             ? "bg-primary text-primary-foreground font-medium"
             : "hover:bg-muted"
@@ -204,24 +204,26 @@ const LeaderBoard = () => {
 
   if (loading) {
     return (
-      <div className="h-screen overflow-scroll p-6 flex items-center justify-center">
-        <div className="text-lg">Loading leaderboard...</div>
+      <div className="min-h-screen p-4 sm:p-6 flex items-center justify-center">
+        <div className="text-base sm:text-lg">Loading leaderboard...</div>
       </div>
     );
   }
 
   return (
-    <div className="h-screen overflow-auto p-6">
-      <div className="space-y-8">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Leader Board</h1>
-          <p className="text-muted-foreground mt-2">
+    <div className="min-h-screen h-screen overflow-auto bg-background p-4 sm:p-6">
+      <div className="container mx-auto space-y-4 sm:space-y-6 lg:space-y-8">
+        <div className="text-center sm:text-left">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+            Leader Board
+          </h1>
+          <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">
             {pagination?.total_items || 0} total users ranked by performance
           </p>
         </div>
 
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex items-center justify-center sm:justify-start space-x-2">
             <span className="text-sm text-muted-foreground">Show</span>
             <select
               value={itemsPerPage}
@@ -240,7 +242,8 @@ const LeaderBoard = () => {
           </div>
         </div>
 
-        <div className="rounded-lg border bg-card">
+        {/* Desktop Table View */}
+        <div className="hidden md:block rounded-lg border bg-card overflow-hidden">
           {leaderboardData.length > 0 ? (
             <CustomTable>
               <CustomTableHeader>
@@ -353,37 +356,138 @@ const LeaderBoard = () => {
               </CustomTableBody>
             </CustomTable>
           ) : (
-            <div className="flex items-center justify-center py-4">
-              <p>No leaderboard data available</p>
+            <div className="flex items-center justify-center py-8">
+              <p className="text-muted-foreground">
+                No leaderboard data available
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Mobile Card View */}
+        <div className="md:hidden space-y-3">
+          {leaderboardData.length > 0 ? (
+            leaderboardData.map((user) => {
+              const scorePercentage = calculateScorePercentage(
+                user.total_correct,
+                user.total_questions
+              );
+
+              return (
+                <div
+                  key={user.user_id}
+                  className="rounded-lg border bg-card p-4 space-y-3"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-3">
+                      <span
+                        className={`relative inline-flex items-center justify-center w-12 h-12 rounded-full font-semibold text-sm border-2 shadow-sm ${
+                          user.rank === 1
+                            ? "bg-gradient-to-br from-yellow-400 to-yellow-600 text-white border-yellow-500"
+                            : user.rank === 2
+                            ? "bg-gradient-to-br from-gray-400 to-gray-600 text-white border-gray-500"
+                            : user.rank === 3
+                            ? "bg-gradient-to-br from-amber-600 to-amber-800 text-white border-amber-700"
+                            : "bg-primary/10 text-primary border-primary/20"
+                        }`}
+                      >
+                        {user.rank <= 3 && (
+                          <span className="absolute -top-2 -right-2">
+                            <span className="text-white text-lg drop-shadow">
+                              👑
+                            </span>
+                          </span>
+                        )}
+                        {user.rank}
+                      </span>
+                      <div>
+                        <h3 className="font-semibold">{user.name}</h3>
+                        <p className="text-xs text-muted-foreground truncate max-w-[200px]">
+                          {user.email}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() =>
+                        navigate(`/admin/profile/user/${user.user_id}`)
+                      }
+                      className="flex items-center justify-center w-8 h-8 hover:bg-primary/10 rounded-md transition-colors"
+                      title="View User Profile"
+                    >
+                      <Eye className="h-4 w-4" />
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div>
+                      <p className="text-muted-foreground text-xs">Questions</p>
+                      <p className="font-medium">
+                        {user.attempted_questions}/{user.total_questions}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground text-xs">Correct</p>
+                      <p className="font-medium text-green-600">
+                        {user.total_correct}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground text-xs">Time</p>
+                      <p className="font-medium">
+                        {formatTime(user.time_taken)}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground text-xs">Score</p>
+                      <p
+                        className={`font-medium ${
+                          scorePercentage >= 80
+                            ? "text-green-600"
+                            : scorePercentage >= 60
+                            ? "text-yellow-600"
+                            : "text-red-600"
+                        }`}
+                      >
+                        {scorePercentage}%
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            <div className="flex items-center justify-center py-8 rounded-lg border bg-card">
+              <p className="text-muted-foreground">
+                No leaderboard data available
+              </p>
             </div>
           )}
         </div>
 
         {pagination && pagination.total_pages > 1 && (
-          <div className="flex items-center justify-between">
-            <div className="text-sm text-muted-foreground">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="text-xs sm:text-sm text-muted-foreground text-center sm:text-left">
               Showing {(currentPage - 1) * itemsPerPage + 1} to{" "}
               {Math.min(currentPage * itemsPerPage, pagination.total_items)} of{" "}
               {pagination.total_items} entries
             </div>
 
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-1 sm:space-x-2">
               <button
                 onClick={goToFirstPage}
                 disabled={currentPage === 1}
-                className="p-1 rounded hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed"
+                className="p-1 sm:p-2 rounded hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <ChevronsLeft className="h-4 w-4" />
+                <ChevronsLeft className="h-3 w-3 sm:h-4 sm:w-4" />
               </button>
               <button
                 onClick={goToPreviousPage}
                 disabled={currentPage === 1}
-                className="p-1 rounded hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed"
+                className="p-1 sm:p-2 rounded hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <ChevronLeft className="h-4 w-4" />
+                <ChevronLeft className="h-3 w-3 sm:h-4 sm:w-4" />
               </button>
 
-              {/* Page numbers */}
               <div className="flex items-center space-x-1">
                 {renderPaginationButtons()}
               </div>
@@ -391,16 +495,16 @@ const LeaderBoard = () => {
               <button
                 onClick={goToNextPage}
                 disabled={currentPage === pagination.total_pages}
-                className="p-1 rounded hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed"
+                className="p-1 sm:p-2 rounded hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />
               </button>
               <button
                 onClick={goToLastPage}
                 disabled={currentPage === pagination.total_pages}
-                className="p-1 rounded hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed"
+                className="p-1 sm:p-2 rounded hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <ChevronsRight className="h-4 w-4" />
+                <ChevronsRight className="h-3 w-3 sm:h-4 sm:w-4" />
               </button>
             </div>
           </div>

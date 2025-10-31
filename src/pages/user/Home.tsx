@@ -138,9 +138,8 @@ function Home() {
                   </p>
                 ) : (
                   <p className="relative flex items-center justify-center self-stretch font-body-regular text-xs text-center tracking-[0] leading-[16px] px-4">
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                    Quis autem vel eum iure reprehenderit qui in ea voluptate
-                    velit esse quam nihil molestiae consequatur
+                    Welcome aboard! Take a deep breath, stay curious, and enjoy
+                    exploring fun challenges that sharpen your mind.
                   </p>
                 )}
               </div>

@@ -170,65 +170,67 @@ const UserProfile = () => {
   const user = profileData.user;
 
   return (
-    <div className="h-screen overflow-auto p-6">
-      <div className="space-y-8 p-6">
+    <div className="h-screen overflow-auto p-4 md:p-6">
+      <div className="space-y-6 md:space-y-8">
         <button
           onClick={() => navigate(-1)}
           className="flex items-center gap-2 text-black hover:text-primary/80 transition-colors mb-4"
         >
-          <ArrowLeft className="h-4 w-4 " />
+          <ArrowLeft className="h-4 w-4" />
           Back to Users
         </button>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Personal Information */}
-          <div className="rounded-lg bg-primary-light border bg-card p-6">
-            <h2 className="text-2xl font-bold mb-4">Personal Information</h2>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+          <div className="rounded-lg bg-primary-light border bg-card p-4 md:p-6">
+            <h2 className="text-xl md:text-2xl font-bold mb-4">
+              Personal Information
+            </h2>
             <div className="space-y-4">
               <div className="flex items-center gap-3">
-                <div className="h-12 w-12 rounded-full bg-primary flex items-center justify-center">
-                  <span className="text-lg font-semibold text-white">
+                <div className="h-10 w-10 md:h-12 md:w-12 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+                  <span className="text-base md:text-lg font-semibold text-white">
                     {user.name
                       .split(" ")
                       .map((n) => n[0])
                       .join("")}
                   </span>
                 </div>
-                <div>
-                  <h3 className="text-xl font-semibold">{user.name}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    User ID: {user._id}
-                  </p>
+                <div className="min-w-0">
+                  <h3 className="text-lg md:text-xl font-semibold truncate">
+                    {user.name}
+                  </h3>
                 </div>
               </div>
 
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
-                  <Mail className="h-4 w-4 text-muted-foreground" />
-                  <span>{user.email}</span>
+                  <Mail className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                  <span className="text-sm md:text-base break-all">
+                    {user.email}
+                  </span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <Phone className="h-4 w-4 text-muted-foreground" />
-                  <span>{user.phone}</span>
+                  <Phone className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                  <span className="text-sm md:text-base">{user.phone}</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <School className="h-4 w-4 text-muted-foreground" />
-                  <span>{user.school}</span>
+                  <School className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                  <span className="text-sm md:text-base">{user.school}</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <CheckCircle
-                    className={`h-4 w-4 ${
+                    className={`h-4 w-4 flex-shrink-0 ${
                       user.is_quiz_attempted
                         ? "text-green-600"
                         : "text-gray-400"
                     }`}
                   />
                   <span
-                    className={
+                    className={`text-sm md:text-base ${
                       user.is_quiz_attempted
                         ? "text-green-600"
                         : "text-gray-600"
-                    }
+                    }`}
                   >
                     {user.is_quiz_attempted
                       ? "Quiz Attempted"
@@ -240,41 +242,43 @@ const UserProfile = () => {
           </div>
 
           {/* Overall Statistics */}
-          <div className="rounded-lg border bg-primary-light bg-card p-6">
-            <h2 className="text-2xl font-bold mb-4">Overall Statistics</h2>
+          <div className="rounded-lg border bg-primary-light bg-card p-4 md:p-6">
+            <h2 className="text-xl md:text-2xl font-bold mb-4">
+              Overall Statistics
+            </h2>
             {overallStats ? (
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3 md:gap-4">
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <BookOpen className="h-4 w-4 text-blue-600" />
-                    <span className="text-sm text-muted-foreground">
+                    <BookOpen className="h-4 w-4 text-blue-600 flex-shrink-0" />
+                    <span className="text-xs md:text-sm text-muted-foreground">
                       Total Quizzes
                     </span>
                   </div>
-                  <p className="text-2xl font-bold">
+                  <p className="text-xl md:text-2xl font-bold">
                     {overallStats.totalQuizzes}
                   </p>
                 </div>
 
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span className="text-sm text-muted-foreground">
+                    <CheckCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
+                    <span className="text-xs md:text-sm text-muted-foreground">
                       Attempted
                     </span>
                   </div>
-                  <p className="text-2xl font-bold">
+                  <p className="text-xl md:text-2xl font-bold">
                     {overallStats.attemptedQuizzes}
                   </p>
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-purple-600" />
-                    <span className="text-sm text-muted-foreground">
+                    <Clock className="h-4 w-4 text-purple-600 flex-shrink-0" />
+                    <span className="text-xs md:text-sm text-muted-foreground">
                       Total Time
                     </span>
                   </div>
-                  <p className="text-2xl font-bold">
+                  <p className="text-xl md:text-2xl font-bold">
                     {overallStats.totalTimeSpent}
                   </p>
                 </div>
@@ -282,12 +286,14 @@ const UserProfile = () => {
                 {overallStats.rank > 0 && (
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
-                      <Award className="h-4 w-4 text-yellow-600" />
-                      <span className="text-sm text-muted-foreground">
+                      <Award className="h-4 w-4 text-yellow-600 flex-shrink-0" />
+                      <span className="text-xs md:text-sm text-muted-foreground">
                         Overall Rank
                       </span>
                     </div>
-                    <p className="text-2xl font-bold">#{overallStats.rank}</p>
+                    <p className="text-xl md:text-2xl font-bold">
+                      #{overallStats.rank}
+                    </p>
                   </div>
                 )}
               </div>
@@ -300,48 +306,48 @@ const UserProfile = () => {
         </div>
 
         {/* Quiz Attempts */}
-        <div className="space-y-6">
-          <h2 className="text-2xl font-bold">Quiz Attempts</h2>
+        <div className="space-y-4 md:space-y-6">
+          <h2 className="text-xl md:text-2xl font-bold">Quiz Attempts</h2>
 
           {quizData.quizzes.length > 0 ? (
             <div className="space-y-4">
-              <h3 className="text-xl font-semibold text-green-600 flex items-center gap-2">
-                <CheckCircle className="h-5 w-5" />
-                Attempted Quizzes ({quizData.quizzes.length})
+              <h3 className="text-lg md:text-xl font-semibold text-green-600 flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 flex-shrink-0" />
+                <span>Attempted Quizzes ({quizData.quizzes.length})</span>
               </h3>
 
               {quizData.quizzes.map((quiz) => (
                 <div key={quiz.quiz_id} className="rounded-lg border bg-card">
                   {/* Quiz Header */}
-                  <div className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <h4 className="text-lg font-semibold">
+                  <div className="p-4 md:p-6">
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-base md:text-lg font-semibold">
                           {quiz.quiz_title}
                         </h4>
-                        <p className="text-sm text-muted-foreground mt-1">
+                        <p className="text-xs md:text-sm text-muted-foreground mt-1">
                           {quiz.quiz_description}
                         </p>
-                        <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                          <span>
+                        <div className="flex flex-wrap items-center gap-3 md:gap-4 mt-2 text-xs md:text-sm text-muted-foreground">
+                          <span className="whitespace-nowrap">
                             Score:{" "}
                             <strong className="text-foreground">
                               {quiz.score_percentage}%
                             </strong>
                           </span>
-                          <span>
+                          <span className="whitespace-nowrap">
                             Correct:{" "}
                             <strong className="text-foreground">
                               {quiz.correct_answers}/{quiz.total_questions}
                             </strong>
                           </span>
-                          <span>
+                          <span className="whitespace-nowrap">
                             Time:{" "}
                             <strong className="text-foreground">
                               {formatTime(quiz.time_taken)}
                             </strong>
                           </span>
-                          <span>
+                          <span className="whitespace-nowrap">
                             Date:{" "}
                             <strong className="text-foreground">
                               {new Date(quiz.submitted_at).toLocaleDateString()}
@@ -351,7 +357,7 @@ const UserProfile = () => {
                       </div>
                       <button
                         onClick={() => toggleQuizDetails(quiz.quiz_id)}
-                        className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+                        className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors text-sm md:text-base whitespace-nowrap"
                       >
                         {expandedQuiz === quiz.quiz_id
                           ? "Hide Details"
@@ -363,17 +369,17 @@ const UserProfile = () => {
                   {/* Expanded Questions Details */}
                   {expandedQuiz === quiz.quiz_id &&
                     quiz.questions.length > 0 && (
-                      <div className="border-t p-4 bg-muted/50">
-                        <h5 className="font-semibold mb-3">
+                      <div className="border-t p-4 md:p-6 bg-muted/50">
+                        <h5 className="text-sm md:text-base font-semibold mb-3">
                           Questions & Answers:
                         </h5>
-                        <div className="space-y-3">
+                        <div className="space-y-3 md:space-y-4">
                           {quiz.questions.map((question, qIndex) => (
                             <div
                               key={question.question_id}
-                              className="p-3 border rounded-lg bg-background"
+                              className="p-3 md:p-4 border rounded-lg bg-background"
                             >
-                              <div className="flex items-start gap-3">
+                              <div className="flex items-start gap-2 md:gap-3">
                                 <div
                                   className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold ${
                                     question.is_correct
@@ -383,17 +389,17 @@ const UserProfile = () => {
                                 >
                                   {qIndex + 1}
                                 </div>
-                                <div className="flex-1">
-                                  <p className="font-medium mb-2">
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm md:text-base font-medium mb-2">
                                     {question.question ||
                                       `Question ${qIndex + 1}`}
                                   </p>
-                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                                  <div className="grid grid-cols-1 gap-2 text-xs md:text-sm">
                                     {question.options.map(
                                       (option, optIndex) => (
                                         <div
                                           key={optIndex}
-                                          className={`p-2 rounded border ${
+                                          className={`p-2 md:p-3 rounded border ${
                                             option === question.correct_answer
                                               ? "bg-green-100 border-green-300 text-green-800"
                                               : option ===
@@ -403,28 +409,32 @@ const UserProfile = () => {
                                               : "bg-gray-50 border-gray-200"
                                           }`}
                                         >
-                                          <span className="font-medium">
-                                            {String.fromCharCode(65 + optIndex)}
-                                            . {option}
-                                          </span>
-                                          {option ===
-                                            question.correct_answer && (
-                                            <span className="ml-2 text-xs bg-green-200 text-green-800 px-2 py-1 rounded">
-                                              Correct Answer
+                                          <div className="flex flex-wrap items-center gap-2">
+                                            <span className="font-medium break-words">
+                                              {String.fromCharCode(
+                                                65 + optIndex
+                                              )}
+                                              . {option}
                                             </span>
-                                          )}
-                                          {option === question.user_answer &&
-                                            !question.is_correct && (
-                                              <span className="ml-2 text-xs bg-red-200 text-red-800 px-2 py-1 rounded">
-                                                Selected Answer
+                                            {option ===
+                                              question.correct_answer && (
+                                              <span className="text-xs bg-green-200 text-green-800 px-2 py-1 rounded whitespace-nowrap">
+                                                Correct Answer
                                               </span>
                                             )}
-                                          {option === question.user_answer &&
-                                            question.is_correct && (
-                                              <span className="ml-2 text-xs bg-green-200 text-green-800 px-2 py-1 rounded">
-                                                Selected Answer
-                                              </span>
-                                            )}
+                                            {option === question.user_answer &&
+                                              !question.is_correct && (
+                                                <span className="text-xs bg-red-200 text-red-800 px-2 py-1 rounded whitespace-nowrap">
+                                                  Selected Answer
+                                                </span>
+                                              )}
+                                            {option === question.user_answer &&
+                                              question.is_correct && (
+                                                <span className="text-xs bg-green-200 text-green-800 px-2 py-1 rounded whitespace-nowrap">
+                                                  Selected Answer
+                                                </span>
+                                              )}
+                                          </div>
                                         </div>
                                       )
                                     )}

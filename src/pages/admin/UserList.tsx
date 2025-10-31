@@ -158,28 +158,23 @@ const UserList = () => {
     const maxVisibleButtons = 5;
 
     if (totalPages <= maxVisibleButtons) {
-      // Show all pages if total pages are less than or equal to maxVisibleButtons
       for (let i = 1; i <= totalPages; i++) {
         buttons.push(i);
       }
     } else {
-      // Show limited pages with ellipsis logic
       if (currentPage <= 3) {
-        // Near the start
         for (let i = 1; i <= 4; i++) {
           buttons.push(i);
         }
         buttons.push("...");
         buttons.push(totalPages);
       } else if (currentPage >= totalPages - 2) {
-        // Near the end
         buttons.push(1);
         buttons.push("...");
         for (let i = totalPages - 3; i <= totalPages; i++) {
           buttons.push(i);
         }
       } else {
-        // In the middle
         buttons.push(1);
         buttons.push("...");
         for (let i = currentPage - 1; i <= currentPage + 1; i++) {
@@ -195,7 +190,7 @@ const UserList = () => {
         key={index}
         onClick={() => typeof page === "number" && goToPage(page)}
         disabled={typeof page !== "number"}
-        className={`w-8 h-8 p-0 flex items-center justify-center ${
+        className={`w-8 h-8 p-0 flex items-center justify-center rounded-md text-sm ${
           currentPage === page
             ? "bg-primary text-primary-foreground font-medium"
             : "hover:bg-muted"
@@ -208,24 +203,25 @@ const UserList = () => {
 
   if (loading) {
     return (
-      <div className="h-screen overflow-scroll p-6 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center p-4">
         <div className="text-lg">Loading users...</div>
       </div>
     );
   }
 
   return (
-    <div className="h-screen overflow-auto p-6">
-      <div className="space-y-8">
+    <div className="min-h-screen h-screen overflow-auto p-4 md:p-6 lg:p-8">
+      <div className="space-y-6 md:space-y-8">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Users</h1>
-          <p className="text-muted-foreground mt-2">
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
+            Users
+          </h1>
+          <p className="text-muted-foreground mt-2 text-sm md:text-base">
             {pagination?.total_items || 0} total users • {attemptedCount}{" "}
             attempted quiz • {notAttemptedCount} not attempted
           </p>
         </div>
-
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center space-x-2">
             <span className="text-sm text-muted-foreground">Show</span>
             <select
@@ -234,7 +230,7 @@ const UserList = () => {
                 setItemsPerPage(Number(e.target.value));
                 setCurrentPage(1);
               }}
-              className="h-8 rounded-md border border-input bg-background px-3 py-1 text-sm"
+              className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm"
             >
               <option value={5}>5</option>
               <option value={10}>10</option>
@@ -245,8 +241,9 @@ const UserList = () => {
           </div>
         </div>
 
-        <div className="rounded-lg border bg-card">
-        {users.length > 0 ? (
+        {/* Desktop Table View */}
+        <div className="hidden md:block rounded-lg border bg-card overflow-hidden">
+          {users.length > 0 ? (
             <CustomTable>
               <CustomTableHeader>
                 <CustomTableRow>
@@ -299,10 +296,10 @@ const UserList = () => {
                         onClick={() =>
                           navigate(`/admin/profile/user/${user._id}`)
                         }
-                        className="flex items-center gap-2 text-black hover:text-primary/80 transition-colors"
+                        className="flex items-center gap-2"
                       >
                         <Eye className="h-4 w-4" />
-                        view
+                        View
                       </button>
                     </CustomTableCell>
                   </CustomTableRow>
@@ -310,53 +307,135 @@ const UserList = () => {
               </CustomTableBody>
             </CustomTable>
           ) : (
-            <div className="flex items-center justify-center py-4">
-              <p>No User data available</p>
+            <div className="flex items-center justify-center py-8">
+              <p className="text-muted-foreground">No user data available</p>
             </div>
           )}
         </div>
 
+        {/* Mobile Card View */}
+        <div className="md:hidden space-y-4">
+          {users.length > 0 ? (
+            users.map((user, index) => (
+              <div
+                key={user._id}
+                className="rounded-lg border bg-card p-4 space-y-3"
+              >
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">
+                      #{startIndex + index}
+                    </p>
+                    <h3 className="font-semibold">{user.name}</h3>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {user.is_quiz_attempted ? (
+                      <CheckCircle className="h-5 w-5 text-green-600" />
+                    ) : (
+                      <XCircle className="h-5 w-5 text-muted-foreground" />
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-2 text-sm">
+                  <div className="flex flex-col">
+                    <span className="text-muted-foreground">Email</span>
+                    <span className="font-medium break-all">{user.email}</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-muted-foreground">Phone</span>
+                    <span className="font-medium">{user.phone}</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-muted-foreground">School</span>
+                    <span className="font-medium">{user.school}</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-muted-foreground">Joined</span>
+                    <span className="font-medium">
+                      {formatDate(user.created_at)}
+                    </span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-muted-foreground">Quiz Status</span>
+                    <span
+                      className={`font-medium ${
+                        user.is_quiz_attempted
+                          ? "text-green-600"
+                          : "text-muted-foreground"
+                      }`}
+                    >
+                      {user.is_quiz_attempted ? "Attempted" : "Not Attempted"}
+                    </span>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => navigate(`/admin/profile/user/${user._id}`)}
+                  className="w-full"
+                >
+                  <Eye className="h-4 w-4 mr-2" />
+                  View Profile
+                </button>
+              </div>
+            ))
+          ) : (
+            <div className="flex items-center justify-center py-8 rounded-lg border bg-card">
+              <p className="text-muted-foreground">No user data available</p>
+            </div>
+          )}
+        </div>
+
+        {/* Pagination */}
         {pagination && pagination.total_pages > 1 && (
-          <div className="flex items-center justify-between">
-            <div className="text-sm text-muted-foreground">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="text-sm text-muted-foreground text-center sm:text-left">
               Showing {startIndex} to {endIndex} of {pagination.total_items}{" "}
               entries
             </div>
 
-            <div className="flex items-center space-x-2">
-              <button
-                onClick={goToFirstPage}
-                disabled={currentPage === 1}
-                className="p-1 rounded hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <ChevronsLeft className="h-4 w-4" />
-              </button>
-              <button
-                onClick={goToPreviousPage}
-                disabled={currentPage === 1}
-                className="p-1 rounded hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </button>
-
+            <div className="flex flex-col items-center gap-4 sm:flex-row">
+              {/* Navigation Buttons */}
               <div className="flex items-center space-x-1">
-                {renderPaginationButtons()}
-              </div>
+                <button
+                  onClick={goToFirstPage}
+                  disabled={currentPage === 1}
+                  className="p-2 rounded-md hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  aria-label="First page"
+                >
+                  <ChevronsLeft className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={goToPreviousPage}
+                  disabled={currentPage === 1}
+                  className="p-2 rounded-md hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  aria-label="Previous page"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
 
-              <button
-                onClick={goToNextPage}
-                disabled={currentPage === pagination.total_pages}
-                className="p-1 rounded hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </button>
-              <button
-                onClick={goToLastPage}
-                disabled={currentPage === pagination.total_pages}
-                className="p-1 rounded hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <ChevronsRight className="h-4 w-4" />
-              </button>
+                {/* Page Numbers - Hide some on mobile */}
+                <div className="flex items-center space-x-1">
+                  {renderPaginationButtons()}
+                </div>
+
+                <button
+                  onClick={goToNextPage}
+                  disabled={currentPage === pagination.total_pages}
+                  className="p-2 rounded-md hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  aria-label="Next page"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={goToLastPage}
+                  disabled={currentPage === pagination.total_pages}
+                  className="p-2 rounded-md hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  aria-label="Last page"
+                >
+                  <ChevronsRight className="h-4 w-4" />
+                </button>
+              </div>
             </div>
           </div>
         )}

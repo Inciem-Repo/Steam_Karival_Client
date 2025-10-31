@@ -9,7 +9,10 @@ import { Link, useNavigate } from "react-router-dom";
 // Define the validation schema with Zod
 const registerSchema = z
   .object({
-    name: z.string().min(1, "Name is required"),
+    name: z
+      .string()
+      .min(1, "Name is required")
+      .regex(/^[A-Za-z\s]+$/, "Name can only contain letters and spaces"),
     email: z
       .string()
       .min(1, "Email is required")
@@ -21,7 +24,8 @@ const registerSchema = z
     school: z
       .string()
       .min(1, "School is required")
-      .min(2, "School name must be at least 2 characters"),
+      .min(2, "School name must be at least 2 characters")
+      .regex(/^[A-Za-z\s]+$/, "School Name can only contain letters"),
     password: z.string().min(1, "Password is required"),
     confirmPassword: z.string().min(1, "Confirm password is required"),
   })
@@ -122,9 +126,7 @@ const Register = () => {
       await callApi(userData);
       toast.success("Registration successful!");
       navigate("/login");
-    } catch {
-      // Error is already handled by showError inside useApi
-    }
+    } catch {}
   };
 
   return (
