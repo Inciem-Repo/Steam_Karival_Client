@@ -1,4 +1,4 @@
-import React, { useState, useEffect, type JSX } from "react";
+import { useState, useEffect, type JSX } from "react";
 import { useQuiz } from "../../context/QuizContext";
 import { submitQuiz } from "../../services/quiz";
 import { useApi } from "../../hooks/useApi";
@@ -27,7 +27,7 @@ export const Quiz = (): JSX.Element => {
   const [responses, setResponses] = useState<QuestionResponse[]>([]);
   const [timeLeft, setTimeLeft] = useState(QUESTION_TIME);
   const [startTime, setStartTime] = useState<number>(Date.now());
-  const [totalTime, setTotalTime] = useState<number>(0);
+//   const [totalTime, setTotalTime] = useState<number>(0);
   const { quiz } = useQuiz();
   const { callApi: callsubmitQuiz } = useApi(submitQuiz);
   const navigate = useNavigate();
@@ -135,7 +135,7 @@ export const Quiz = (): JSX.Element => {
     } else {
       const endTime = Date.now();
       const totalTimeTaken = Math.round((endTime - startTime) / 1000);
-      setTotalTime(totalTimeTaken);
+    //   setTotalTime(totalTimeTaken);
 
       const quizResults = {
         responses: updatedResponses,

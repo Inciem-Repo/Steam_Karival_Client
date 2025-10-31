@@ -1,4 +1,4 @@
-import { BookOpen, LayoutDashboard, Trophy, User, Users } from "lucide-react";
+import { BookOpen, LayoutDashboard, Trophy, Users } from "lucide-react";
 
 export const items = [
   { title: "Dashboard", url: "/admin/dashboard", icon: LayoutDashboard },

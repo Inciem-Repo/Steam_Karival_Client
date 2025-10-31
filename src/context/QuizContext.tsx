@@ -14,7 +14,6 @@ interface QuizContextType {
   quiz: Quiz | null;
   setQuiz: (quiz: Quiz) => void;
   isLoading: boolean;
-  isUserAttendedQuiz: boolean;
 }
 
 const QuizContext = createContext<QuizContextType | undefined>(undefined);
@@ -26,7 +25,6 @@ export const QuizProvider = ({ children }: { children: ReactNode }) => {
 
   const [quiz, setQuiz] = useState<Quiz | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isUserAttendedQuiz, setIsUserAttendedQuiz] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchQuiz = async () => {
@@ -55,9 +53,7 @@ export const QuizProvider = ({ children }: { children: ReactNode }) => {
   }, [user?.id]);
 
   return (
-    <QuizContext.Provider
-      value={{ quiz, setQuiz, isLoading, isUserAttendedQuiz }}
-    >
+    <QuizContext.Provider value={{ quiz, setQuiz, isLoading }}>
       {children}
     </QuizContext.Provider>
   );

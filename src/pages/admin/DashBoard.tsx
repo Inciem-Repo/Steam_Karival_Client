@@ -188,7 +188,7 @@ const Dashboard = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {dashboardData.leaderboard_preview.map((user, index) => {
+                  {dashboardData.leaderboard_preview.map((user) => {
                     const scorePercentage =
                       user.total_questions > 0
                         ? Math.round(

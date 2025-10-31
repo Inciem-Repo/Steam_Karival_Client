@@ -1,4 +1,4 @@
-import React, { useState, useEffect, type JSX } from "react";
+import { useState, useEffect, type JSX } from "react";
 import { quizQuestions } from "../../utils/constants/quizzData";
 import ResultCard from "../../components/common/ResultCard";
 import { useAuth } from "../../context/AuthContext";
@@ -22,7 +22,7 @@ interface UserProfile {
 }
 
 export const Profile = (): JSX.Element => {
-  const [answers, setAnswers] = useState<(number | null)[]>([]);
+  //   const [answers, setAnswers] = useState<(number | null)[]>([]);
   const [score, setScore] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
   const [wrongCount, setWrongCount] = useState(0);
@@ -49,7 +49,7 @@ export const Profile = (): JSX.Element => {
     const savedAnswers = localStorage.getItem("quizAnswers");
     if (savedAnswers) {
       const userAnswers: (number | null)[] = JSON.parse(savedAnswers);
-      setAnswers(userAnswers);
+      //   setAnswers(userAnswers);
 
       let correct = 0;
       let wrong = 0;

@@ -256,7 +256,7 @@ const LeaderBoard = () => {
             </CustomTableHeader>
             <CustomTableBody>
               {leaderboardData.length > 0 ? (
-                leaderboardData.map((user, index) => {
+                leaderboardData.map((user) => {
                   const scorePercentage = calculateScorePercentage(
                     user.total_correct,
                     user.total_questions

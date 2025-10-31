@@ -1,14 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  Plus,
-  Trash2,
-  Save,
-  X,
-  Edit,
-  ChevronsLeftIcon,
-  Delete,
-  DeleteIcon,
-} from "lucide-react";
+import { Plus, Trash2, Save, Edit } from "lucide-react";
 import { toast } from "react-toastify";
 import { useApi } from "../../hooks/useApi";
 import {
@@ -19,7 +10,6 @@ import {
   updateQuiz,
 } from "../../services/quiz";
 import Loader from "../../components/ui/Loader";
-import type { QuizData, UpdateQuizPayload } from "../../utils/types/quiz";
 import ConfirmModal from "../../components/common/ConfirmModal";
 
 interface Question {
@@ -54,12 +44,9 @@ const QuizManager = () => {
   const [isQuizDeleted, setIsQuizDeleted] = useState<boolean>(false);
   const { callApi: callGetAllQuiz, loading: loadingQuizzes } =
     useApi(getAllQuiz);
-  const { callApi: callUpdateQuiz, loading: loadingUpdateQuizzes } =
-    useApi(updateQuiz);
-  const { callApi: callDeleteQuiz, loading: loadingDeleteQuizzes } =
-    useApi(deleteQuiz);
-  const { callApi: callDeleteQuizID, loading: loadingDeleteQuizzesID } =
-    useApi(deleteQuizByID);
+  const { callApi: callUpdateQuiz } = useApi(updateQuiz);
+  const { callApi: callDeleteQuiz } = useApi(deleteQuiz);
+  const { callApi: callDeleteQuizID } = useApi(deleteQuizByID);
   const { callApi, loading } = useApi(createQuiz);
   const [currentQuiz, setCurrentQuiz] = useState<
     Omit<

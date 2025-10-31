@@ -1,5 +1,4 @@
-import React, { useState, useEffect, type JSX } from "react";
-import { quizQuestions } from "../../utils/constants/quizzData";
+import { useState, useEffect, type JSX } from "react";
 import ResultCard from "../../components/common/ResultCard";
 import { useApi } from "../../hooks/useApi";
 import { getUserQuizInfo } from "../../services/auth";
@@ -81,16 +80,6 @@ export const Results = (): JSX.Element => {
     localStorage.removeItem("quizAnswers");
     localStorage.removeItem("quizState");
     navigator("/");
-  };
-  const formatTime = (seconds: number) => {
-    if (!seconds) return "0s";
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-
-    if (minutes === 0) {
-      return `${remainingSeconds}s`;
-    }
-    return `${minutes}m ${remainingSeconds}s`;
   };
 
   if (loading) {
@@ -191,14 +180,7 @@ export const Results = (): JSX.Element => {
     );
   }
 
-  const {
-    correct_answers,
-    total_questions,
-    score_percentage,
-    questions,
-    time_taken,
-    quiz_title,
-  } = latestQuiz;
+  const { correct_answers, total_questions, questions } = latestQuiz;
   const wrongCount = total_questions - correct_answers;
 
   return (

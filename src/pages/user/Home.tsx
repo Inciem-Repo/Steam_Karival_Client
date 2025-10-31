@@ -16,7 +16,6 @@ function Home() {
   const { user, loading: authLoading } = useAuth();
   const [isUserAttendedQuiz, setIsUserAttendedQuiz] = useState<boolean>(false);
   const [quizID, setQuizID] = useState<string>("");
-  const [dataLoading, setDataLoading] = useState<boolean>(true);
   const { setQuiz } = useQuiz();
 
   useEffect(() => {
@@ -24,7 +23,6 @@ function Home() {
       if (!user?.id) return;
 
       try {
-        setDataLoading(true);
         const [profileResponse, quizResponse] = await Promise.all([
           callGetProfile(user.id),
           callGetAllQuiz(),
@@ -43,7 +41,6 @@ function Home() {
         setIsUserAttendedQuiz(false);
         setQuizID("");
       } finally {
-        setDataLoading(false);
       }
     };
 
