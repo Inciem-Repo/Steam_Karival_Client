@@ -190,6 +190,8 @@ export const Quiz = (): JSX.Element => {
       if (response.status) {
         toast.success(response.message);
         navigate("/results");
+        localStorage.removeItem("quizState");
+        localStorage.removeItem("quizResults");
       }
     }
   };
