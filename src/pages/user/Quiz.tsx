@@ -30,7 +30,8 @@ export const Quiz = (): JSX.Element => {
   const [timeLeft, setTimeLeft] = useState(QUESTION_TIME);
   const [startTime, setStartTime] = useState<number>(Date.now());
   const { quiz } = useQuiz();
-  const { callApi: callsubmitQuiz } = useApi(submitQuiz);
+  const { callApi: callsubmitQuiz, loading: quizAddLoader } =
+    useApi(submitQuiz);
   const navigate = useNavigate();
   const { user } = useAuth();
   const { callApi: callGetProfile } = useApi(getProfileService);
@@ -260,20 +261,29 @@ export const Quiz = (): JSX.Element => {
 
         <button
           onClick={handleNext}
-          className="flex items-center justify-center gap-2 px-6 py-3 relative self-end btn"
+          disabled={quizAddLoader}
+          className={`flex items-center justify-center gap-2 px-6 py-3 relative self-end btn 
+    ${quizAddLoader ? "opacity-50 cursor-not-allowed" : ""}`}
         >
           <span>
-            {currentQuestion < TOTAL_QUESTIONS - 1 ? "Next" : "Finish"}
+            {quizAddLoader
+              ? "Submitting..."
+              : currentQuestion < TOTAL_QUESTIONS - 1
+              ? "Next"
+              : "Finish"}
           </span>
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path
-              d="M7.5 15L12.5 10L7.5 5"
-              stroke="black"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+
+          {!quizAddLoader && (
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path
+                d="M7.5 15L12.5 10L7.5 5"
+                stroke="black"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          )}
         </button>
       </main>
     </div>

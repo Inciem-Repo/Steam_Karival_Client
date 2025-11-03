@@ -366,7 +366,10 @@ const QuizManager = () => {
       toast.info("This question already exists in the quiz");
       return;
     }
-
+    if (hasDuplicateOptions(currentQuestion.options)) {
+      toast.error("Options cannot have duplicate values");
+      return;
+    }
     const newQuestion: Question = {
       ...currentQuestion,
       question_id: generateQuestionId(),
@@ -697,12 +700,12 @@ const QuizManager = () => {
                             <Edit className="h-4 w-4" />
                             View Details
                           </button>
-                          <button
+                          {/* <button
                             className="btn-outline flex items-center text-red-600 gap-2"
                             onClick={() => setConfirmDelete(quizzes[0]._id)}
                           >
                             <Trash2 className="h-4 w-4" />
-                          </button>
+                          </button> */}
                         </div>
                       </div>
                     </div>
