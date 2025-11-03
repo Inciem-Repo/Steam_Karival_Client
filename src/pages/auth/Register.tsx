@@ -19,13 +19,12 @@ const registerSchema = z
       .email("Invalid email address"),
     phone: z
       .string()
-      .min(1, "Phone number is required")
+      .min(1, "Phone number is required") 
       .regex(/^\d{10}$/, "Phone number must be 10 digits"),
     school: z
       .string()
       .min(1, "School is required")
-      .min(2, "School name must be at least 2 characters")
-      .regex(/^[A-Za-z\s]+$/, "School Name can only contain letters"),
+      .min(2, "School name must be at least 2 characters"),
     password: z.string().min(1, "Password is required"),
     confirmPassword: z.string().min(1, "Confirm password is required"),
   })

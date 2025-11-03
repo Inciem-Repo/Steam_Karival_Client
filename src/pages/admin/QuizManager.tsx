@@ -69,6 +69,14 @@ const QuizManager = () => {
     return Math.random().toString(36).substr(2, 9);
   };
 
+  const hasDuplicateOptions = (options: string[]): boolean => {
+    const nonEmptyOptions = options.filter((opt) => opt.trim() !== "");
+    const uniqueOptions = new Set(
+      nonEmptyOptions.map((opt) => opt.toLowerCase().trim())
+    );
+    return nonEmptyOptions.length !== uniqueOptions.size;
+  };
+
   const addQuestion = () => {
     if (!currentQuestion.question.trim()) {
       toast.info("Please enter a question");
@@ -82,6 +90,20 @@ const QuizManager = () => {
 
     if (!currentQuestion.correct_answer) {
       toast.info("Please select a correct answer");
+      return;
+    }
+    const questionExists = currentQuiz.questions.some(
+      (q) =>
+        q.question.trim().toLowerCase() ===
+        currentQuestion.question.trim().toLowerCase()
+    );
+
+    if (questionExists) {
+      toast.info("This question already exists in the quiz");
+      return;
+    }
+    if (hasDuplicateOptions(currentQuestion.options)) {
+      toast.error("Options cannot have duplicate values");
       return;
     }
 
@@ -134,6 +156,10 @@ const QuizManager = () => {
         if (q.question_id === questionId) {
           const newOptions = [...q.options];
           newOptions[index] = value;
+          if (hasDuplicateOptions(newOptions)) {
+            toast.error("Options cannot have duplicate values");
+            return q;
+          }
           return { ...q, options: newOptions };
         }
         return q;
@@ -174,9 +200,13 @@ const QuizManager = () => {
         prev ? { ...prev, questions: updatedQuestions } : null
       );
     } else {
-      setCurrentQuestion((prev) => ({
+      setCurrentQuiz((prev) => ({
         ...prev,
-        correct_answer: correctAnswer,
+        questions: prev.questions.map((q) =>
+          q.question_id === questionId
+            ? { ...q, correct_answer: correctAnswer }
+            : q
+        ),
       }));
     }
   };
@@ -230,12 +260,10 @@ const QuizManager = () => {
     setShowAddQuiz(false);
     setEditingQuiz(null);
   };
-
   const handleViewDetails = (quiz: Quiz) => {
     setEditingQuiz(quiz);
     setShowAddQuiz(false);
   };
-
   const handleUpdateQuiz = async () => {
     if (!editingQuiz) return;
 
@@ -247,7 +275,6 @@ const QuizManager = () => {
         return;
       }
 
-      // Prepare payload with only changed data
       const payload: any = {};
       if (editingQuiz.title !== originalQuiz.title) {
         payload.title = editingQuiz.title;
@@ -288,7 +315,6 @@ const QuizManager = () => {
         toast.info("No changes detected");
         return;
       }
-
       const response = await callUpdateQuiz(editingQuiz._id, payload);
 
       if (response?.status) {
@@ -328,6 +354,16 @@ const QuizManager = () => {
 
     if (!currentQuestion.correct_answer) {
       toast.info("Please select a correct answer");
+      return;
+    }
+    const questionExists = editingQuiz.questions.some(
+      (q) =>
+        q.question.trim().toLowerCase() ===
+        currentQuestion.question.trim().toLowerCase()
+    );
+
+    if (questionExists) {
+      toast.info("This question already exists in the quiz");
       return;
     }
 

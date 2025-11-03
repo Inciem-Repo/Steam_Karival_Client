@@ -19,6 +19,7 @@ export const createQuiz = async (quizData: QuizData) => {
   return res.data;
 };
 export const updateQuiz = async (quizID: string, quizData: QuizData) => {
+  console.log({ quizData });
   const res = await apiClient.put(api.quiz.updateQuiz(quizID), quizData);
   return res.data;
 };
