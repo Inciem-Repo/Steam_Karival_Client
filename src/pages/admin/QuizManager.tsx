@@ -698,7 +698,9 @@ const QuizManager = () => {
                             onClick={() => handleViewDetails(quizzes[0])}
                           >
                             <Edit className="h-4 w-4" />
-                            View Details
+                            <span className="md:block hidden">
+                              View Details
+                            </span>
                           </button>
                           {/* <button
                             className="btn-outline flex items-center text-red-600 gap-2"

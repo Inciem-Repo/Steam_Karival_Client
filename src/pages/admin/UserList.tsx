@@ -211,7 +211,7 @@ const UserList = () => {
 
   return (
     <div className="min-h-screen h-screen overflow-auto p-4 md:p-6 lg:p-8">
-      <div className="space-y-6 md:space-y-8">
+      <div className="space-y-6 md:space-y-8 md:mt-0 mt-10">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
             Users

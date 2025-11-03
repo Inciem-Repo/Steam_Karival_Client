@@ -145,7 +145,7 @@ export const Profile = (): JSX.Element => {
           </button>
         </div>
 
-        <div className="flex flex-col items-center gap-6 relative self-stretch w-full">
+        <div className="flex flex-col items-center gap-6 relative self-stretch w-full text-center">
           <div className="w-full flex items-start">
             <h1 className="relative font-h1-bold text-black tracking-[var(--h1-bold-letter-spacing)] leading-[var(--h1-bold-line-height)] [font-style:var(--h1-bold-font-style)]">
               User Profile

@@ -171,10 +171,10 @@ const UserProfile = () => {
 
   return (
     <div className="h-screen overflow-auto p-4 md:p-6">
-      <div className="space-y-6 md:space-y-8">
+      <div className="space-y-6 md:space-y-8 ">
         <button
           onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-black hover:text-primary/80 transition-colors mb-4"
+          className="flex items-center gap-2 m text-black hover:text-primary/80 transition-colors md:mt-5 mt-10 mb-4"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to Users
