@@ -1,35 +1,27 @@
-name: Deploy Steam Karival Client
+name: Deploy Chatbot - quiz-steamkarnival
 
 on:
   push:
     branches:
-      - main  # Deploy on pushes to main branch
+      - main
 
 jobs:
-  deploy:
+  deploy-chatbot:
+    name: Deploy to Chatbot Server (quiz-steamkarnival)
     runs-on: ubuntu-latest
-
+    
     steps:
-      # 1️⃣ Checkout repository
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+      - name: SSH to Chatbot Server
+        env:
+          SSH_SERVER_PRIVATE_KEY: ${{ secrets.SERVER_SSH_KEY }}
+          SSH_SERVER_IP: ${{ secrets.SERVER_HOST }}
+          SSH_SERVER_USER_NAME: ${{ secrets.SERVER_USER }}
+        run: |
+          mkdir -p $HOME/.ssh/
+          echo "$SSH_SERVER_PRIVATE_KEY" > $HOME/.ssh/id_rsa
+          chmod 600 $HOME/.ssh/id_rsa
+          ssh -o StrictHostKeyChecking=no -i $HOME/.ssh/id_rsa "${SSH_SERVER_USER_NAME}@${SSH_SERVER_IP}" "/home/${SSH_SERVER_USER_NAME}/quiz-steamkarnival/script/deploy.sh"
 
-      # 2️⃣ Set up Node.js (needed for npm commands)
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '22'  # Use your Node.js version
-
-      # 3️⃣ Deploy via SSH
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v0.1.6
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}  # This is the private key secret
-          port: 22  # Change if your server uses a different SSH port
-          script: |
-            cd /home/quiz-steamkarnival/public/Steam_Karival_Client
-            git pull
-            npm install
-            pm2 restart steam-client
+      - name: Cleanup PEM File
+        run: |
+          rm -f $HOME/.ssh/id_rsa
