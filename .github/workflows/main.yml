@@ -1,4 +1,4 @@
-name: Deploy Chatbot - quiz-steamkarnival
+name: Quiz-steamkarnival
 
 on:
   push:
