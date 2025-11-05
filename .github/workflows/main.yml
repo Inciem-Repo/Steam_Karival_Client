@@ -10,23 +10,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v3
+      # 1️⃣ Checkout the repository
+      - name: Checkout Repository
+        uses: actions/checkout@v3
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '20'  # Use your project Node version
+      # 2️⃣ Set up Node.js (needed if you run npm commands)
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
 
-    - name: Deploy via SSH
-      uses: appleboy/ssh-action@v0.1.6
-      with:
-        host: ${{ secrets.SERVER_HOST }}          # e.g., your server IP
-        username: ${{ secrets.SERVER_USER }}      # your server user
-        key: ${{ secrets.SSH_PRIVATE_KEY }}       # private key (without passphrase)
-        port: 22                                  # default SSH port
-        script: |
-          cd /home/quiz-steamkarnival/public/Steam_Karival_Client
-          git pull
-          npm install
-          pm2 restart steam-client
+      # 3️⃣ Deploy via SSH
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}       # Correct secret name
+          port: 22                                 # Change if your server uses a different port
+          script: |
+            cd /home/quiz-steamkarnival/public/Steam_Karival_Client
+            git pull
+            npm install
+            pm2 restart steam-client
