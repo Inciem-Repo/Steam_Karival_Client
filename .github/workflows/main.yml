@@ -20,7 +20,7 @@ jobs:
           mkdir -p $HOME/.ssh/
           echo "$SSH_SERVER_PRIVATE_KEY" > $HOME/.ssh/id_rsa
           chmod 600 $HOME/.ssh/id_rsa
-          ssh -o StrictHostKeyChecking=no -i $HOME/.ssh/id_rsa "${SSH_SERVER_USER_NAME}@${SSH_SERVER_IP}" "/home/${SSH_SERVER_USER_NAME}/quiz-steamkarnival/script/deploy.sh"
+          ssh -o StrictHostKeyChecking=no -i $HOME/.ssh/id_rsa "${SSH_SERVER_USER_NAME}@${SSH_SERVER_IP}" "/home/${SSH_SERVER_USER_NAME}/script/deploy.sh"
 
       - name: Cleanup PEM File
         run: |
