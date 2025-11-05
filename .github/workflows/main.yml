@@ -7,11 +7,11 @@ on:
 
 jobs:
   deploy-chatbot:
-    name: Deploy to Chatbot Server (quiz-steamkarnival)
+    name: Deploy quiz-steamkarnival Server
     runs-on: ubuntu-latest
     
     steps:
-      - name: SSH to Chatbot Server
+      - name: SSH  quiz-steamkarnival Server
         env:
           SSH_SERVER_PRIVATE_KEY: ${{ secrets.SERVER_SSH_KEY }}
           SSH_SERVER_IP: ${{ secrets.SERVER_HOST }}
