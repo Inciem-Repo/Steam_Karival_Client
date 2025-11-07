@@ -152,7 +152,7 @@ function Home() {
                 </button>
               ) : quizID ? (
                 <button
-                  className="flex flex-col w-full btn"
+                  className="flex flex-col w-full btn items-center"
                   onClick={startCountdown}
                   disabled={loadingQuizInfo}
                 >
