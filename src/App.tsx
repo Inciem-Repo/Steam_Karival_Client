@@ -92,7 +92,7 @@ function AppRoutes() {
 function App() {
   return (
     <>
-      <ToastContainer position="top-right" autoClose={3000} theme="colored" />
+      <ToastContainer position="top-center" autoClose={3000} theme="colored" />
       <AuthProvider>
         <QuizProvider>
           <Router>

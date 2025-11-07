@@ -9,6 +9,7 @@ import Login from "../pages/auth/Login";
 import Register from "../pages/auth/Register";
 import NotFound from "../pages/commen/NotFound";
 import Home from "../pages/user/Home";
+import PaymentPage from "../pages/user/PaymentPage";
 import { Profile } from "../pages/user/Profile";
 import { Quiz } from "../pages/user/Quiz";
 import { Results } from "../pages/user/Results";
@@ -44,6 +45,13 @@ export const routes: AppRoute[] = [
     id: "home",
     path: "/",
     component: Home,
+    protected: true,
+    roles: [roleName.user],
+  },
+  {
+    id: "home",
+    path: "/payment",
+    component: PaymentPage,
     protected: true,
     roles: [roleName.user],
   },
