@@ -6,6 +6,7 @@ export const api = {
   user: {
     getProfile: (userId: string) => `/user/${userId}`,
     getAllUser: (page: number, limit: number) => `/users?${page}&${limit}`,
+    getPaidUser: (page: number, limit: number) => `/paid-users?${page}&${limit}`,
     getUserQuizInfo: (userId: string) => `/quiz_info/${userId}`,
   },
   quiz: {
@@ -22,5 +23,9 @@ export const api = {
     getDashboardInfo: "/dashboard",
     getLeaderboard: (page: number, limit: number) =>
       `/leaderboard?${page}&${limit}`,
+  },
+  payment: {
+    order: "/order",
+    verify: "/verify",
   },
 };

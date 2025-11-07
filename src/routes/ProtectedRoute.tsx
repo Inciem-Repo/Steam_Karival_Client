@@ -4,11 +4,15 @@ import { useAuth } from "../context/AuthContext";
 type ProtectedRouteProps = {
   children: React.ReactNode;
   roles?: string[];
+  requiresPayment?: boolean;
 };
 
-export const ProtectedRoute = ({ children, roles }: ProtectedRouteProps) => {
+export const ProtectedRoute = ({
+  children,
+  roles,
+  requiresPayment,
+}: ProtectedRouteProps) => {
   const { user, loading } = useAuth();
-
   if (loading) return <p>Loading...</p>;
 
   if (!user) return <Navigate to="/login" replace />;
@@ -16,6 +20,8 @@ export const ProtectedRoute = ({ children, roles }: ProtectedRouteProps) => {
   if (roles && !roles.includes(user.role)) {
     return <Navigate to="/login" replace />;
   }
-
+  if (requiresPayment && !user.isPaid) {
+    return <Navigate to="/payment" replace />;
+  }
   return <>{children}</>;
 };

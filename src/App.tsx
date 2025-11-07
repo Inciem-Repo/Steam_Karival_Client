@@ -25,6 +25,7 @@ function AppRoutes() {
           component: Component,
           protected: isProtected,
           roles,
+          requiresPayment,
         }) => {
           if (children && Layout) {
             return (
@@ -33,7 +34,10 @@ function AppRoutes() {
                 path={path}
                 element={
                   isProtected ? (
-                    <ProtectedRoute roles={roles}>
+                    <ProtectedRoute
+                      roles={roles}
+                      requiresPayment={requiresPayment}
+                    >
                       <Layout>
                         <Outlet />
                       </Layout>
@@ -73,7 +77,12 @@ function AppRoutes() {
                 path={path}
                 element={
                   isProtected ? (
-                    <ProtectedRoute roles={roles}>{element}</ProtectedRoute>
+                    <ProtectedRoute
+                      roles={roles}
+                      requiresPayment={requiresPayment}
+                    >
+                      {element}
+                    </ProtectedRoute>
                   ) : (
                     element
                   )

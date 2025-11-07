@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect} from "react";
 import { useNavigate } from "react-router-dom";
 import home from "../../assets/images/home.png";
 import { useApi } from "../../hooks/useApi";
@@ -32,7 +32,7 @@ function Home() {
         ]);
 
         setIsUserAttendedQuiz(
-          profileResponse?.user?.is_quiz_attempted || false
+          profileResponse?.user?.stats?.is_quiz_attempted || false
         );
         if (quizResponse?.quizzes?.length > 0) {
           setQuizID(quizResponse.quizzes[0]._id);
@@ -72,6 +72,13 @@ function Home() {
       navigate("/");
     }
   };
+  const checkUserPaidOrNot = async () => {
+    if (user && user?.isPaid) {
+      await startCountdown();
+    } else {
+      navigate("/payment");
+    }
+  };
 
   useEffect(() => {
     if (countdown === null) return;
@@ -87,8 +94,6 @@ function Home() {
 
     return () => clearTimeout(timer);
   }, [countdown, navigate]);
-
-  // Show loading during initial auth check or data fetching
   if (authLoading || dataLoading) {
     return (
       <div className="w-full min-h-screen flex items-center justify-center">
@@ -145,7 +150,7 @@ function Home() {
               </div>
               {isUserAttendedQuiz ? (
                 <button
-                  className="flex flex-col w-full btn"
+                  className="flex flex-col w-full btn items-center justify-center"
                   onClick={() => navigate("/profile")}
                 >
                   Go to Profile
@@ -153,7 +158,7 @@ function Home() {
               ) : quizID ? (
                 <button
                   className="flex flex-col w-full btn items-center"
-                  onClick={startCountdown}
+                  onClick={checkUserPaidOrNot}
                   disabled={loadingQuizInfo}
                 >
                   {loadingQuizInfo ? "Loading..." : "Start Quiz"}

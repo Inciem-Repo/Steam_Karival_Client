@@ -59,3 +59,12 @@ export const getAuthDetails = (): AuthUser | null => {
     return null;
   }
 };
+export const replaceAuthToken = (newToken: string): void => {
+  try {
+    localStorage.removeItem("token");
+    if (!newToken || newToken === "undefined" || newToken === "null") return;
+    localStorage.setItem("token", newToken);
+  } catch (err) {
+    console.error("Error replacing auth token:", err);
+  }
+};
