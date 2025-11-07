@@ -8,26 +8,7 @@ import {
 import { showError } from "../utils/toast";
 import { loginService } from "../services/auth";
 import { getAuthDetails, getAuthToken } from "../utils/helper";
-
-export interface User {
-  id?: string;
-  name: string;
-  email: string;
-  role: string;
-  phone?: string;
-  school?: string;
-  user_id?: string;
-  username?: string;
-  [key: string]: any;
-}
-
-interface AuthContextType {
-  user: User | null;
-  token: string | null;
-  loading: boolean;
-  login: (email: string, password: string) => Promise<User | null>;
-  logout: () => void;
-}
+import type { AuthContextType, User } from "../utils/types/user";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -52,6 +33,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           phone: decoded.phone,
           school: decoded.school,
           username: decoded.name,
+          isPaid: decoded?.isPaid,
         };
         setUser(userFromToken);
       }
@@ -78,6 +60,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         phone: data.user.phone,
         school: data.user.school,
         username: data.user.name,
+        isPaid: data.user.isPaid,
       };
 
       if (userInfo) setUser(userInfo);

@@ -17,11 +17,11 @@ const ResultCard: React.FC<ResultCardProps> = ({
   return (
     <div className="bg-primary-light rounded-[12px] p-4 flex flex-col items-center gap-4 w-full max-w-[360px] shadow-sm">
       <div className="flex w-full justify-between items-start">
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 items-start">
           <h2 className="font-h1-bold font-semibold text-[40px] leading-none text-black">
             {score}/{total}
           </h2>
-          <p className="font-body-semibold font-normal text-black">
+          <p className="font-body-semibold font-normal text-start text-black">
             Great job! You've completed the quiz successfully.
           </p>
 

@@ -65,6 +65,16 @@ interface ProfileUser {
     total_correct: number;
     total_questions: number;
   };
+  stats?: {
+    average_score: number;
+    is_quiz_attempted: boolean;
+    rank: number;
+    time_taken: number;
+    total_correct: number;
+    total_questions: number;
+    total_questions_attempted: number;
+    total_quizzes_attempted: number;
+  };
 }
 
 interface ProfileResponse {
@@ -95,7 +105,6 @@ const UserProfile = () => {
           callGetUserQuizInfo(id) as Promise<QuizResponse>,
           callGetProfile(id) as Promise<ProfileResponse>,
         ]);
-
         setQuizData(userQuizInfo);
         setProfileData(userProfileInfo);
       } catch (error) {
@@ -167,7 +176,7 @@ const UserProfile = () => {
     );
   }
 
-  const user = profileData.user;
+
 
   return (
     <div className="h-screen overflow-auto p-4 md:p-6">
@@ -189,7 +198,7 @@ const UserProfile = () => {
               <div className="flex items-center gap-3">
                 <div className="h-10 w-10 md:h-12 md:w-12 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
                   <span className="text-base md:text-lg font-semibold text-white">
-                    {user.name
+                    {profileData?.user?.name
                       .split(" ")
                       .map((n) => n[0])
                       .join("")}
@@ -197,7 +206,7 @@ const UserProfile = () => {
                 </div>
                 <div className="min-w-0">
                   <h3 className="text-lg md:text-xl font-semibold truncate">
-                    {user.name}
+                    {profileData?.user?.name}
                   </h3>
                 </div>
               </div>
@@ -206,33 +215,37 @@ const UserProfile = () => {
                 <div className="flex items-center gap-3">
                   <Mail className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                   <span className="text-sm md:text-base break-all">
-                    {user.email}
+                    {profileData?.user?.email}
                   </span>
                 </div>
                 <div className="flex items-center gap-3">
                   <Phone className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                  <span className="text-sm md:text-base">{user.phone}</span>
+                  <span className="text-sm md:text-base">
+                    {profileData?.user?.phone}
+                  </span>
                 </div>
                 <div className="flex items-center gap-3">
                   <School className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                  <span className="text-sm md:text-base">{user.school}</span>
+                  <span className="text-sm md:text-base">
+                    {profileData?.user?.school}
+                  </span>
                 </div>
                 <div className="flex items-center gap-3">
                   <CheckCircle
                     className={`h-4 w-4 flex-shrink-0 ${
-                      user.is_quiz_attempted
+                      profileData?.user?.stats?.is_quiz_attempted
                         ? "text-green-600"
                         : "text-gray-400"
                     }`}
                   />
                   <span
                     className={`text-sm md:text-base ${
-                      user.is_quiz_attempted
+                      profileData?.user?.stats?.is_quiz_attempted
                         ? "text-green-600"
                         : "text-gray-600"
                     }`}
                   >
-                    {user.is_quiz_attempted
+                    {profileData?.user?.stats?.is_quiz_attempted
                       ? "Quiz Attempted"
                       : "Not Attempted Quiz"}
                   </span>
@@ -282,20 +295,17 @@ const UserProfile = () => {
                     {overallStats.totalTimeSpent}
                   </p>
                 </div>
-
-                {overallStats.rank > 0 && (
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <Award className="h-4 w-4 text-yellow-600 flex-shrink-0" />
-                      <span className="text-xs md:text-sm text-muted-foreground">
-                        Overall Rank
-                      </span>
-                    </div>
-                    <p className="text-xl md:text-2xl font-bold">
-                      #{overallStats.rank}
-                    </p>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Award className="h-4 w-4 text-yellow-600 flex-shrink-0" />
+                    <span className="text-xs md:text-sm text-muted-foreground">
+                      Overall Rank
+                    </span>
                   </div>
-                )}
+                  <p className="text-xl md:text-2xl font-bold">
+                    #{profileData?.user?.stats?.rank}
+                  </p>
+                </div>
               </div>
             ) : (
               <div className="text-center py-4 text-muted-foreground">
@@ -304,8 +314,6 @@ const UserProfile = () => {
             )}
           </div>
         </div>
-
-        {/* Quiz Attempts */}
         <div className="space-y-4 md:space-y-6">
           <h2 className="text-xl md:text-2xl font-bold">Quiz Attempts</h2>
 
@@ -318,7 +326,6 @@ const UserProfile = () => {
 
               {quizData.quizzes.map((quiz) => (
                 <div key={quiz.quiz_id} className="rounded-lg border bg-card">
-                  {/* Quiz Header */}
                   <div className="p-4 md:p-6">
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                       <div className="flex-1 min-w-0">

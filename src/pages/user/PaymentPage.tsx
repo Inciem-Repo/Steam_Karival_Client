@@ -1,25 +1,126 @@
 import { useState } from "react";
+import type {
+  RazorpayErrorPayload,
+  RazorpayInstance,
+  RazorpayOptions,
+  RazorpayResponse,
+} from "../../utils/types/user";
+import { toast } from "react-toastify";
+import { useAuth } from "../../context/AuthContext";
+import {
+  orderPaymentService,
+  verifyPaymentService,
+} from "../../services/payment";
+import { useApi } from "../../hooks/useApi";
+import { checkOutURL, RAZORPAY_KEY_ID } from "../../utils/constants/env";
+import { replaceAuthToken } from "../../utils/helper";
+
+declare global {
+  interface Window {
+    Razorpay: new (options: RazorpayOptions) => RazorpayInstance;
+  }
+}
 
 const PaymentPage = () => {
-  const [amount] = useState("₹250.00");
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [amount] = useState<number>(5000);
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  const { user } = useAuth();
+  const { callApi: callPaymentOrder } = useApi(orderPaymentService);
+  const { callApi: callPaymentVerify } = useApi(verifyPaymentService);
 
-  const handlePayment = () => {
+  const loadRazorpay = (src: string): Promise<boolean> => {
+    return new Promise((resolve) => {
+      const script = document.createElement("script");
+      script.src = src;
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
+  const handlePayment = async (): Promise<void> => {
     setIsProcessing(true);
-    setTimeout(() => {
+    const res = await loadRazorpay(checkOutURL);
+    console.log(res);
+    if (!res) {
+      toast.error(
+        "Failed to load payment options. Please check your connection."
+      );
       setIsProcessing(false);
-      alert("Payment processed successfully!");
-    }, 2000);
+      return;
+    }
+    try {
+      const orderData = await callPaymentOrder({ amount });
+      if (!orderData?.order?.id) {
+        toast.error("Failed to create Razorpay order");
+        setIsProcessing(false);
+        return;
+      }
+      const options: RazorpayOptions = {
+        key: RAZORPAY_KEY_ID,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: "Steam Karnival",
+        description: "Payment for quiz participation",
+        order_id: orderData?.order?.id,
+        handler: async (response: RazorpayResponse) => {
+          try {
+            const verifyData = await callPaymentVerify(response);
+            if (verifyData.status) {
+              toast.success("Payment Successful!");
+              replaceAuthToken(verifyData?.token);
+            } else {
+              toast.error("Payment Verification Failed!");
+            }
+          } catch (e) {
+            toast.error("Verification error. Please contact support.");
+          } finally {
+            setIsProcessing(false);
+          }
+        },
+        prefill: {
+          name: user?.name,
+          email: user?.email,
+          contact: user?.phone?.replace(/\D/g, "")?.replace(/^91/, "") || "",
+        },
+        modal: {
+          ondismiss: () => {
+            toast.info("Payment cancelled.");
+            setIsProcessing(false);
+          },
+        },
+      };
+
+      const rzp = new window.Razorpay(options);
+
+      rzp.on("payment.failed", (resp?: RazorpayErrorPayload) => {
+        const msg =
+          resp?.error?.description ||
+          resp?.error?.reason ||
+          "Payment failed. Please try again.";
+        toast.error(msg);
+        setIsProcessing(false);
+      });
+      rzp.on("close", () => {
+        setIsProcessing(false);
+      });
+
+      rzp.open();
+    } catch (error) {
+      console.error(error);
+      toast.error("Something went wrong during payment initiation.");
+      setIsProcessing(false);
+    }
   };
 
   return (
-    <div className="min-h-screen  from-slate-50 to-slate-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-md   border-slate-200 overflow-hidden">
+    <div className="min-h-screen from-slate-50 to-slate-100 flex items-center justify-center p-4">
+      <div className="max-w-md  w-[362px] border-slate-200 overflow-hidden">
         <div className="pt-8 pb-8 px-6 space-y-8">
-          <div className="w-full flex items-center justify-center ">
+          <div className="flex justify-center">
             <svg
               width="300"
-              height="300"
+              height="200"
               viewBox="0 0 2523 2363"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
@@ -1435,14 +1536,37 @@ const PaymentPage = () => {
               />
             </svg>
           </div>
-
-          <div className="space-y-4 text-center">
-            <p className="text-lg text-slate-600 font-medium">Amount to Pay</p>
+          <div className="space-y-2 text-center">
+            <p className=" font-h1-bold ">
+              Unlock Your Quiz Adventure
+            </p>
             <div className="relative">
-              <h1 className="text-5xl font-bold">
-                {amount}
-              </h1>
+              {/* <h1 className="text-3xl font-bold">
+                ₹{(amount / 100).toFixed(2)}
+              </h1> */}
             </div>
+            <p className="text-sm text-slate-500 px-2">
+              You’re just one step away from joining the fun! Complete your
+              payment and get ready to challenge your mind, earn rewards, and
+              climb the leaderboard.
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            <button
+              onClick={handlePayment}
+              disabled={isProcessing}
+              className="btn w-full flex items-center justify-center"
+            >
+              {isProcessing ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-3"></div>
+                  Processing Payment...
+                </>
+              ) : (
+                `Pay ₹${(amount / 100).toFixed(2)}`
+              )}
+            </button>
             <div className="flex items-center justify-center space-x-2 text-slate-500">
               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                 <path
@@ -1451,24 +1575,8 @@ const PaymentPage = () => {
                   clipRule="evenodd"
                 />
               </svg>
-              <p className="text-sm">Secure encrypted connection</p>
+              <p className="text-xs">Secure encrypted connection</p>
             </div>
-          </div>
-          <div className="space-y-4">
-            <button
-              onClick={handlePayment}
-              disabled={isProcessing}
-              className="btn w-full"
-            >
-              {isProcessing ? (
-                <>
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-3"></div>
-                  Processing Payment...
-                </>
-              ) : (
-                `Pay ${amount}`
-              )}
-            </button>
           </div>
         </div>
       </div>

@@ -2,7 +2,6 @@ import axios from "axios";
 import { BASE_URL, ENV_TYPE } from "../utils/constants/env";
 import { getAuthToken } from "../utils/helper";
 
-// Create a central axios instance
 const apiClient = axios.create({
   baseURL: BASE_URL || "N/A",
   headers: { "Content-Type": "application/json" },

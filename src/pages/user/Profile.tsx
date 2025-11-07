@@ -7,26 +7,11 @@ import { useApi } from "../../hooks/useApi";
 import { useNavigate } from "react-router-dom";
 import ConfirmModal from "../../components/common/ConfirmModal";
 
-interface UserProfile {
-  _id: string;
-  email: string;
-  is_quiz_attempted: boolean;
-  name: string;
-  phone: string;
-  role: string;
-  school: string;
-  score: {
-    total_correct: number;
-    total_questions: number;
-  };
-}
-
 export const Profile = (): JSX.Element => {
-  //   const [answers, setAnswers] = useState<(number | null)[]>([]);
   const [score, setScore] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
   const [wrongCount, setWrongCount] = useState(0);
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [userProfile, setUserProfile] = useState<any | null>(null);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const { user, logout } = useAuth();
   const { callApi: callGetProfile } = useApi(getProfileService);
@@ -37,7 +22,7 @@ export const Profile = (): JSX.Element => {
       const response = await callGetProfile(user?.id);
       if (response?.status && response.user) {
         setUserProfile(response.user);
-        const { total_correct, total_questions } = response.user.score;
+        const { total_correct, total_questions } = response.user.stats;
         setCorrectCount(total_correct);
         setWrongCount(total_questions - total_correct);
         setScore(total_correct);
@@ -49,7 +34,6 @@ export const Profile = (): JSX.Element => {
     const savedAnswers = localStorage.getItem("quizAnswers");
     if (savedAnswers) {
       const userAnswers: (number | null)[] = JSON.parse(savedAnswers);
-      //   setAnswers(userAnswers);
 
       let correct = 0;
       let wrong = 0;
@@ -66,10 +50,17 @@ export const Profile = (): JSX.Element => {
       setCorrectCount(correct);
       setWrongCount(wrong);
       setScore(correct);
-    } else {
-      //   setLocation("/home");
     }
   }, []);
+
+  // Calculate values based on userProfile or local state
+  const totalScore = userProfile?.stats?.total_correct || score;
+  const totalQuestions =
+    userProfile?.stats?.total_questions || correctCount + wrongCount;
+  const finalCorrectCount = userProfile?.stats?.total_correct || correctCount;
+  const finalWrongCount = userProfile
+    ? userProfile.stats.total_questions - userProfile.stats.total_correct
+    : wrongCount;
 
   return (
     <div className="w-full min-h-screen flex items-center justify-center">
@@ -153,15 +144,10 @@ export const Profile = (): JSX.Element => {
           </div>
 
           <ResultCard
-            score={userProfile?.score?.total_correct || score}
-            total={userProfile?.score?.total_questions || 0}
-            correctCount={userProfile?.score?.total_correct || correctCount}
-            wrongCount={
-              userProfile
-                ? userProfile?.score?.total_questions -
-                  userProfile?.score?.total_correct
-                : wrongCount
-            }
+            score={totalScore}
+            total={totalQuestions}
+            correctCount={finalCorrectCount}
+            wrongCount={finalWrongCount}
           />
 
           <button

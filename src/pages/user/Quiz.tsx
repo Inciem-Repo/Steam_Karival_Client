@@ -24,6 +24,7 @@ interface QuizState {
 const QUESTION_TIME = 6;
 
 export const Quiz = (): JSX.Element => {
+  const [quizStateLoaded, setQuizStateLoaded] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [responses, setResponses] = useState<QuestionResponse[]>([]);
@@ -38,32 +39,7 @@ export const Quiz = (): JSX.Element => {
 
   const TOTAL_QUESTIONS = quiz?.questions?.length || 0;
 
-  useEffect(() => {
-    if (!quiz) return;
-    if (TOTAL_QUESTIONS > 0 && responses.length === 0) {
-      const initialResponses: QuestionResponse[] = quiz.questions.map(
-        (question, index) => ({
-          questionId: question.question_id || `question-${index}`,
-          selectedOption: null,
-          selectedOptionIndex: null,
-          timeTaken: 0,
-        })
-      );
-      setResponses(initialResponses);
-      setStartTime(Date.now());
-    }
-  }, [TOTAL_QUESTIONS, responses.length, quiz]);
-  useEffect(() => {
-    const checkQuizAccess = async () => {
-      const profileResponse = await callGetProfile(user?.id);
-      const hasAttempted = profileResponse?.user?.is_quiz_attempted || false;
-      if (hasAttempted) {
-        navigate("/");
-      }
-    };
-    checkQuizAccess();
-  }, [user, navigate, callGetProfile]);
-
+  // Load saved state from localStorage on component mount
   useEffect(() => {
     const savedState = localStorage.getItem("quizState");
     if (savedState) {
@@ -76,17 +52,49 @@ export const Quiz = (): JSX.Element => {
         state.responses[state.currentQuestion]?.selectedOptionIndex || null
       );
     }
+    setQuizStateLoaded(true);
   }, []);
 
   useEffect(() => {
-    const state: QuizState = {
-      currentQuestion,
-      responses,
-      timeLeft,
-      startTime,
+    if (!quiz || !quizStateLoaded) return;
+
+    // Only initialize responses if we don't have any from localStorage
+    if (TOTAL_QUESTIONS > 0 && responses.length === 0) {
+      const initialResponses: QuestionResponse[] = quiz.questions.map(
+        (question, index) => ({
+          questionId: question.question_id || `question-${index}`,
+          selectedOption: null,
+          selectedOptionIndex: null,
+          timeTaken: 0,
+        })
+      );
+      setResponses(initialResponses);
+      setStartTime(Date.now());
+    }
+  }, [TOTAL_QUESTIONS, responses.length, quiz, quizStateLoaded]);
+
+  useEffect(() => {
+    const checkQuizAccess = async () => {
+      const profileResponse = await callGetProfile(user?.id);
+      const hasAttempted =
+        profileResponse?.user?.stats?.is_quiz_attempted || false;
+      if (hasAttempted) {
+        navigate("/");
+      }
     };
-    localStorage.setItem("quizState", JSON.stringify(state));
-  }, [currentQuestion, responses, timeLeft, startTime]);
+    checkQuizAccess();
+  }, [user, navigate, callGetProfile]);
+  useEffect(() => {
+    if (quizStateLoaded) {
+      const state: QuizState = {
+        currentQuestion,
+        responses,
+        timeLeft,
+        startTime,
+      };
+      localStorage.setItem("quizState", JSON.stringify(state));
+    }
+  }, [currentQuestion, responses, timeLeft, startTime, quizStateLoaded]);
 
   useEffect(() => {
     if (timeLeft === 0) {
@@ -200,7 +208,7 @@ export const Quiz = (): JSX.Element => {
   const question = quiz?.questions?.[currentQuestion];
   const progress = `${currentQuestion + 1}/${TOTAL_QUESTIONS}`;
 
-  if (!quiz || !question) {
+  if (!quiz || !question || !quizStateLoaded) {
     return (
       <div className="w-full min-h-screen flex items-center justify-center">
         <div className="text-center">

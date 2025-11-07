@@ -58,7 +58,7 @@ export const Results = (): JSX.Element => {
       try {
         setLoading(true);
         const response = (await callGetUserQuizInfo(user.id)) as QuizResponse;
-
+        console.log(response)
         if (response.status && response.quizzes.length > 0) {
           setLatestQuiz(response.quizzes[0]);
           setHasAttempted(true);

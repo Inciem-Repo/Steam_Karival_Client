@@ -2,6 +2,7 @@
 import AdminLayout from "../components/admin/AdminLayout";
 import Dashboard from "../pages/admin/DashBoard";
 import LeaderBoard from "../pages/admin/LeaderBoard";
+import PaidUserList from "../pages/admin/PaidUserList";
 import QuizManager from "../pages/admin/QuizManager";
 import UserList from "../pages/admin/UserList";
 import UsersProfile from "../pages/admin/UsersProfile";
@@ -23,6 +24,7 @@ export type AppRoute = {
   roles?: string[];
   layout?: React.ComponentType<{ children: React.ReactNode }>;
   children?: AppRoute[];
+  requiresPayment?: boolean;
 };
 
 export const routes: AppRoute[] = [
@@ -32,11 +34,13 @@ export const routes: AppRoute[] = [
     protected: true,
     roles: [roleName.admin],
     layout: AdminLayout,
+    requiresPayment: false,
     children: [
       { id: "dashboard", path: "dashboard", component: Dashboard },
       { id: "leaderboard", path: "leaderboard", component: LeaderBoard },
       { id: "quizz-manger", path: "quizz-manger", component: QuizManager },
       { id: "users", path: "users", component: UserList },
+      { id: "paid-users", path: "paid-users", component: PaidUserList },
       { id: "profile", path: "profile/user/:id", component: UsersProfile },
     ],
   },
@@ -47,13 +51,15 @@ export const routes: AppRoute[] = [
     component: Home,
     protected: true,
     roles: [roleName.user],
+    requiresPayment: false,
   },
   {
-    id: "home",
+    id: "payment",
     path: "/payment",
     component: PaymentPage,
     protected: true,
     roles: [roleName.user],
+    requiresPayment: false,
   },
   {
     id: "profile",
@@ -61,6 +67,7 @@ export const routes: AppRoute[] = [
     component: Profile,
     protected: true,
     roles: [roleName.user],
+    requiresPayment: true,
   },
   {
     id: "quiz",
@@ -68,6 +75,7 @@ export const routes: AppRoute[] = [
     component: Quiz,
     protected: true,
     roles: [roleName.user],
+    requiresPayment: true,
   },
   {
     id: "results",
@@ -75,8 +83,14 @@ export const routes: AppRoute[] = [
     component: Results,
     protected: true,
     roles: [roleName.user],
+    requiresPayment: true,
   },
-  { id: "login", path: "/login", component: Login },
-  { id: "register", path: "/register", component: Register },
-  { id: "not-found", path: "*", component: NotFound },
+  { id: "login", path: "/login", component: Login, requiresPayment: false },
+  {
+    id: "register",
+    path: "/register",
+    component: Register,
+    requiresPayment: false,
+  },
+  { id: "not-found", path: "*", component: NotFound, requiresPayment: false },
 ];
