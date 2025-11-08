@@ -1,117 +1,117 @@
 import { useState } from "react";
-import type {
-  RazorpayErrorPayload,
-  RazorpayInstance,
-  RazorpayOptions,
-  RazorpayResponse,
-} from "../../utils/types/user";
 import { toast } from "react-toastify";
 import { useAuth } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { checkOutURL } from "../../utils/constants/env";
+import { useApi } from "../../hooks/useApi";
 import {
   orderPaymentService,
   verifyPaymentService,
 } from "../../services/payment";
-import { useApi } from "../../hooks/useApi";
-import { checkOutURL, RAZORPAY_KEY_ID } from "../../utils/constants/env";
 import { replaceAuthToken } from "../../utils/helper";
-import { useNavigate } from "react-router-dom";
 
 declare global {
   interface Window {
-    Razorpay: new (options: RazorpayOptions) => RazorpayInstance;
+    EasebuzzCheckout: new (
+      access_key: string,
+      env: "test" | "prod"
+    ) => EasebuzzInstance;
   }
 }
 
-const PaymentPage = () => {
-  const [amount] = useState<number>(5000);
+interface EasebuzzInstance {
+  initiatePayment(options: EasebuzzPaymentOptions): void;
+}
+
+interface EasebuzzPaymentOptions {
+  access_key: string;
+  onResponse?: (response: any) => void;
+  theme?: string;
+}
+
+
+const PaymentPage: React.FC = () => {
+  const [amount] = useState<number>(100);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const { user } = useAuth();
   const { callApi: callPaymentOrder } = useApi(orderPaymentService);
   const { callApi: callPaymentVerify } = useApi(verifyPaymentService);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
-  const loadRazorpay = (src: string): Promise<boolean> => {
+  // Load Easebuzz SDK dynamically
+  const loadEasebuzzScript = async (): Promise<boolean> => {
+    if (window.EasebuzzCheckout) return true;
+    const script = document.createElement("script");
+    script.src = checkOutURL;
+    script.async = true;
+    document.body.appendChild(script);
+
     return new Promise((resolve) => {
-      const script = document.createElement("script");
-      script.src = src;
-      script.onload = () => resolve(true);
-      script.onerror = () => resolve(false);
-      document.body.appendChild(script);
+      let tries = 0;
+      const interval = setInterval(() => {
+        if (window.EasebuzzCheckout) {
+          clearInterval(interval);
+          resolve(true);
+        } else if (tries++ > 10) {
+          clearInterval(interval);
+          resolve(false);
+        }
+      }, 300);
     });
   };
 
   const handlePayment = async (): Promise<void> => {
     setIsProcessing(true);
-    const res = await loadRazorpay(checkOutURL);
-    console.log(res);
-    if (!res) {
-      toast.error(
-        "Failed to load payment options. Please check your connection."
-      );
-      setIsProcessing(false);
-      return;
-    }
     try {
-      const orderData = await callPaymentOrder({ amount });
-      if (!orderData?.order?.id) {
-        toast.error("Failed to create Razorpay order");
-        setIsProcessing(false);
+      const sdkLoaded = await loadEasebuzzScript();
+      if (!sdkLoaded) {
+        toast.error("Easebuzz SDK not loaded properly");
         return;
       }
-      const options: RazorpayOptions = {
-        key: RAZORPAY_KEY_ID,
-        amount: orderData.amount,
-        currency: orderData.currency,
-        name: "Steam Karnival",
-        description: "Payment for quiz participation",
-        order_id: orderData?.order?.id,
-        handler: async (response: RazorpayResponse) => {
-          try {
-            const verifyData = await callPaymentVerify(response);
-            if (verifyData.status) {
-              toast.success("Payment Successful!");
-              replaceAuthToken(verifyData?.token);
-              navigate("/")
-            } else {
-              toast.error("Payment Verification Failed!");
+      const data = await callPaymentOrder({
+        amount: (amount / 100).toFixed(2),
+        firstname: user?.name,
+        email: user?.email,
+        phone: user?.phone,
+      });
+      if (!data?.status) {
+        toast.error("Failed to create payment order");
+        return;
+      }
+
+      const paymentData = data.order;
+      const easebuzzCheckout = new window.EasebuzzCheckout(
+        paymentData.access_key,
+        "prod"
+      );
+      easebuzzCheckout.initiatePayment({
+        access_key: paymentData.access_key,
+        theme: "#2563eb",
+        onResponse: async (response: any) => {
+          if (response?.status) {
+            try {
+              const verifyData = await callPaymentVerify(response);
+              if (verifyData.status) {
+                toast.success("Payment Successful!");
+                replaceAuthToken(verifyData?.token);
+                navigate("/");
+              } else {
+                toast.error("Payment Verification Failed!");
+              }
+            } catch (e) {
+            } finally {
+              setIsProcessing(false);
             }
-          } catch (e) {
-            toast.error("Verification error. Please contact support.");
-          } finally {
-            setIsProcessing(false);
+          } else {
+            toast.error(response?.error_Message || "Cancel the payment");
           }
         },
-        prefill: {
-          name: user?.name,
-          email: user?.email,
-          contact: user?.phone?.replace(/\D/g, "")?.replace(/^91/, "") || "",
-        },
-        modal: {
-          ondismiss: () => {
-            toast.info("Payment cancelled.");
-            setIsProcessing(false);
-          },
-        },
-      };
-
-      const rzp = new window.Razorpay(options);
-
-      rzp.on("payment.failed", (resp?: RazorpayErrorPayload) => {
-        const msg =
-          resp?.error?.description ||
-          resp?.error?.reason ||
-          "Payment failed. Please try again.";
-        toast.error(msg);
-        setIsProcessing(false);
       });
-      rzp.on("close", () => {
-        setIsProcessing(false);
-      });
-
-      rzp.open();
-    } catch (error) {
-      console.error(error);
-      toast.error("Something went wrong during payment initiation.");
+      toast.info("Redirecting to payment page...");
+    } catch (err) {
+      console.error("Payment error:", err);
+      toast.error("Payment initiation failed");
+    } finally {
       setIsProcessing(false);
     }
   };
@@ -1540,9 +1540,7 @@ const PaymentPage = () => {
             </svg>
           </div>
           <div className="space-y-2 text-center">
-            <p className=" font-h1-bold ">
-              Unlock Your Quiz Adventure
-            </p>
+            <p className=" font-h1-bold ">Unlock Your Quiz Adventure</p>
             <div className="relative">
               {/* <h1 className="text-3xl font-bold">
                 ₹{(amount / 100).toFixed(2)}

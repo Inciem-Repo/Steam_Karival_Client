@@ -179,27 +179,27 @@ function Login() {
           </span>
         </div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 animate-fade-in">
-        <PromoBanner
-          icon="rocket"
-          title="WIN A TRIP TO NASA"
-          subtitle="Top performers get to visit NASA!"
-          variant="primary"
-        />
-        <PromoBanner
-          icon="trophy"
-          title="₹5 CRORE WORTH PRIZES"
-          subtitle="For top 100 schools"
-          variant="accent"
-        />
-        <PromoBanner
-          icon="brain"
-          title="NATIONAL ROBOTICS & AI MISSION"
-          subtitle="Join the future of technology"
-          variant="secondary"
-        />
-      </div>
-    </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 animate-fade-in">
+          <PromoBanner
+            icon="rocket"
+            title="WIN A TRIP TO NASA"
+            subtitle="Top performers get to visit NASA!"
+            variant="primary"
+          />
+          <PromoBanner
+            icon="trophy"
+            title="₹5 CRORE WORTH PRIZES"
+            subtitle="For top 100 schools"
+            variant="accent"
+          />
+          <PromoBanner
+            icon="brain"
+            title="NATIONAL ROBOTICS & AI MISSION"
+            subtitle="Join the future of technology"
+            variant="secondary"
+          />
+        </div>
+    </div> 
   );
 }
 
