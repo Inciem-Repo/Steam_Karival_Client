@@ -17,6 +17,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    const handleTokenChange = () => {
+      const savedToken = getAuthToken();
+      setToken(savedToken);
+    };
+
+    window.addEventListener("auth-token-updated", handleTokenChange);
+    return () => {
+      window.removeEventListener("auth-token-updated", handleTokenChange);
+    };
+  }, []);
+
   /** Initialize user/token on app load */
   useEffect(() => {
     const savedToken = getAuthToken();
@@ -40,7 +52,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
 
     setLoading(false);
-  }, []);
+  }, [token]);
 
   /** Login and save token (user derived from response or decoded) */
   const login = async (email: string, password: string) => {

@@ -23,7 +23,6 @@ function Home() {
   useEffect(() => {
     const fetchData = async () => {
       if (!user?.id) return;
-
       try {
         setDataLoading(true);
         const [profileResponse, quizResponse] = await Promise.all([
