@@ -92,7 +92,6 @@ function Login() {
         result.data.username,
         result.data.password
       );
-      console.log({ loggedInUser });
       toast.success("Login successful!");
       if (loggedInUser && loggedInUser.role === roleName.admin) {
         navigate("/admin/dashboard");

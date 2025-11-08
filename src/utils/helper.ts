@@ -64,6 +64,7 @@ export const replaceAuthToken = (newToken: string): void => {
     localStorage.removeItem("token");
     if (!newToken || newToken === "undefined" || newToken === "null") return;
     localStorage.setItem("token", newToken);
+    window.dispatchEvent(new Event("auth-token-updated"));
   } catch (err) {
     console.error("Error replacing auth token:", err);
   }
