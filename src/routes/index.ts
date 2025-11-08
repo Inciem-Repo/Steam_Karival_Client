@@ -1,5 +1,6 @@
 // src/routes/index.ts
 import AdminLayout from "../components/admin/AdminLayout";
+import ChatBotAccessList from "../pages/admin/ChatBotAccessList";
 import Dashboard from "../pages/admin/DashBoard";
 import LeaderBoard from "../pages/admin/LeaderBoard";
 import PaidUserList from "../pages/admin/PaidUserList";
@@ -41,6 +42,7 @@ export const routes: AppRoute[] = [
       { id: "quizz-manger", path: "quizz-manger", component: QuizManager },
       { id: "users", path: "users", component: UserList },
       { id: "paid-users", path: "paid-users", component: PaidUserList },
+      { id: "paid-users", path: "chat-users", component: ChatBotAccessList },
       { id: "profile", path: "profile/user/:id", component: UsersProfile },
     ],
   },

@@ -7,6 +7,7 @@ export const api = {
     getProfile: (userId: string) => `/user/${userId}`,
     getAllUser: (page: number, limit: number) => `/users?${page}&${limit}`,
     getPaidUser: (page: number, limit: number) => `/paid-users?${page}&${limit}`,
+    getChatUser: (page: number, limit: number) => `/whatsapp_chats?${page}&${limit}`,
     getUserQuizInfo: (userId: string) => `/quiz_info/${userId}`,
   },
   quiz: {
