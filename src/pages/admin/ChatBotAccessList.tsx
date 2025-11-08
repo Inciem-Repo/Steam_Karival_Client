@@ -150,13 +150,6 @@ const ChatBotAccessList = () => {
     return mobile.replace("whatsapp:", "");
   };
 
-  // Truncate long text for display
-  const truncateText = (text: string, maxLength: number = 50) => {
-    if (text.length <= maxLength) return text;
-    return text.substring(0, maxLength) + "...";
-  };
-
-  // Generate pagination buttons
   const renderPaginationButtons = () => {
     if (!pagination) return null;
 
