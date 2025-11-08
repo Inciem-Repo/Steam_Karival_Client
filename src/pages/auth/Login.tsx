@@ -5,6 +5,7 @@ import { useAuth } from "../../context/AuthContext";
 import { toast } from "react-toastify";
 import { Link, useNavigate } from "react-router-dom";
 import { roleName } from "../../utils/constants/env";
+import { PromoBanner } from "../../components/common/PromoBanner";
 
 // Define the validation schema with Zod
 const loginSchema = z.object({
@@ -105,7 +106,7 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen flex justify-center p-4 font-manrope">
+    <div className="min-h-screen flex flex-col items-center gap-3 justify-center p-4 font-manrope">
       <div className="w-full max-w-md">
         <div className="flex items-center justify-between my-8">
           <h1 className="text-2xl font-bold text-center text-black">Login</h1>
@@ -177,6 +178,26 @@ function Login() {
             </Link>
           </span>
         </div>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 animate-fade-in">
+        <PromoBanner
+          icon="rocket"
+          title="WIN A TRIP TO NASA"
+          subtitle="Top performers get to visit NASA!"
+          variant="primary"
+        />
+        <PromoBanner
+          icon="trophy"
+          title="₹5 CRORE WORTH PRIZES"
+          subtitle="For top 100 schools"
+          variant="accent"
+        />
+        <PromoBanner
+          icon="brain"
+          title="NATIONAL ROBOTICS & AI MISSION"
+          subtitle="Join the future of technology"
+          variant="secondary"
+        />
       </div>
     </div>
   );
