@@ -14,6 +14,7 @@ import {
 import { useApi } from "../../hooks/useApi";
 import { checkOutURL, RAZORPAY_KEY_ID } from "../../utils/constants/env";
 import { replaceAuthToken } from "../../utils/helper";
+import { useNavigate } from "react-router-dom";
 
 declare global {
   interface Window {
@@ -27,6 +28,7 @@ const PaymentPage = () => {
   const { user } = useAuth();
   const { callApi: callPaymentOrder } = useApi(orderPaymentService);
   const { callApi: callPaymentVerify } = useApi(verifyPaymentService);
+  const navigate = useNavigate()
 
   const loadRazorpay = (src: string): Promise<boolean> => {
     return new Promise((resolve) => {
@@ -69,6 +71,7 @@ const PaymentPage = () => {
             if (verifyData.status) {
               toast.success("Payment Successful!");
               replaceAuthToken(verifyData?.token);
+              navigate("/")
             } else {
               toast.error("Payment Verification Failed!");
             }

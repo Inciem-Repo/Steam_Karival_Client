@@ -38,8 +38,6 @@ export const Quiz = (): JSX.Element => {
   const { callApi: callGetProfile } = useApi(getProfileService);
 
   const TOTAL_QUESTIONS = quiz?.questions?.length || 0;
-
-  // Load saved state from localStorage on component mount
   useEffect(() => {
     const savedState = localStorage.getItem("quizState");
     if (savedState) {
@@ -57,12 +55,10 @@ export const Quiz = (): JSX.Element => {
 
   useEffect(() => {
     if (!quiz || !quizStateLoaded) return;
-
-    // Only initialize responses if we don't have any from localStorage
     if (TOTAL_QUESTIONS > 0 && responses.length === 0) {
       const initialResponses: QuestionResponse[] = quiz.questions.map(
-        (question, index) => ({
-          questionId: question.question_id || `question-${index}`,
+        (question) => ({
+          questionId: question.question_id || ``,
           selectedOption: null,
           selectedOptionIndex: null,
           timeTaken: 0,
@@ -187,7 +183,7 @@ export const Quiz = (): JSX.Element => {
       localStorage.removeItem("quizState");
 
       const apiRequestData = {
-        title: quiz?.title?.toLowerCase() || "science",
+        title: quiz?.title?.toLowerCase() || "",
         questions: updatedResponses.map((response) => ({
           question_id: response.questionId,
           answer: response.selectedOption || "",
@@ -195,6 +191,7 @@ export const Quiz = (): JSX.Element => {
           time_taken: response.timeTaken,
         })),
       };
+
       const response = await callsubmitQuiz(quiz?._id, apiRequestData);
       if (response.status) {
         toast.success(response.message);
