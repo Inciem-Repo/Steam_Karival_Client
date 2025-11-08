@@ -162,13 +162,12 @@ export const Results = (): JSX.Element => {
             </div>
 
             <div className="bg-white rounded-lg p-6 text-center border border-black/10 w-full">
-              <div className="text-4xl mb-4">📝</div>
               <h3 className="text-lg font-semibold mb-2">No Quiz Attempts</h3>
               <p className="text-gray-600 mb-4">
                 You haven't attempted any quizzes yet.
               </p>
               <button
-                onClick={() => navigator("/home")}
+                onClick={() => navigator("/")}
                 className="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary/90 transition-colors"
               >
                 Take a Quiz

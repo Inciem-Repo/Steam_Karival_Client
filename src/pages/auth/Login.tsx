@@ -97,7 +97,7 @@ function Login() {
       if (loggedInUser && loggedInUser.role === roleName.admin) {
         navigate("/admin/dashboard");
       } else {
-        loggedInUser?.isPaid ? navigate("/") : navigate("/payment");
+        navigate("/");
       }
     } catch (err) {
     } finally {
