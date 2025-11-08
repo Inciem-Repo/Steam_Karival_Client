@@ -6,11 +6,17 @@ import {
   ChevronsLeft,
   ChevronsRight,
   IndianRupee,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useApi } from "../../hooks/useApi";
-import { getAllPaidUser } from "../../services/auth"; 
+import { getAllPaidUser } from "../../services/auth";
 
+interface CustomTableRowProps
+  extends React.HTMLAttributes<HTMLTableRowElement> {
+  children: React.ReactNode;
+}
 // Custom Table Components (same as before)
 const CustomTable = ({ children }: { children: React.ReactNode }) => (
   <div className="w-full overflow-auto">
@@ -26,8 +32,15 @@ const CustomTableBody = ({ children }: { children: React.ReactNode }) => (
   <tbody className="[&_tr:last-child]:border-0">{children}</tbody>
 );
 
-const CustomTableRow = ({ children }: { children: React.ReactNode }) => (
-  <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+const CustomTableRow: React.FC<CustomTableRowProps> = ({
+  children,
+  className = "",
+  ...props
+}) => (
+  <tr
+    className={`border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted ${className}`}
+    {...props}
+  >
     {children}
   </tr>
 );
@@ -58,6 +71,20 @@ const CustomTableCell = ({
   </td>
 );
 
+interface Transaction {
+  addedon: string;
+  amount: string;
+  bank_ref_num: string;
+  created_at: string;
+  easepayid: string;
+  mode: string;
+  order_id: string;
+  payment_source: string;
+  status: string;
+  upi_va: string;
+  verified: boolean;
+}
+
 interface PaidUser {
   _id: string;
   email: string;
@@ -67,11 +94,8 @@ interface PaidUser {
   phone: string;
   role: string;
   school: string;
-  last_payment: {
-    amount: number;
-    date: string;
-    method: string;
-  };
+  last_payment: Transaction;
+  transactions: Transaction[];
 }
 
 interface PaginationInfo {
@@ -89,12 +113,142 @@ interface ApiResponse {
   users: PaidUser[];
 }
 
+// Transaction Status Badge Component
+const TransactionStatusBadge = ({ status }: { status: string }) => {
+  const getStatusStyles = (status: string) => {
+    switch (status) {
+      case "success":
+        return "bg-green-100 text-green-800 border-green-200";
+      case "userCancelled":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      case "failed":
+        return "bg-red-100 text-red-800 border-red-200";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200";
+    }
+  };
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case "success":
+        return "Success";
+      case "userCancelled":
+        return "Cancelled";
+      case "failed":
+        return "Failed";
+      default:
+        return status;
+    }
+  };
+
+  return (
+    <span
+      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusStyles(
+        status
+      )}`}
+    >
+      {getStatusText(status)}
+    </span>
+  );
+};
+
+// Transaction Details Dropdown Component
+const TransactionDetails = ({
+  transactions,
+  isOpen,
+}: {
+  transactions: Transaction[];
+  isOpen: boolean;
+}) => {
+  if (!isOpen) return null;
+
+  const formatDate = (dateString: string) => {
+    if (!dateString) return "N/A";
+    try {
+      return new Date(dateString).toLocaleString();
+    } catch {
+      return "Invalid Date";
+    }
+  };
+
+  const formatCurrency = (amount: string) => {
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+    }).format(parseFloat(amount));
+  };
+
+  return (
+    <div className="bg-gray-50 border-t border-gray-200 p-4">
+      <h4 className="font-semibold text-sm mb-3 text-gray-700">
+        Transaction History ({transactions?.length})
+      </h4>
+      <div className="space-y-3">
+        {transactions.map((transaction, index) => (
+          <div
+            key={transaction?.order_id}
+            className="bg-white rounded-lg border border-gray-200 p-3 space-y-2"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-3">
+                <span className="text-xs font-medium text-gray-500">
+                  #{index + 1}
+                </span>
+                <span className="text-sm font-semibold">
+                  {formatCurrency(transaction?.amount) || 0}
+                </span>
+                <TransactionStatusBadge status={transaction?.status} />
+              </div>
+              <span className="text-xs text-gray-500">
+                {formatDate(transaction?.addedon)}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+              <div>
+                <span className="text-gray-500">Order ID:</span>
+                <p className="font-medium truncate">{transaction?.order_id}</p>
+              </div>
+              <div>
+                <span className="text-gray-500">Payment ID:</span>
+                <p className="font-medium truncate">{transaction?.easepayid}</p>
+              </div>
+              <div>
+                <span className="text-gray-500">Bank Ref:</span>
+                <p className="font-medium">
+                  {transaction?.bank_ref_num === "NA"
+                    ? "N/A"
+                    : transaction?.bank_ref_num}
+                </p>
+              </div>
+              <div>
+                <span className="text-gray-500">Method:</span>
+                <p className="font-medium capitalize">
+                  {transaction?.mode === "NA" ? "N/A" : transaction?.mode}
+                </p>
+              </div>
+            </div>
+
+            {transaction?.upi_va && transaction?.upi_va !== "NA" && (
+              <div className="text-xs">
+                <span className="text-gray-500">UPI/VPA:</span>
+                <p className="font-medium">{transaction?.upi_va}</p>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const PaidUserList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [users, setUsers] = useState<PaidUser[]>([]);
   const [pagination, setPagination] = useState<PaginationInfo | null>(null);
   const [loading, setLoading] = useState(true);
+  const [expandedUsers, setExpandedUsers] = useState<Set<string>>(new Set());
   const { callApi: callGetAllPaidUser } = useApi(getAllPaidUser);
 
   useEffect(() => {
@@ -106,9 +260,9 @@ const PaidUserList = () => {
           itemsPerPage
         )) as ApiResponse;
 
-        if (response.status && response.users) {
-          setUsers(response.users);
-          setPagination(response.pagination);
+        if (response?.status && response?.users) {
+          setUsers(response?.users);
+          setPagination(response?.pagination);
         }
       } catch (error) {
         console.error("Error fetching paid users:", error);
@@ -120,15 +274,26 @@ const PaidUserList = () => {
     fetchGetAllPaidUser();
   }, [currentPage, itemsPerPage]);
 
+  // Toggle transaction details
+  const toggleUserTransactions = (userId: string) => {
+    const newExpanded = new Set(expandedUsers);
+    if (newExpanded.has(userId)) {
+      newExpanded.delete(userId);
+    } else {
+      newExpanded.add(userId);
+    }
+    setExpandedUsers(newExpanded);
+  };
+
   // Pagination handlers
   const goToPage = (page: number) => {
     if (pagination) {
-      setCurrentPage(Math.max(1, Math.min(page, pagination.total_pages)));
+      setCurrentPage(Math.max(1, Math.min(page, pagination?.total_pages)));
     }
   };
 
   const goToFirstPage = () => goToPage(1);
-  const goToLastPage = () => pagination && goToPage(pagination.total_pages);
+  const goToLastPage = () => pagination && goToPage(pagination?.total_pages);
   const goToNextPage = () => pagination && goToPage(currentPage + 1);
   const goToPreviousPage = () => goToPage(currentPage - 1);
 
@@ -142,11 +307,17 @@ const PaidUserList = () => {
   const attemptedCount = users.filter((user) => user.is_quiz_attempted).length;
   const notAttemptedCount = users.length - attemptedCount;
 
-  // Calculate total revenue
-  const totalRevenue = users.reduce(
-    (sum, user) => sum + user.last_payment.amount,
-    0
-  );
+  // Calculate total revenue from successful transactions only
+  const totalRevenue = users.reduce((sum, user) => {
+    const successfulTx = user.transactions.filter(
+      (tx) => tx.status === "success"
+    );
+    const total = successfulTx.reduce(
+      (txSum, tx) => txSum + parseFloat(tx.amount),
+      0
+    );
+    return sum + total;
+  }, 0);
 
   // Format date function
   const formatDate = (dateString: string) => {
@@ -159,11 +330,12 @@ const PaidUserList = () => {
   };
 
   // Format currency
-  const formatCurrency = (amount: number) => {
+  const formatCurrency = (amount: string | number) => {
+    const numAmount = typeof amount === "string" ? parseFloat(amount) : amount;
     return new Intl.NumberFormat("en-IN", {
       style: "currency",
       currency: "INR",
-    }).format(amount);
+    }).format(numAmount);
   };
 
   // Generate pagination buttons
@@ -278,47 +450,76 @@ const PaidUserList = () => {
                   <CustomTableHead>Amount</CustomTableHead>
                   <CustomTableHead>Payment Method</CustomTableHead>
                   <CustomTableHead>Attempted Quiz</CustomTableHead>
+                  <CustomTableHead>Transactions</CustomTableHead>
                 </CustomTableRow>
               </CustomTableHeader>
               <CustomTableBody>
                 {users.map((user, index) => (
-                  <CustomTableRow key={user._id}>
-                    <CustomTableCell className="font-medium">
-                      {startIndex + index}
-                    </CustomTableCell>
-                    <CustomTableCell className="font-medium">
-                      {user.name}
-                    </CustomTableCell>
-                    <CustomTableCell>{user.email}</CustomTableCell>
-                    <CustomTableCell>{user.phone}</CustomTableCell>
-                    <CustomTableCell>{user.school}</CustomTableCell>
-                    <CustomTableCell>
-                      {formatDate(user.last_payment.date)}
-                    </CustomTableCell>
-                    <CustomTableCell className="font-medium text-green-600">
-                      {formatCurrency(user.last_payment.amount)}
-                    </CustomTableCell>
-                    <CustomTableCell className="capitalize">
-                      {user.last_payment.method}
-                    </CustomTableCell>
-                    <CustomTableCell>
-                      <div className="flex items-center gap-2">
-                        {user.is_quiz_attempted ? (
-                          <>
-                            <CheckCircle className="h-4 w-4 text-green-600" />
-                            <span className="text-green-600 font-medium">
-                              Yes
-                            </span>
-                          </>
-                        ) : (
-                          <>
-                            <XCircle className="h-4 w-4 text-muted-foreground" />
-                            <span className="text-muted-foreground">No</span>
-                          </>
-                        )}
-                      </div>
-                    </CustomTableCell>
-                  </CustomTableRow>
+                  <>
+                    <CustomTableRow
+                      key={user._id}
+                      className="cursor-pointer hover:bg-muted/70"
+                      onClick={() => toggleUserTransactions(user._id)}
+                    >
+                      <CustomTableCell className="font-medium">
+                        {startIndex + index}
+                      </CustomTableCell>
+                      <CustomTableCell className="font-medium">
+                        {user.name}
+                      </CustomTableCell>
+                      <CustomTableCell>{user?.email}</CustomTableCell>
+                      <CustomTableCell>{user?.phone}</CustomTableCell>
+                      <CustomTableCell>{user?.school}</CustomTableCell>
+                      <CustomTableCell>
+                        {formatDate(user.last_payment?.addedon)}
+                      </CustomTableCell>
+                      <CustomTableCell className="font-medium text-green-600">
+                        {formatCurrency(user?.last_payment?.amount || 0)}
+                      </CustomTableCell>
+                      <CustomTableCell className="capitalize">
+                        {user.last_payment?.mode === "NA"
+                          ? "N/A"
+                          : user?.last_payment?.mode}
+                      </CustomTableCell>
+                      <CustomTableCell>
+                        <div className="flex items-center gap-2">
+                          {user?.is_quiz_attempted ? (
+                            <>
+                              <CheckCircle className="h-4 w-4 text-green-600" />
+                              <span className="text-green-600 font-medium">
+                                Yes
+                              </span>
+                            </>
+                          ) : (
+                            <>
+                              <XCircle className="h-4 w-4 text-muted-foreground" />
+                              <span className="text-muted-foreground">No</span>
+                            </>
+                          )}
+                        </div>
+                      </CustomTableCell>
+                      <CustomTableCell>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-muted-foreground">
+                            {user?.transactions?.length} txns
+                          </span>
+                          {expandedUsers.has(user._id) ? (
+                            <ChevronUp className="h-4 w-4" />
+                          ) : (
+                            <ChevronDown className="h-4 w-4" />
+                          )}
+                        </div>
+                      </CustomTableCell>
+                    </CustomTableRow>
+                    <tr>
+                      <td colSpan={10} className="p-0">
+                        <TransactionDetails
+                          transactions={user?.transactions}
+                          isOpen={expandedUsers.has(user._id)}
+                        />
+                      </td>
+                    </tr>
+                  </>
                 ))}
               </CustomTableBody>
             </CustomTable>
@@ -329,75 +530,109 @@ const PaidUserList = () => {
           )}
         </div>
 
+        {/* Mobile View */}
         <div className="md:hidden space-y-4">
           {users.length > 0 ? (
             users.map((user, index) => (
-              <div
-                key={user._id}
-                className="rounded-lg border bg-card p-4 space-y-3"
-              >
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">
-                      #{startIndex + index}
-                    </p>
-                    <h3 className="font-semibold">{user.name}</h3>
+              <div key={user._id}>
+                <div
+                  className="rounded-lg border bg-card p-4 space-y-3 cursor-pointer"
+                  onClick={() => toggleUserTransactions(user?._id)}
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-1">
+                      <p className="text-sm text-muted-foreground">
+                        #{startIndex + index}
+                      </p>
+                      <h3 className="font-semibold">{user?.name}</h3>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {user?.is_quiz_attempted ? (
+                        <CheckCircle className="h-5 w-5 text-green-600" />
+                      ) : (
+                        <XCircle className="h-5 w-5 text-muted-foreground" />
+                      )}
+                      {expandedUsers.has(user._id) ? (
+                        <ChevronUp className="h-4 w-4" />
+                      ) : (
+                        <ChevronDown className="h-4 w-4" />
+                      )}
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    {user.is_quiz_attempted ? (
-                      <CheckCircle className="h-5 w-5 text-green-600" />
-                    ) : (
-                      <XCircle className="h-5 w-5 text-muted-foreground" />
-                    )}
+
+                  <div className="space-y-2 text-sm">
+                    <div className="flex flex-col">
+                      <span className="text-muted-foreground">Email</span>
+                      <span className="font-medium break-all">
+                        {user.email}
+                      </span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-muted-foreground">Phone</span>
+                      <span className="font-medium">{user?.phone}</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-muted-foreground">School</span>
+                      <span className="font-medium">{user?.school}</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-muted-foreground">
+                        Last Payment
+                      </span>
+                      <span className="font-medium">
+                        {formatDate(user.last_payment?.addedon)}
+                      </span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-muted-foreground">Amount</span>
+                      <span className="font-medium text-green-600">
+                        {formatCurrency(user.last_payment?.amount  || 0)}
+                      </span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-muted-foreground">
+                        Payment Method
+                      </span>
+                      <span className="font-medium capitalize">
+                        {user.last_payment?.mode === "NA"
+                          ? "N/A"
+                          : user.last_payment?.mode}
+                      </span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-muted-foreground">
+                        Transactions
+                      </span>
+                      <span className="font-medium">
+                        {user.transactions?.length} transactions
+                      </span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-muted-foreground">Quiz Status</span>
+                      <span
+                        className={`font-medium ${
+                          user?.is_quiz_attempted
+                            ? "text-green-600"
+                            : "text-muted-foreground"
+                        }`}
+                      >
+                        {user?.is_quiz_attempted
+                          ? "Attempted"
+                          : "Not Attempted"}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
-                <div className="space-y-2 text-sm">
-                  <div className="flex flex-col">
-                    <span className="text-muted-foreground">Email</span>
-                    <span className="font-medium break-all">{user.email}</span>
+                {/* Mobile Transaction Details */}
+                {expandedUsers.has(user._id) && (
+                  <div className="mt-2">
+                    <TransactionDetails
+                      transactions={user?.transactions}
+                      isOpen={true}
+                    />
                   </div>
-                  <div className="flex flex-col">
-                    <span className="text-muted-foreground">Phone</span>
-                    <span className="font-medium">{user.phone}</span>
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-muted-foreground">School</span>
-                    <span className="font-medium">{user.school}</span>
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-muted-foreground">Last Payment</span>
-                    <span className="font-medium">
-                      {formatDate(user.last_payment.date)}
-                    </span>
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-muted-foreground">Amount</span>
-                    <span className="font-medium text-green-600">
-                      {formatCurrency(user.last_payment.amount)}
-                    </span>
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-muted-foreground">
-                      Payment Method
-                    </span>
-                    <span className="font-medium capitalize">
-                      {user.last_payment.method}
-                    </span>
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-muted-foreground">Quiz Status</span>
-                    <span
-                      className={`font-medium ${
-                        user.is_quiz_attempted
-                          ? "text-green-600"
-                          : "text-muted-foreground"
-                      }`}
-                    >
-                      {user.is_quiz_attempted ? "Attempted" : "Not Attempted"}
-                    </span>
-                  </div>
-                </div>
+                )}
               </div>
             ))
           ) : (

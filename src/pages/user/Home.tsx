@@ -81,7 +81,6 @@ function Home() {
 
   useEffect(() => {
     if (countdown === null) return;
-
     if (countdown === 0) {
       navigate("/quiz");
       return;
