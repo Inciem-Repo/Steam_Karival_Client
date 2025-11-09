@@ -178,7 +178,7 @@ export const Results = (): JSX.Element => {
     );
   }
 
-  const { correct_answers, total_questions, questions } = latestQuiz;
+  const { correct_answers, total_questions } = latestQuiz;
   const wrongCount = total_questions - correct_answers;
 
   return (
