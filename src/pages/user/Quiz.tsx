@@ -21,7 +21,7 @@ interface QuizState {
   startTime: number;
 }
 
-const QUESTION_TIME = 6;
+const QUESTION_TIME = 8;
 
 export const Quiz = (): JSX.Element => {
   const [quizStateLoaded, setQuizStateLoaded] = useState(false);
