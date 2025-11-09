@@ -58,7 +58,6 @@ export const Results = (): JSX.Element => {
       try {
         setLoading(true);
         const response = (await callGetUserQuizInfo(user.id)) as QuizResponse;
-        console.log(response)
         if (response.status && response.quizzes.length > 0) {
           setLatestQuiz(response.quizzes[0]);
           setHasAttempted(true);
@@ -183,7 +182,7 @@ export const Results = (): JSX.Element => {
   const wrongCount = total_questions - correct_answers;
 
   return (
-    <div className="w-full flex items-center justify-center">
+    <div className="w-full h-[100vh] flex justify-center">
       <main className="flex h-auto w-[362px] max-w-full px-4 py-8 relative flex-col items-start gap-6 ">
         <div className="flex items-center justify-between relative self-stretch w-full">
           <button
@@ -255,61 +254,7 @@ export const Results = (): JSX.Element => {
             correctCount={correct_answers}
             wrongCount={wrongCount}
           />
-
-          <div className="flex flex-col items-start gap-4 relative self-stretch w-full">
-            <h3 className="font-[number:var(--h2-medium-font-weight)] text-[length:var(--h2-medium-font-size)] font-h2-medium text-black tracking-[var(--h2-medium-letter-spacing)] leading-[var(--h2-medium-line-height)] [font-style:var(--h2-medium-font-style)]">
-              Answers
-            </h3>
-
-            <div className="flex flex-col items-start gap-4 relative self-stretch w-full">
-              {questions.map((question, index) => (
-                <div
-                  key={question.question_id}
-                  className="bg-white rounded-lg p-4 flex flex-col gap-2 relative self-stretch w-full border border-black/10"
-                >
-                  <div className="flex flex-col gap-2">
-                    <div className="flex items-start justify-between gap-2">
-                      <p className="[font-family:'Manrope',Helvetica] font-normal text-black text-sm tracking-[0] leading-[18px]">
-                        Question {index + 1}
-                      </p>
-                      {question.is_correct ? (
-                        <span className="text-green-600 text-xs">
-                          ✓ Correct
-                        </span>
-                      ) : (
-                        <span className="text-red-600 text-xs">✗ Wrong</span>
-                      )}
-                    </div>
-                    <p className="[font-family:'Manrope',Helvetica] font-normal text-black text-sm tracking-[0] leading-[18px]">
-                      {question?.question}
-                    </p>
-                  </div>
-                  {question.options && question.options.length > 0 && (
-                    <div className="mt-2">
-                      <p className="text-xs font-semibold mb-1">Options:</p>
-                      <div className="grid grid-cols-1 gap-1">
-                        {question.options.map((option, optIndex) => (
-                          <div
-                            key={optIndex}
-                            className={`text-xs p-1 rounded ${
-                              option === question.correct_answer
-                                ? "bg-green-100 text-green-800"
-                                : option === question.user_answer &&
-                                  !question.is_correct
-                                ? "bg-red-100 text-red-800"
-                                : "bg-gray-100"
-                            }`}
-                          >
-                            {String.fromCharCode(65 + optIndex)}. {option}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
+          <button className="btn w-full">View Profile</button>
         </div>
       </main>
     </div>
