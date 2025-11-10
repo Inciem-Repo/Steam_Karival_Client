@@ -33,5 +33,9 @@ export type QuizData = {
 
 export type UpdateQuizPayload = {
   title: string;
-  questions: Omit<IQuestion, "question_id">[]; 
+  questions: Omit<IQuestion, "question_id">[];
 };
+
+export interface ICertificate {
+  name: String;
+}

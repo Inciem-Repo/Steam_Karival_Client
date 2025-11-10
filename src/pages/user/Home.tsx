@@ -1,4 +1,4 @@
-import { useState, useEffect} from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import home from "../../assets/images/home.png";
 import { useApi } from "../../hooks/useApi";
@@ -6,6 +6,7 @@ import { getAllQuiz, getQuizInfoByID } from "../../services/quiz";
 import { getProfileService } from "../../services/auth";
 import { useAuth } from "../../context/AuthContext";
 import { useQuiz } from "../../context/QuizContext";
+import { PromoBanner } from "../../components/common/PromoBanner";
 
 function Home() {
   const [countdown, setCountdown] = useState<number | null>(null);
@@ -154,13 +155,48 @@ function Home() {
                   Go to Profile
                 </button>
               ) : quizID ? (
-                <button
-                  className="flex flex-col w-full btn items-center"
-                  onClick={checkUserPaidOrNot}
-                  disabled={loadingQuizInfo}
-                >
-                  {loadingQuizInfo ? "Loading..." : "Start Quiz"}
-                </button>
+                <>
+                  <button
+                    className="flex flex-col w-full btn items-center"
+                    onClick={checkUserPaidOrNot}
+                    disabled={loadingQuizInfo}
+                  >
+                    {loadingQuizInfo ? "Loading..." : "Start Quiz"}
+                  </button>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 animate-fade-in">
+                    <div className="flex gap-2">
+                      <PromoBanner
+                        icon="rocket"
+                        title="WIN A TRIP TO NASA"
+                        subtitle="Top performers get to visit NASA!"
+                        variant="primary"
+                      />
+                      <PromoBanner
+                        icon="trophy"
+                        title="₹5 CRORE WORTH PRIZES"
+                        subtitle="For top 100 schools"
+                        variant="accent"
+                      />
+                    </div>
+                    <div
+                      className="flex gap-2
+                    "
+                    >
+                      <PromoBanner
+                        icon="brain"
+                        title="NATIONAL ROBOTICS & AI MISSION"
+                        subtitle="Join the future of technology"
+                        variant="secondary"
+                      />
+                      <PromoBanner
+                        icon="brain"
+                        title="NaMo AI Mission"
+                        subtitle="Official national initiative for AI & Robotics."
+                        variant="secondary"
+                      />
+                    </div>
+                  </div>
+                </>
               ) : (
                 <div className="text-center text-gray-500 py-4">
                   No Quiz Available Right Now

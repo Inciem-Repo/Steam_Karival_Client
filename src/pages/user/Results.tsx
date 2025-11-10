@@ -78,7 +78,7 @@ export const Results = (): JSX.Element => {
   const handleBackToHome = () => {
     localStorage.removeItem("quizAnswers");
     localStorage.removeItem("quizState");
-    navigator("/");
+    navigator("/home");
   };
 
   if (loading) {
@@ -254,7 +254,9 @@ export const Results = (): JSX.Element => {
             correctCount={correct_answers}
             wrongCount={wrongCount}
           />
-          <button className="btn w-full">View Profile</button>
+          <button className="btn w-full" onClick={() => navigator("/profile")}>
+            View Profile
+          </button>
         </div>
       </main>
     </div>

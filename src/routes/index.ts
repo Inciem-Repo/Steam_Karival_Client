@@ -11,6 +11,7 @@ import Login from "../pages/auth/Login";
 import Register from "../pages/auth/Register";
 import NotFound from "../pages/commen/NotFound";
 import Home from "../pages/user/Home";
+import Landing from "../pages/user/Landing";
 import PaymentPage from "../pages/user/PaymentPage";
 import { Profile } from "../pages/user/Profile";
 import { Quiz } from "../pages/user/Quiz";
@@ -49,12 +50,13 @@ export const routes: AppRoute[] = [
 
   {
     id: "home",
-    path: "/",
+    path: "/home",
     component: Home,
     protected: true,
     roles: [roleName.user],
     requiresPayment: false,
   },
+
   {
     id: "payment",
     path: "/payment",
@@ -92,6 +94,14 @@ export const routes: AppRoute[] = [
     id: "register",
     path: "/register",
     component: Register,
+    requiresPayment: false,
+  },
+  {
+    id: "landing",
+    path: "/",
+    component: Landing,
+    protected: false,
+    roles: [roleName.user],
     requiresPayment: false,
   },
   { id: "not-found", path: "*", component: NotFound, requiresPayment: false },
