@@ -94,7 +94,7 @@ const PaymentPage: React.FC = () => {
               if (verifyData.status) {
                 toast.success("Payment Successful!");
                 replaceAuthToken(verifyData?.token);
-                navigate("/");
+                navigate("/home");
               } else {
                 toast.error("Payment Verification Failed!");
               }
