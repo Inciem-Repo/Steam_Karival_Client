@@ -22,7 +22,7 @@ const navigate = useNavigate()
               The Grandest Celebration of Art, Culture & Learning
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 animate-fade-in">
+          <div className="grid grid-cols-1  gap-6 mb-8 animate-fade-in">
             <div className="flex gap-2">
               <PromoBanner
                 icon="rocket"
