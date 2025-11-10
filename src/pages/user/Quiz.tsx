@@ -75,7 +75,7 @@ export const Quiz = (): JSX.Element => {
       const hasAttempted =
         profileResponse?.user?.stats?.is_quiz_attempted || false;
       if (hasAttempted) {
-        navigate("/");
+        navigate("/home");
       }
     };
     checkQuizAccess();
