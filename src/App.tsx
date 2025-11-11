@@ -1,4 +1,3 @@
-// src/App.tsx (or src/routes/AppRoutes.tsx)
 import {
   BrowserRouter as Router,
   Routes,
@@ -9,7 +8,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 import { AuthProvider } from "./context/AuthContext";
-import { ProtectedRoute } from "./routes/ProtectedRoute";
+import { ProtectedRoute, PublicRoute } from "./routes/ProtectedRoute";
 import { routes } from "./routes";
 import { QuizProvider } from "./context/QuizContext";
 
@@ -27,6 +26,8 @@ function AppRoutes() {
           roles,
           requiresPayment,
         }) => {
+          const isAuthPage = ["/login", "/register","/"].includes(path);
+
           if (children && Layout) {
             return (
               <Route
@@ -42,6 +43,12 @@ function AppRoutes() {
                         <Outlet />
                       </Layout>
                     </ProtectedRoute>
+                  ) : isAuthPage ? (
+                    <PublicRoute>
+                      <Layout>
+                        <Outlet />
+                      </Layout>
+                    </PublicRoute>
                   ) : (
                     <Layout>
                       <Outlet />
@@ -71,6 +78,7 @@ function AppRoutes() {
             ) : (
               <Component />
             );
+
             return (
               <Route
                 key={id}
@@ -83,6 +91,8 @@ function AppRoutes() {
                     >
                       {element}
                     </ProtectedRoute>
+                  ) : isAuthPage ? (
+                    <PublicRoute>{element}</PublicRoute>
                   ) : (
                     element
                   )

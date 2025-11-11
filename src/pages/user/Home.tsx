@@ -133,7 +133,7 @@ function Home() {
                 <h1 className="text-center">
                   Welcome to
                   <br />
-                  Stream Karnival
+                  Steam Karnival
                 </h1>
                 {isUserAttendedQuiz ? (
                   <p className="relative flex items-center justify-center self-stretch font-body-regular text-xs text-center tracking-[0] leading-[16px] px-4">

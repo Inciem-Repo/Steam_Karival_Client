@@ -1,7 +1,6 @@
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import ReactDOM from "react-dom/client";
-import "../assets/styles/Certificate.css";
 import { Certificate } from "../components/common/Certificate";
 
 export const downloadCertificateAsPDF = async (name: string) => {

@@ -30,6 +30,7 @@ export const Quiz = (): JSX.Element => {
   const [responses, setResponses] = useState<QuestionResponse[]>([]);
   const [timeLeft, setTimeLeft] = useState(QUESTION_TIME);
   const [startTime, setStartTime] = useState<number>(Date.now());
+  const [isSubmitting, setIsSubmitting] = useState(false); // Add submission lock
   const { quiz } = useQuiz();
   const { callApi: callsubmitQuiz, loading: quizAddLoader } =
     useApi(submitQuiz);
@@ -38,6 +39,7 @@ export const Quiz = (): JSX.Element => {
   const { callApi: callGetProfile } = useApi(getProfileService);
 
   const TOTAL_QUESTIONS = quiz?.questions?.length || 0;
+
   useEffect(() => {
     const savedState = localStorage.getItem("quizState");
     if (savedState) {
@@ -80,6 +82,7 @@ export const Quiz = (): JSX.Element => {
     };
     checkQuizAccess();
   }, [user, navigate, callGetProfile]);
+
   useEffect(() => {
     if (quizStateLoaded) {
       const state: QuizState = {
@@ -93,6 +96,11 @@ export const Quiz = (): JSX.Element => {
   }, [currentQuestion, responses, timeLeft, startTime, quizStateLoaded]);
 
   useEffect(() => {
+    // Don't run timer if submitting or quiz finished
+    if (isSubmitting || currentQuestion >= TOTAL_QUESTIONS) {
+      return;
+    }
+
     if (timeLeft === 0) {
       handleNext();
       return;
@@ -103,7 +111,7 @@ export const Quiz = (): JSX.Element => {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [timeLeft, currentQuestion]);
+  }, [timeLeft, currentQuestion, isSubmitting]); // Add isSubmitting to dependencies
 
   const handleOptionSelect = (optionIndex: number) => {
     setSelectedOption(optionIndex);
@@ -129,6 +137,12 @@ export const Quiz = (): JSX.Element => {
   };
 
   const handleNext = async () => {
+    // Prevent multiple submissions
+    if (isSubmitting) {
+      return;
+    }
+    setIsSubmitting(true);
+
     const timeSpentOnQuestion = QUESTION_TIME - timeLeft;
     const updatedResponses = [...responses];
     const currentQuestionData: any = quiz?.questions?.[currentQuestion];
@@ -160,6 +174,7 @@ export const Quiz = (): JSX.Element => {
         updatedResponses[nextQuestion]?.selectedOptionIndex || null
       );
       setTimeLeft(QUESTION_TIME);
+      setIsSubmitting(false); // Reset submission lock for next question
     } else {
       const endTime = Date.now();
       const totalTimeTaken = Math.round((endTime - startTime) / 1000);
@@ -192,12 +207,19 @@ export const Quiz = (): JSX.Element => {
         })),
       };
 
-      const response = await callsubmitQuiz(quiz?._id, apiRequestData);
-      if (response.status) {
-        toast.success(response.message);
-        navigate("/results");
-        localStorage.removeItem("quizState");
-        localStorage.removeItem("quizResults");
+      try {
+        const response = await callsubmitQuiz(quiz?._id, apiRequestData);
+        if (response.status) {
+          toast.success(response.message);
+          navigate("/results");
+          localStorage.removeItem("quizState");
+          localStorage.removeItem("quizResults");
+        }
+      } catch (error) {
+        console.error("Submission error:", error);
+        toast.error("Failed to submit quiz");
+      } finally {
+        setIsSubmitting(false);
       }
     }
   };
@@ -266,19 +288,19 @@ export const Quiz = (): JSX.Element => {
 
         <button
           onClick={handleNext}
-          disabled={quizAddLoader}
+          disabled={quizAddLoader || isSubmitting} // Add isSubmitting to disabled condition
           className={`flex items-center justify-center gap-2 px-6 py-3 relative self-end btn 
-    ${quizAddLoader ? "opacity-50 cursor-not-allowed" : ""}`}
+    ${quizAddLoader || isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
         >
           <span>
-            {quizAddLoader
+            {quizAddLoader || isSubmitting
               ? "Submitting..."
               : currentQuestion < TOTAL_QUESTIONS - 1
               ? "Next"
               : "Finish"}
           </span>
 
-          {!quizAddLoader && (
+          {!(quizAddLoader || isSubmitting) && (
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
               <path
                 d="M7.5 15L12.5 10L7.5 5"

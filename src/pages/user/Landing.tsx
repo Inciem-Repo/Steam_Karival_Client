@@ -14,9 +14,9 @@ const navigate = useNavigate()
           />
           <div className="flex flex-col gap-4 font-h1-bold w-full">
             <h1>
-              Welcome to
+              Welcome To
               <br />
-              Stream Karnival
+              Steam Karnival
             </h1>
             <p className="relative self-stretch font-body-regular text-xs tracking-[0] leading-[16px]">
               The Grandest Celebration of Art, Culture & Learning
@@ -33,7 +33,7 @@ const navigate = useNavigate()
               <PromoBanner
                 icon="trophy"
                 title="₹5 CRORE WORTH PRIZES"
-                subtitle="For top 100 schools"
+                subtitle="For Top 100 schools"
                 variant="accent"
               />
             </div>
