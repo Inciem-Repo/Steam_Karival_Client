@@ -213,7 +213,7 @@ export const Profile = (): JSX.Element => {
 
           <div className="flex flex-col gap-4 relative self-stretch w-full">
             <form className="space-y-4">
-              <div>
+              <div className="flex flex-col items-start">
                 <label className="block mb-2 font-body-semibold">Name</label>
                 <input
                   type="text"
@@ -223,7 +223,7 @@ export const Profile = (): JSX.Element => {
                   readOnly
                 />
               </div>
-              <div>
+              <div className="flex flex-col items-start">
                 <label className="block mb-2 font-body-semibold">
                   Email ID
                 </label>
@@ -235,21 +235,21 @@ export const Profile = (): JSX.Element => {
                   readOnly
                 />
               </div>
-              <div>
+              <div className="flex flex-col items-start">
                 <label className="block mb-2 font-body-semibold">
                   Phone Number
                 </label>
-                <div className="flex gap-2">
+                <div className="flex flex-col items-start w-full">
                   <input
                     type="tel"
                     placeholder="Enter Your Phone Number"
-                    className="flex-1 input"
+                    className="flex-1 input w-full"
                     value={userProfile?.phone || ""}
                     readOnly
                   />
                 </div>
               </div>
-              <div>
+              <div className="flex flex-col items-start">
                 <label className="block mb-2 font-body-semibold">School</label>
                 <input
                   type="text"

@@ -1,4 +1,3 @@
-import "../../assets/styles/Certificate.css";
 import type { ICertificate } from "../../utils/types/quiz";
 
 export function Certificate({ name = "" }: ICertificate) {

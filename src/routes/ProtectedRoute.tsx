@@ -1,7 +1,7 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
-type ProtectedRouteProps = {
+type RouteProps = {
   children: React.ReactNode;
   roles?: string[];
   requiresPayment?: boolean;
@@ -11,7 +11,7 @@ export const ProtectedRoute = ({
   children,
   roles,
   requiresPayment,
-}: ProtectedRouteProps) => {
+}: RouteProps) => {
   const { user, loading } = useAuth();
   if (loading) return <p>Loading...</p>;
 
@@ -23,5 +23,18 @@ export const ProtectedRoute = ({
   if (requiresPayment && !user.isPaid) {
     return <Navigate to="/payment" replace />;
   }
+  return <>{children}</>;
+};
+
+export const PublicRoute = ({ children }: RouteProps) => {
+  const { user, loading } = useAuth();
+
+  if (loading) return <p>Loading...</p>;
+  if (user) {
+    if (user.role === "admin")
+      return <Navigate to="/admin/dashboard" replace />;
+    return <Navigate to="/home" replace />;
+  }
+
   return <>{children}</>;
 };
