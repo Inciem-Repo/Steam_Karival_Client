@@ -5,8 +5,8 @@ export const api = {
   },
   user: {
     getProfile: (userId: string) => `/user/${userId}`,
-    getAllUser: (page: number, limit: number) => `/users?${page}&${limit}`,
-    getPaidUser: (page: number, limit: number) => `/paid-users?${page}&${limit}`,
+    getAllUser: (page?: number, limit?: number) => `/users?${page}&${limit}`,
+    getPaidUser: (page?: number, limit?: number) => `/paid-users?${page}&${limit}`,
     getChatUser: (page: number, limit: number) => `/whatsapp_chats?${page}&${limit}`,
     getUserQuizInfo: (userId: string) => `/quiz_info/${userId}`,
   },
@@ -22,7 +22,7 @@ export const api = {
   },
   admin: {
     getDashboardInfo: "/dashboard",
-    getLeaderboard: (page: number, limit: number) =>
+    getLeaderboard: (page?: number, limit?: number) =>
       `/leaderboard?${page}&${limit}`,
   },
   payment: {

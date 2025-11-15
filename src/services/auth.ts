@@ -14,11 +14,11 @@ export const getProfileService = async (userId: string) => {
   const res = await apiClient.get(api.user.getProfile(userId));
   return res.data;
 };
-export const getAllUser = async (page: number, limit: number) => {
+export const getAllUser = async (page?: number, limit?: number) => {
   const res = await apiClient.get(api.user.getAllUser(page, limit));
   return res.data;
 };
-export const getAllPaidUser = async (page: number, limit: number) => {
+export const getAllPaidUser = async (page?: number, limit?: number) => {
   const res = await apiClient.get(api.user.getPaidUser(page, limit));
   return res.data;
 };

@@ -6,7 +6,7 @@ export const getDashboardInfo = async () => {
   return res.data;
 };
 
-export const getLeaderboard = async (page: number, limit: number) => {
+export const getLeaderboard = async (page?: number, limit?: number) => {
   const res = await apiClient.get(api.admin.getLeaderboard(page, limit));
   return res.data;
 };
