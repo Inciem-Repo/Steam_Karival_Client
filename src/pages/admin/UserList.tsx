@@ -10,7 +10,10 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useApi } from "../../hooks/useApi";
-import { getAllUser } from "../../services/auth";
+import { getAllPaidUser, getAllUser } from "../../services/auth";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+import { getLeaderboard } from "../../services/admin";
 
 // Custom Table Components
 const CustomTable = ({ children }: { children: React.ReactNode }) => (
@@ -92,7 +95,10 @@ const UserList = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [pagination, setPagination] = useState<PaginationInfo | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isloading, IssetLoading] = useState(false);
   const { callApi: callGetAllUser } = useApi(getAllUser);
+  const { callApi: callGetAllPaidUser } = useApi(getAllPaidUser);
+  const { callApi: CallLeaderBoardInfo } = useApi(getLeaderboard);
 
   useEffect(() => {
     const fetchGetAllUser = async () => {
@@ -116,6 +122,66 @@ const UserList = () => {
 
     fetchGetAllUser();
   }, [currentPage, itemsPerPage]);
+
+  const handleExportExcel = async () => {
+    try {
+      IssetLoading(true);
+      const usersData = await callGetAllUser();
+      const paidUsersData = await callGetAllPaidUser();
+      const leaderboardData = await CallLeaderBoardInfo();
+
+      const users = usersData.users || [];
+      const leaderboard = leaderboardData.leaderboard_preview || [];
+      const paidUsers = paidUsersData.users || [];
+
+      // helper finders
+      const findQuiz = (id: string) =>
+        leaderboard.find((q: any) => q.user_id === id);
+      const findPaid = (id: string) => paidUsers.find((p: any) => p._id === id);
+
+      // Combine all user info
+      const rows = users.map((u: any) => {
+        const quiz = findQuiz(u._id);
+        const paid = findPaid(u._id);
+        return {
+          Name: u.name,
+          Email: u.email,
+          Phone: u.phone,
+          School: u.school,
+          Is_Paid: paid ? "Yes" : "No",
+          Payment_Amount: paid?.last_payment?.amount || "N/A",
+          Payment_Mode: paid?.last_payment?.mode || "N/A",
+          Payment_Status: paid?.last_payment?.status || "N/A",
+          Payment_Date: paid?.last_payment?.addedon || "N/A",
+          Quiz_Attempted: u.is_quiz_attempted ? "Yes" : "No",
+          Rank: quiz?.rank || "N/A",
+          Total_Correct: quiz?.total_correct || "N/A",
+          Attempted_Questions: quiz?.attempted_questions || "N/A",
+          Time_Taken: quiz?.time_taken || "N/A",
+        };
+      });
+
+      // Convert JSON → Excel sheet
+      const worksheet = XLSX.utils.json_to_sheet(rows);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "User Report");
+
+      // Save Excel file
+      const excelBuffer = XLSX.write(workbook, {
+        bookType: "xlsx",
+        type: "array",
+      });
+      saveAs(
+        new Blob([excelBuffer], { type: "application/octet-stream" }),
+        "User_Report.xlsx"
+      );
+      IssetLoading(false);
+    } catch (error) {
+      IssetLoading(false);
+      console.error("Error generating Excel:", error);
+      alert("Failed to generate report.");
+    }
+  };
 
   // Pagination handlers
   const goToPage = (page: number) => {
@@ -239,8 +305,13 @@ const UserList = () => {
             </select>
             <span className="text-sm text-muted-foreground">entries</span>
           </div>
+          <button
+            onClick={handleExportExcel}
+            className="px-4 py-2 border border-1 btn text-sm rounded-md transition"
+          >
+            {isloading ? "Downloading..." : "Export Excel"}
+          </button>
         </div>
-
         {/* Desktop Table View */}
         <div className="hidden md:block rounded-lg border bg-card overflow-hidden">
           {users.length > 0 ? (
