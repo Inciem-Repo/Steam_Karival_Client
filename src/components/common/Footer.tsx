@@ -13,7 +13,7 @@ const Footer = React.memo(() => {
               className="w-56 md:w-64"
             />
           </div>
-          <div className="w-full md:w-[70%] md:border-l-2 border-gray-500 pl-8 text-[#1e1e1e]">
+          <div className="w-full md:w-[70%] md:border-l-2 border-gray-500 md:pl-8 text-[#1e1e1e]">
             <p className="text-[15px] leading-relaxed font-medium tracking-wide text-justify md:text-left">
               THE STEAM CUP IS PROUDLY ORGANIZED IN COLLABORATION WITH NAMO AI –
               THE NATIONAL MODULAR ROBOTICS & AI MISSION, A PIONEERING

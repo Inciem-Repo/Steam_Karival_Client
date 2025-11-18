@@ -12,9 +12,7 @@ export const ProtectedRoute = ({
   roles,
   requiresPayment,
 }: RouteProps) => {
-  const { user, loading } = useAuth();
-  if (loading) return <p>Loading...</p>;
-
+  const { user } = useAuth();
   if (!user) return <Navigate to="/login" replace />;
 
   if (roles && !roles.includes(user.role)) {
@@ -27,9 +25,8 @@ export const ProtectedRoute = ({
 };
 
 export const PublicRoute = ({ children }: RouteProps) => {
-  const { user, loading } = useAuth();
+  const { user } = useAuth();
 
-  if (loading) return <p>Loading...</p>;
   if (user) {
     if (user.role === "admin")
       return <Navigate to="/admin/dashboard" replace />;

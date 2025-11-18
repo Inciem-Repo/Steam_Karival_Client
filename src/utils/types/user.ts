@@ -82,3 +82,38 @@ export interface AuthContextType {
   login: (email: string, password: string) => Promise<User | null>;
   logout: () => void;
 }
+
+export interface Question {
+  question_id: string;
+  correct_answer: string;
+  user_answer: string;
+  is_correct: boolean;
+  options: string[];
+  question?: string;
+}
+
+export interface Quiz {
+  quiz_id: string;
+  quiz_title: string;
+  quiz_description: string;
+  total_questions: number;
+  correct_answers: number;
+  score_percentage: number;
+  time_taken: number;
+  submitted_at: string;
+  questions: Question[];
+}
+
+export interface UserInfo {
+  user_id: string;
+  name: string;
+  email: string;
+  total_quizzes_attempted: number;
+}
+
+export interface QuizResponse {
+  status: boolean;
+  message: string;
+  quizzes: Quiz[];
+  user_info: UserInfo;
+}

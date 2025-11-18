@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import HeroSection from "../../components/common/HeroSection";
 import StepsSection from "../../components/common/StepsSection";
 import { Suspense, lazy } from "react";
@@ -9,6 +10,7 @@ const OpportunitiesSection = lazy(
 const Footer = lazy(() => import("../../components/common/Footer"));
 
 function Landing() {
+  const navigate = useNavigate();
   return (
     <>
       <HeroSection />
@@ -22,7 +24,7 @@ function Landing() {
       </Suspense>
 
       <div className="fixed bottom-0 left-0 w-full bg-[#b11e3a] text-white text-center py-3 font-semibold tracking-wide uppercase md:hidden z-50">
-        <button className="w-full">Register Now</button>
+        <button className="w-full" onClick={()=>navigate("/register")}>Register Now</button>
       </div>
     </>
   );
