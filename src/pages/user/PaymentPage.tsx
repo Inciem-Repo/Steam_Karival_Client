@@ -30,7 +30,7 @@ interface EasebuzzPaymentOptions {
 }
 
 const PaymentPage: React.FC = () => {
-  const [amount] = useState<number>(100);
+  const [amount] = useState<number>(5000);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const { user } = useAuth();
   const { callApi: callPaymentOrder } = useApi(orderPaymentService);
