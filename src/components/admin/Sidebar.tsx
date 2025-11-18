@@ -5,8 +5,7 @@ import logo from "../../assets/images/logo.png";
 import { items } from "../../utils/constants/menuBar";
 import ConfirmModal from "../common/ConfirmModal";
 import { useAuth } from "../../context/AuthContext";
-
-export function Sidebar() {
+function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -161,3 +160,5 @@ export function Sidebar() {
     </>
   );
 }
+
+export default Sidebar;

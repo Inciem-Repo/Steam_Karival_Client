@@ -10,6 +10,7 @@ import { useApi } from "../hooks/useApi";
 import { getAllQuiz, getQuizInfoByID } from "../services/quiz";
 import { useAuth } from "../context/AuthContext";
 
+
 interface QuizContextType {
   quiz: Quiz | null;
   setQuiz: (quiz: Quiz) => void;
@@ -66,3 +67,5 @@ export const useQuiz = (): QuizContextType => {
   }
   return context;
 };
+
+export default QuizProvider;

@@ -1,3 +1,4 @@
+import { lazy } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -7,10 +8,26 @@ import {
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-import { AuthProvider } from "./context/AuthContext";
-import { ProtectedRoute, PublicRoute } from "./routes/ProtectedRoute";
+// import { AuthProvider } from "./context/AuthContext";
+// import { ProtectedRoute, PublicRoute } from "./routes/ProtectedRoute";
+// import { QuizProvider } from "./context/QuizContext";
+
 import { routes } from "./routes";
-import { QuizProvider } from "./context/QuizContext";
+
+const AuthProvider = lazy(() => import("./context/AuthContext"));
+const QuizProvider = lazy(() => import("./context/QuizContext"));
+
+const ProtectedRoute = lazy(() =>
+  import("./routes/ProtectedRoute").then((m) => ({
+    default: m.ProtectedRoute,
+  }))
+);
+
+const PublicRoute = lazy(() =>
+  import("./routes/ProtectedRoute").then((m) => ({
+    default: m.PublicRoute,
+  }))
+);
 
 function AppRoutes() {
   return (
@@ -26,7 +43,7 @@ function AppRoutes() {
           roles,
           requiresPayment,
         }) => {
-          const isAuthPage = ["/login", "/register","/"].includes(path);
+          const isAuthPage = ["/login", "/register", "/"].includes(path);
 
           if (children && Layout) {
             return (

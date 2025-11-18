@@ -1,5 +1,6 @@
 import { Outlet } from "react-router-dom";
-import { Sidebar } from "./Sidebar";
+import { lazy } from "react";
+const Sidebar = lazy(() => import("./Sidebar"));
 
 const AdminLayout: React.FC = () => {
   return (

@@ -12,7 +12,7 @@ import type { AuthContextType, User } from "../utils/types/user";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
+const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -103,3 +103,5 @@ export const useAuth = () => {
   if (!ctx) throw new Error("useAuth must be used within an AuthProvider");
   return ctx;
 };
+
+export default AuthProvider;
