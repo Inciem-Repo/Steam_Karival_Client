@@ -100,8 +100,6 @@ function Home() {
       </div>
     );
   }
-
-  // Show loading when starting quiz countdown
   if (loadingQuizInfo && countdown === null) {
     return (
       <div className="w-full min-h-screen flex items-center justify-center">

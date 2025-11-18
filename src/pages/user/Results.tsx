@@ -4,41 +4,9 @@ import { useApi } from "../../hooks/useApi";
 import { getUserQuizInfo } from "../../services/auth";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import type { Quiz, QuizResponse } from "../../utils/types/user";
 
-interface Question {
-  question_id: string;
-  correct_answer: string;
-  user_answer: string;
-  is_correct: boolean;
-  options: string[];
-  question?: string;
-}
 
-interface Quiz {
-  quiz_id: string;
-  quiz_title: string;
-  quiz_description: string;
-  total_questions: number;
-  correct_answers: number;
-  score_percentage: number;
-  time_taken: number;
-  submitted_at: string;
-  questions: Question[];
-}
-
-interface UserInfo {
-  user_id: string;
-  name: string;
-  email: string;
-  total_quizzes_attempted: number;
-}
-
-interface QuizResponse {
-  status: boolean;
-  message: string;
-  quizzes: Quiz[];
-  user_info: UserInfo;
-}
 
 const Results = () => {
   const [latestQuiz, setLatestQuiz] = useState<Quiz | null>(null);
