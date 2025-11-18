@@ -8,7 +8,12 @@ const StepsSection = () => {
           YOU ARE JUST 4 STEPS AWAY FROM THE NASA TRIP & STEAM CUP
         </h2>
         <div className="flex justify-center gap-6 max-w-6xl mx-auto">
-          <img src={levelImg} alt="levels"  className="w-[50rem]" />
+          <img
+            src={levelImg}
+            alt="levels"
+            loading="lazy"
+            className="w-[50rem]"
+          />
         </div>
       </div>
     </section>

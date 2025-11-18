@@ -1,6 +1,6 @@
 import steamLogo from "../../assets/svg/logosteam.svg";
-
-const Footer = () => {
+import React from "react";
+const Footer = React.memo(() => {
   return (
     <footer className="bg-[#d9def0] w-full py-16 flex justify-center items-center">
       <div className="container mx-auto px-6 md:px-16">
@@ -8,6 +8,7 @@ const Footer = () => {
           <div className="w-full md:w-[30%] flex justify-center md:justify-start">
             <img
               src={steamLogo}
+              loading="lazy"
               alt="STEAM Karnival Logo"
               className="w-56 md:w-64"
             />
@@ -26,6 +27,6 @@ const Footer = () => {
       </div>
     </footer>
   );
-};
+});
 
 export default Footer;
