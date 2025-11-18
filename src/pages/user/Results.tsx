@@ -1,4 +1,4 @@
-import { useState, useEffect, type JSX } from "react";
+import { useState, useEffect } from "react";
 import ResultCard from "../../components/common/ResultCard";
 import { useApi } from "../../hooks/useApi";
 import { getUserQuizInfo } from "../../services/auth";
@@ -40,7 +40,7 @@ interface QuizResponse {
   user_info: UserInfo;
 }
 
-export const Results = (): JSX.Element => {
+const Results = () => {
   const [latestQuiz, setLatestQuiz] = useState<Quiz | null>(null);
   const [loading, setLoading] = useState(true);
   const [hasAttempted, setHasAttempted] = useState(false);
@@ -262,3 +262,4 @@ export const Results = (): JSX.Element => {
     </div>
   );
 };
+export default Results;
