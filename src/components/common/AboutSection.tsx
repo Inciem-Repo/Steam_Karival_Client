@@ -20,7 +20,7 @@ const AboutSection = () => {
 
         <div className="grid md:grid-cols-2 gap-6 items-center max-w-6xl mx-auto mt-16">
           <div className="bg-[#dbdff0] flex justify-center flex-col p-10 h-full">
-            <img src={cup} alt="prize cup" />
+            <img src={cup} alt="prize cup" loading="lazy" />
             <button
               className="rounded-full py-4 bg-[#b11e3a] text-white"
               onClick={() => navigate("/register")}

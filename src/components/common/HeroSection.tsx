@@ -13,6 +13,7 @@ const HeroSection = () => {
             <div className="flex-shrink-0">
               <img
                 src={home}
+                loading="lazy"
                 alt="home cup logo"
                 className="md:w-[35rem] w-[15rem] h-auto"
               />
@@ -30,7 +31,7 @@ const HeroSection = () => {
                 </p>
               </div>
               <div>
-                <img src={grand} alt="grand logo" />
+                <img src={grand} loading="lazy" alt="grand logo" />
               </div>
             </div>
           </div>
