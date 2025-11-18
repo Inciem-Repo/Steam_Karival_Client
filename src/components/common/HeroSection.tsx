@@ -1,0 +1,43 @@
+import home from "../../assets/svg/cup.svg";
+import grand from "../../assets/svg/grand.svg";
+
+const HeroSection = () => {
+  return (
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#191c6b]">
+      <div className="relative z-10 container mx-auto px-4 py-16">
+        <div className="text-center mx-auto">
+          <h1 className="text-xl md:text-4xl text-white font-thin mb-16 tracking-wide uppercase">
+            World's Largest AI & Robotics Challenge!
+          </h1>
+          <div className="flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-12">
+            <div className="flex-shrink-0">
+              <img
+                src={home}
+                alt="home cup logo"
+                className="w-[35rem] h-auto"
+              />
+            </div>
+            <div className="space-y-6">
+              <div className="text-white space-y-2">
+                <p className="text-6xl md:text-7xl font-black text-accent">
+                  ₹5 CRORE
+                </p>
+                <p className="text-6xl font-medium tracking-wide uppercase">
+                  IN REWARDS
+                </p>
+                <p className="text-lg text-end  text-primary-foreground/80">
+                  IN ALL CATEGORIES
+                </p>
+              </div>
+              <div>
+                <img src={grand} alt="grand logo" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default HeroSection;
