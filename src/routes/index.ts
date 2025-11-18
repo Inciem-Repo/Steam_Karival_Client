@@ -1,6 +1,6 @@
 import { lazy } from "react";
 import { roleName } from "../utils/constants/env";
-import AdminLayout from "../components/admin/AdminLayout";
+const AdminLayout = lazy(() => import("../components/admin/AdminLayout"));
 const ChatBotAccessList = lazy(
   () => import("../pages/admin/ChatBotAccessList")
 );
@@ -108,3 +108,5 @@ export const routes: AppRoute[] = [
   },
   { id: "not-found", path: "*", component: NotFound, requiresPayment: false },
 ];
+
+export default routes;
