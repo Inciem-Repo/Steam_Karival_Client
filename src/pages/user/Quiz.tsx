@@ -1,4 +1,4 @@
-import { useState, useEffect, type JSX } from "react";
+import { useState, useEffect,} from "react";
 import { useQuiz } from "../../context/QuizContext";
 import { submitQuiz } from "../../services/quiz";
 import { useApi } from "../../hooks/useApi";
@@ -23,7 +23,7 @@ interface QuizState {
 
 const QUESTION_TIME = 8;
 
-export const Quiz = (): JSX.Element => {
+const Quiz = () => {
   const [quizStateLoaded, setQuizStateLoaded] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
@@ -316,3 +316,5 @@ export const Quiz = (): JSX.Element => {
     </div>
   );
 };
+
+export default Quiz;

@@ -29,9 +29,8 @@ interface EasebuzzPaymentOptions {
   theme?: string;
 }
 
-
 const PaymentPage: React.FC = () => {
-  const [amount] = useState<number>(5000);
+  const [amount] = useState<number>(100);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const { user } = useAuth();
   const { callApi: callPaymentOrder } = useApi(orderPaymentService);
@@ -1541,11 +1540,7 @@ const PaymentPage: React.FC = () => {
           </div>
           <div className="space-y-2 text-center">
             <p className=" font-h1-bold ">Unlock Your Quiz Adventure</p>
-            <div className="relative">
-              {/* <h1 className="text-3xl font-bold">
-                ₹{(amount / 100).toFixed(2)}
-              </h1> */}
-            </div>
+            <div className="relative"></div>
             <p className="text-sm text-slate-500 px-2">
               You’re just one step away from joining the fun! Complete your
               payment and get ready to challenge your mind, earn rewards, and

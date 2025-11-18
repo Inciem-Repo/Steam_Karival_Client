@@ -1,22 +1,24 @@
-// src/routes/index.ts
-import AdminLayout from "../components/admin/AdminLayout";
-import ChatBotAccessList from "../pages/admin/ChatBotAccessList";
-import Dashboard from "../pages/admin/DashBoard";
-import LeaderBoard from "../pages/admin/LeaderBoard";
-import PaidUserList from "../pages/admin/PaidUserList";
-import QuizManager from "../pages/admin/QuizManager";
-import UserList from "../pages/admin/UserList";
-import UsersProfile from "../pages/admin/UsersProfile";
-import Login from "../pages/auth/Login";
-import Register from "../pages/auth/Register";
-import NotFound from "../pages/commen/NotFound";
-import Home from "../pages/user/Home";
-import Landing from "../pages/user/Landing";
-import PaymentPage from "../pages/user/PaymentPage";
-import { Profile } from "../pages/user/Profile";
-import { Quiz } from "../pages/user/Quiz";
-import { Results } from "../pages/user/Results";
+import { lazy } from "react";
 import { roleName } from "../utils/constants/env";
+import AdminLayout from "../components/admin/AdminLayout";
+const ChatBotAccessList = lazy(
+  () => import("../pages/admin/ChatBotAccessList")
+);
+const Dashboard = lazy(() => import("../pages/admin/DashBoard"));
+const LeaderBoard = lazy(() => import("../pages/admin/LeaderBoard"));
+const PaidUserList = lazy(() => import("../pages/admin/PaidUserList"));
+const QuizManager = lazy(() => import("../pages/admin/QuizManager"));
+const UserList = lazy(() => import("../pages/admin/UserList"));
+const UsersProfile = lazy(() => import("../pages/admin/UsersProfile"));
+const Login = lazy(() => import("../pages/auth/Login"));
+const Register = lazy(() => import("../pages/auth/Register"));
+const NotFound = lazy(() => import("../pages/commen/NotFound"));
+const Home = lazy(() => import("../pages/user/Home"));
+const Landing = lazy(() => import("../pages/user/Landing"));
+const PaymentPage = lazy(() => import("../pages/user/PaymentPage"));
+const Profile = lazy(() => import("../pages/user/Profile"));
+const Quiz = lazy(() => import("../pages/user/Quiz"));
+const Results = lazy(() => import("../pages/user/Results"));
 
 export type AppRoute = {
   id: string;

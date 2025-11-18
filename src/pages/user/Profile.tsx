@@ -1,4 +1,4 @@
-import { useState, useEffect, type JSX } from "react";
+import { useState, useEffect } from "react";
 import { quizQuestions } from "../../utils/constants/quizzData";
 import ResultCard from "../../components/common/ResultCard";
 import { useAuth } from "../../context/AuthContext";
@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 import ConfirmModal from "../../components/common/ConfirmModal";
 import { downloadCertificateAsPDF } from "../../utils/downloadCertificate";
 
-export const Profile = (): JSX.Element => {
+const Profile = () => {
   const [score, setScore] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
   const [wrongCount, setWrongCount] = useState(0);
@@ -275,3 +275,5 @@ export const Profile = (): JSX.Element => {
     </div>
   );
 };
+
+export default Profile;
