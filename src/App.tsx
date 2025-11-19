@@ -7,27 +7,25 @@ import {
 } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
-// import { AuthProvider } from "./context/AuthContext";
-// import { ProtectedRoute, PublicRoute } from "./routes/ProtectedRoute";
-// import { QuizProvider } from "./context/QuizContext";
-
 import { routes } from "./routes";
-
 const AuthProvider = lazy(() => import("./context/AuthContext"));
 const QuizProvider = lazy(() => import("./context/QuizContext"));
-
 const ProtectedRoute = lazy(() =>
   import("./routes/ProtectedRoute").then((m) => ({
     default: m.ProtectedRoute,
   }))
 );
-
 const PublicRoute = lazy(() =>
   import("./routes/ProtectedRoute").then((m) => ({
     default: m.PublicRoute,
   }))
 );
+
+
+// import { AuthProvider } from "./context/AuthContext";
+// import { ProtectedRoute, PublicRoute } from "./routes/ProtectedRoute";
+// import { QuizProvider } from "./context/QuizContext";
+
 
 function AppRoutes() {
   return (

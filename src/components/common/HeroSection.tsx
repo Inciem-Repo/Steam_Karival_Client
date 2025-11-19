@@ -74,9 +74,6 @@ const HeroSection = () => {
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 1.4, duration: 0.6 }}
                 />
-                <p className="md:text-3xl text-3xl mt-0 text-white font-bold tracking-wide uppercase">
-                  + cup + certificate
-                </p>
               </motion.div>
               <div className="relative">
               </div>
