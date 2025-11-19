@@ -1,0 +1,41 @@
+name: devquiz-uat
+
+on:
+  push:
+    branches:
+      - UAT
+
+jobs:
+  deploy-devquiz-uat:
+    name: Deploy UAT - devquiz.steamkarnival.com
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup SSH Key for Deployment
+        env:
+          SSH_SERVER_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
+          SSH_SERVER_IP: ${{ secrets.SSH_HOST }}
+          SSH_SERVER_USER_NAME: ${{ secrets.SSH_USER }}
+          SSH_SERVER_PORT: ${{ secrets.SSH_PORT }}
+        run: |
+          mkdir -p $HOME/.ssh/
+          echo "$SSH_SERVER_PRIVATE_KEY" > $HOME/.ssh/id_rsa
+          chmod 600 $HOME/.ssh/id_rsa
+          # Test connection
+          ssh -o StrictHostKeyChecking=no -p "$SSH_SERVER_PORT" -i $HOME/.ssh/id_rsa "${SSH_SERVER_USER_NAME}@${SSH_SERVER_IP}" "echo 'Connected to UAT Server ✔'"
+
+      - name: Run UAT Deploy Script on Server
+        env:
+          SSH_SERVER_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
+          SSH_SERVER_IP: ${{ secrets.SSH_HOST }}
+          SSH_SERVER_USER_NAME: ${{ secrets.SSH_USER }}
+          SSH_SERVER_PORT: ${{ secrets.SSH_PORT }}
+        run: |
+          ssh -o StrictHostKeyChecking=no -p "$SSH_SERVER_PORT" -i $HOME/.ssh/id_rsa "${SSH_SERVER_USER_NAME}@${SSH_SERVER_IP}" "/home/${SSH_SERVER_USER_NAME}/scripts/deploy-uat.sh"
+
+      - name: Cleanup SSH Key
+        run: |
+          rm -f $HOME/.ssh/id_rsa
