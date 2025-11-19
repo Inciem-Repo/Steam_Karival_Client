@@ -1,34 +1,93 @@
 const SkeletonLoader = ({
-  size = "medium",
-  text = "Loading...",
-  fullScreen = false,
+  variant = "text",
+  lines = 3,
+  width = "full",
+  height = "auto",
+  circle = false,
+  animated = true,
+  className = "",
 }: {
-  size?: "small" | "medium" | "large";
-  text?: string;
-  fullScreen?: boolean;
+  variant?: "text" | "card" | "image";
+  lines?: number;
+  width?: string | number;
+  height?: string | number;
+  circle?: boolean;
+  animated?: boolean;
+  className?: string;
 }) => {
-  const sizeClasses = {
-    small: "w-6 h-6",
-    medium: "w-12 h-12",
-    large: "w-16 h-16",
+  const getSkeletonContent = () => {
+    switch (variant) {
+      case "text":
+        return (
+          <div className="space-y-3 p-3">
+            {Array.from({ length: lines }).map((_, index) => (
+              <div
+                key={index}
+                className={`h-4 bg-gray-200 rounded ${
+                  index === lines - 1 ? "w-3/4" : "w-full"
+                }`}
+              />
+            ))}
+          </div>
+        );
+
+      case "card":
+        return (
+          <div className="border border-gray-200 rounded-lg p-4 space-y-4">
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 bg-gray-200 rounded-full" />
+              <div className="space-y-2 flex-1">
+                <div className="h-4 bg-gray-200 rounded w-3/4" />
+                <div className="h-3 bg-gray-200 rounded w-1/2" />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <div className="h-3 bg-gray-200 rounded w-full" />
+              <div className="h-3 bg-gray-200 rounded w-full" />
+              <div className="h-3 bg-gray-200 rounded w-2/3" />
+            </div>
+          </div>
+        );
+
+      case "image":
+        return (
+          <div className="space-y-3">
+            <div
+              className={`bg-gray-200 rounded ${
+                circle ? "rounded-full" : "rounded-lg"
+              }`}
+              style={{
+                width: circle ? width : "100%",
+                height: circle ? width : height,
+              }}
+            />
+            <div className="space-y-2">
+              <div className="h-4 bg-gray-200 rounded w-3/4" />
+              <div className="h-3 bg-gray-200 rounded w-1/2" />
+            </div>
+          </div>
+        );
+
+      default:
+        return null;
+    }
   };
 
-  const containerClass = fullScreen
-    ? "fixed inset-0 flex items-center justify-center bg-white bg-opacity-90 z-50"
-    : "flex items-center justify-center p-8";
+  const skeletonStyle = {
+    width: typeof width === "number" ? `${width}px` : width,
+    height: typeof height === "number" ? `${height}px` : height,
+  };
 
   return (
-    <div className={containerClass}>
-      <div className="flex flex-col items-center space-y-4">
-        <div className={`${sizeClasses[size]} relative`}>
-          <div className="absolute inset-0 rounded-full border-4 border-gray-200"></div>
-          <div className="absolute inset-0 rounded-full border-4 border-blue-500 border-t-transparent animate-spin"></div>
-        </div>
-        {text && (
-          <p className="text-gray-600 font-medium animate-pulse">{text}</p>
-        )}
-      </div>
+    <div
+      className={`${animated ? "animate-pulse" : ""} ${className}`}
+      style={skeletonStyle}
+      role="status"
+      aria-label="Loading..."
+    >
+      {getSkeletonContent()}
     </div>
   );
 };
+
 export default SkeletonLoader;

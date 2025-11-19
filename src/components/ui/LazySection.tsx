@@ -2,8 +2,10 @@ import { useEffect, useRef, useState } from "react";
 
 export default function LazySection({
   children,
+  loader = null,
 }: {
   children: React.ReactNode;
+  loader?: React.ReactNode;
 }) {
   const ref = useRef<HTMLDivElement | null>(null);
   const [isVisible, setIsVisible] = useState(false);
@@ -16,12 +18,10 @@ export default function LazySection({
       }
     });
 
-    if (ref.current) {
-      observer.observe(ref.current);
-    }
+    if (ref.current) observer.observe(ref.current);
 
     return () => observer.disconnect();
   }, []);
 
-  return <div ref={ref}>{isVisible ? children : null}</div>;
+  return <div ref={ref}>{isVisible ? children : loader}</div>;
 }
