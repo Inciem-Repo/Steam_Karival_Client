@@ -8,6 +8,7 @@ export default defineConfig({
     allowedHosts: [
       "quiz.steamkarnival.com",
       "steamkarnival.com",
+      "devquiz.steamkarnival.com",
     ],
   },
 });
