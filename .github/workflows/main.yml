@@ -1,27 +1,44 @@
-name: Quiz-steamkarnival
+name: Deploy UAT to devquiz.steamkarnival.com
 
 on:
   push:
-    branches:
-      - main
+    branches: ["UAT"]
 
 jobs:
-  deploy-chatbot:
-    name: Deploy quiz-steamkarnival Server
+  build-and-deploy:
     runs-on: ubuntu-latest
-    
-    steps:
-      - name: SSH  quiz-steamkarnival Server
-        env:
-          SSH_SERVER_PRIVATE_KEY: ${{ secrets.SERVER_SSH_KEY }}
-          SSH_SERVER_IP: ${{ secrets.SERVER_HOST }}
-          SSH_SERVER_USER_NAME: ${{ secrets.SERVER_USER }}
-        run: |
-          mkdir -p $HOME/.ssh/
-          echo "$SSH_SERVER_PRIVATE_KEY" > $HOME/.ssh/id_rsa
-          chmod 600 $HOME/.ssh/id_rsa
-          ssh -o StrictHostKeyChecking=no -i $HOME/.ssh/id_rsa "${SSH_SERVER_USER_NAME}@${SSH_SERVER_IP}" "/home/${SSH_SERVER_USER_NAME}/script/deploy.sh"
 
-      - name: Cleanup PEM File
-        run: |
-          rm -f $HOME/.ssh/id_rsa
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Setup Node
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Build project
+      run: npm run build
+
+    - name: Upload dist to server
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USER }}
+        key: ${{ secrets.SSH_KEY }}
+        port: ${{ secrets.SSH_PORT }}
+        source: "dist/*"
+        target: "/var/www/devquiz/site"
+
+    - name: Restart Nginx
+      uses: appleboy/ssh-action@v0.1.10
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USER }}
+        key: ${{ secrets.SSH_KEY }}
+        port: ${{ secrets.SSH_PORT }}
+        script: |
+          systemctl reload nginx
