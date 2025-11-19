@@ -1,44 +1,31 @@
-name: Deploy UAT to devquiz.steamkarnival.com
+name: devquiz.steamkarnival.com devquiz-uat
 
 on:
   push:
-    branches: ["UAT"]
+    branches:
+      - UAT
 
 jobs:
-  build-and-deploy:
+  deploy-api-devquiz-uat:
+    name: Deploy API (UAT) - devquiz.steamkarnival.com
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: SSH to API UAT Server
+        env:
+          SSH_SERVER_PRIVATE_KEY: ${{ secrets.API_UAT_SSH_KEY }}
+          SSH_SERVER_IP: ${{ secrets.API_UAT_HOST }}
+          SSH_SERVER_USER_NAME: ${{ secrets.API_UAT_USER }}
+        run: |
+          mkdir -p $HOME/.ssh/
+          echo "$SSH_SERVER_PRIVATE_KEY" > $HOME/.ssh/id_rsa
+          chmod 600 $HOME/.ssh/id_rsa
 
-    - name: Setup Node
-      uses: actions/setup-node@v3
-      with:
-        node-version: 18
+          ssh -o StrictHostKeyChecking=no \
+              -i $HOME/.ssh/id_rsa \
+              "${SSH_SERVER_USER_NAME}@${SSH_SERVER_IP}" \
+              "/home/${SSH_SERVER_USER_NAME}/scripts/deploy-uat.sh"
 
-    - name: Install dependencies
-      run: npm install
-
-    - name: Build project
-      run: npm run build
-
-    - name: Upload dist to server
-      uses: appleboy/scp-action@v0.1.7
-      with:
-        host: ${{ secrets.SSH_HOST }}
-        username: ${{ secrets.SSH_USER }}
-        key: ${{ secrets.SSH_KEY }}
-        port: ${{ secrets.SSH_PORT }}
-        source: "dist/*"
-        target: "/home/devquiz-steamkarnival/public/devquiz.steamkarnival.com/"
-
-    - name: Restart Nginx
-      uses: appleboy/ssh-action@v0.1.10
-      with:
-        host: ${{ secrets.SSH_HOST }}
-        username: ${{ secrets.SSH_USER }}
-        key: ${{ secrets.SSH_KEY }}
-        port: ${{ secrets.SSH_PORT }}
-        script: |
-          systemctl reload nginx
+      - name: Cleanup SSH Key
+        run: |
+          rm -f $HOME/.ssh/id_rsa
