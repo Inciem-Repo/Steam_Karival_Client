@@ -31,7 +31,7 @@ jobs:
         key: ${{ secrets.SSH_KEY }}
         port: ${{ secrets.SSH_PORT }}
         source: "dist/*"
-        target: "/var/www/devquiz/site"
+        target: "/home/devquiz-steamkarnival/public/devquiz.steamkarnival.com/"
 
     - name: Restart Nginx
       uses: appleboy/ssh-action@v0.1.10
