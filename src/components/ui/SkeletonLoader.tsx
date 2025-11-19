@@ -1,4 +1,4 @@
-export const SkeletonLoader  = ({
+const SkeletonLoader = ({
   size = "medium",
   text = "Loading...",
   fullScreen = false,
@@ -31,3 +31,4 @@ export const SkeletonLoader  = ({
     </div>
   );
 };
+export default SkeletonLoader;
