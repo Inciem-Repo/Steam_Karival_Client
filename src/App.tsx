@@ -21,12 +21,6 @@ const PublicRoute = lazy(() =>
   }))
 );
 
-
-// import { AuthProvider } from "./context/AuthContext";
-// import { ProtectedRoute, PublicRoute } from "./routes/ProtectedRoute";
-// import { QuizProvider } from "./context/QuizContext";
-
-
 function AppRoutes() {
   return (
     <Routes>

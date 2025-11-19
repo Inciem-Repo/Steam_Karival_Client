@@ -4,7 +4,7 @@ import HeroSection from "../../components/common/HeroSection";
 import StepsSection from "../../components/common/StepsSection";
 import LazySection from "../../components/ui/LazySection";
 
-const  SkeletonLoader = lazy(() => import("../../components/ui/SkeletonLoader"));
+const SkeletonLoader = lazy(() => import("../../components/ui/SkeletonLoader"));
 const AboutSection = lazy(() => import("../../components/common/AboutSection"));
 const OpportunitiesSection = lazy(
   () => import("../../components/common/OpportunitiesSection")
@@ -20,19 +20,19 @@ function Landing() {
       <Suspense
         fallback={
           <div className="text-center text-white py-8">
-            <SkeletonLoader />
+            <SkeletonLoader variant="text" lines={4} />
           </div>
         }
       >
-        <LazySection>
+        <LazySection loader={<SkeletonLoader variant="text" lines={4} />}>
           <AboutSection />
         </LazySection>
 
-        <LazySection>
+        <LazySection loader={<SkeletonLoader variant="text" lines={4} />}>
           <OpportunitiesSection />
         </LazySection>
 
-        <LazySection>
+        <LazySection loader={<SkeletonLoader variant="text" lines={4} />}>
           <Footer />
         </LazySection>
       </Suspense>

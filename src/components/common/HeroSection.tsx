@@ -11,7 +11,7 @@ const HeroSection = () => {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-xl md:text-4xl text-white font-thin md:mb-16 mb-6 tracking-wide uppercase"
+            className="text-xl md:text-4xl text-white font-thin mb-5  tracking-wide uppercase"
           >
             World's Largest AI & Robotics Challenge!
           </motion.h1>
@@ -34,7 +34,7 @@ const HeroSection = () => {
               />
             </motion.div>
 
-            <div className="space-y-6">
+            <div className="space-y-6 md:pt-20">
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -75,8 +75,6 @@ const HeroSection = () => {
                   transition={{ delay: 1.4, duration: 0.6 }}
                 />
               </motion.div>
-              <div className="relative">
-              </div>
             </div>
           </div>
         </div>
