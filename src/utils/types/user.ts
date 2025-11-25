@@ -8,6 +8,7 @@ export interface AuthUser {
   exp: number;
   iat: number;
   isPaid?: boolean;
+  current_quiz_level?: string;
 }
 export interface RazorpayOptions {
   key: string;
@@ -73,6 +74,7 @@ export interface User {
   username?: string;
   [key: string]: any;
   isPaid?: boolean;
+  current_quiz_level?: string;
 }
 
 export interface AuthContextType {

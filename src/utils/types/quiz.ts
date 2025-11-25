@@ -4,10 +4,12 @@ export interface Question {
   question_id: string;
   question: string;
   options: string[];
+  correct_answer?: string;
 }
 export interface Quiz {
   _id: string;
   title: string;
+  category: string;
   total_questions: number;
   created_at: string;
   created_by: string;
@@ -35,4 +37,14 @@ export type UpdateQuizPayload = {
 };
 export interface ICertificate {
   name: String;
+}
+export interface ApiQuizResponse {
+  quizzes: Quiz[];
+  status: boolean;
+  total: number;
+}
+export interface QuizContextType {
+  quiz: Quiz | null;
+  setQuiz: (quiz: Quiz) => void;
+  isLoading: boolean;
 }

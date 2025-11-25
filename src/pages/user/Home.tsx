@@ -2,47 +2,37 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import home from "../../assets/images/home.png";
 import { useApi } from "../../hooks/useApi";
-import { getAllQuiz, getQuizInfoByID } from "../../services/quiz";
+import { getQuizInfoByID } from "../../services/quiz";
 import { getProfileService } from "../../services/auth";
 import { useAuth } from "../../context/AuthContext";
 import { useQuiz } from "../../context/QuizContext";
 import { PromoBanner } from "../../components/common/PromoBanner";
+import { quizCategory } from "../../utils/constants/values";
 
 function Home() {
   const [countdown, setCountdown] = useState<number | null>(null);
   const navigate = useNavigate();
-  const { callApi: callGetAllQuiz } = useApi(getAllQuiz);
   const { callApi: callGetProfile } = useApi(getProfileService);
   const { callApi: callGetQuizInfoByID, loading: loadingQuizInfo } =
     useApi(getQuizInfoByID);
   const { user, loading: authLoading } = useAuth();
   const [isUserAttendedQuiz, setIsUserAttendedQuiz] = useState<boolean>(false);
-  const [quizID, setQuizID] = useState<string>("");
-  const { setQuiz } = useQuiz();
+  const { quiz, setQuiz } = useQuiz();
   const [dataLoading, setDataLoading] = useState<boolean>(true);
+  const [selectedLevel, setSelectedLevel] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
       if (!user?.id) return;
       try {
         setDataLoading(true);
-        const [profileResponse, quizResponse] = await Promise.all([
-          callGetProfile(user.id),
-          callGetAllQuiz(),
-        ]);
-
+        const [profileResponse] = await Promise.all([callGetProfile(user.id)]);
         setIsUserAttendedQuiz(
           profileResponse?.user?.stats?.is_quiz_attempted || false
         );
-        if (quizResponse?.quizzes?.length > 0) {
-          setQuizID(quizResponse.quizzes[0]._id);
-        } else {
-          setQuizID("");
-        }
       } catch (err) {
         console.error("Error fetching data");
         setIsUserAttendedQuiz(false);
-        setQuizID("");
       } finally {
         setDataLoading(false);
       }
@@ -55,15 +45,13 @@ function Home() {
     }
   }, [user, authLoading]);
 
-  const startCountdown = async () => {
+  const startCountdown = async (level: string) => {
     try {
-      if (!quizID) return;
-
-      const quizData = await callGetQuizInfoByID(quizID);
-
+      setSelectedLevel(level);
+      setCountdown(3);
+      const quizData = await callGetQuizInfoByID(level);
       if (quizData?.quiz) {
         setQuiz(quizData.quiz);
-        setCountdown(3);
       } else {
         navigate("/");
       }
@@ -72,11 +60,48 @@ function Home() {
       navigate("/");
     }
   };
-  const checkUserPaidOrNot = async () => {
-    if (user && user?.isPaid) {
-      await startCountdown();
+
+  const handleLevelSelection = async (level: string) => {
+    if (!user) return;
+    if (level === quizCategory.SCHOOL_LEVEL) {
+      await startCountdown(level);
+      return;
+    }
+
+    if (user.isPaid) {
+      await startCountdown(level);
     } else {
       navigate("/payment");
+    }
+  };
+
+  const getLevelButtonText = (level: string) => {
+    switch (level) {
+      case quizCategory.SCHOOL_LEVEL:
+        return "School Level";
+      case quizCategory.STATE_LEVEL:
+        return "State Level";
+      case quizCategory.NATIONAL_LEVEL:
+        return "National Level";
+      case quizCategory.GLOBAL_LEVEL:
+        return "Global Level";
+      default:
+        return "Start Quiz";
+    }
+  };
+
+  const getLevelDescription = (level: string) => {
+    switch (level) {
+      case quizCategory.SCHOOL_LEVEL:
+        return "Begin your journey - Free";
+      case quizCategory.STATE_LEVEL:
+        return "Compete at state level";
+      case quizCategory.NATIONAL_LEVEL:
+        return "National championship";
+      case quizCategory.GLOBAL_LEVEL:
+        return "International challenge";
+      default:
+        return "";
     }
   };
 
@@ -86,13 +111,12 @@ function Home() {
       navigate("/quiz");
       return;
     }
-
     const timer = setTimeout(() => {
       setCountdown((prev) => (prev ? prev - 1 : 0));
     }, 1000);
-
     return () => clearTimeout(timer);
   }, [countdown, navigate]);
+
   if (authLoading || dataLoading) {
     return (
       <div className="w-full min-h-screen flex items-center justify-center">
@@ -118,6 +142,9 @@ function Home() {
                 <span className="font-h1-bold text-5xl">{countdown}</span>
               </div>
               <h2 className="text-2xl font-h1-bold">Get Ready!</h2>
+              <p className="text-center text-gray-600">
+                Starting {getLevelButtonText(selectedLevel || "")}
+              </p>
             </div>
           ) : (
             <>
@@ -140,8 +167,8 @@ function Home() {
                   </p>
                 ) : (
                   <p className="relative flex items-center justify-center self-stretch font-body-regular text-xs text-center tracking-[0] leading-[16px] px-4">
-                    Welcome aboard! Take a deep breath, stay curious, and enjoy
-                    exploring fun challenges that sharpen your mind.
+                    Welcome aboard! Choose your level and begin your STEAM
+                    journey.
                   </p>
                 )}
               </div>
@@ -152,15 +179,37 @@ function Home() {
                 >
                   Go to Profile
                 </button>
-              ) : quizID ? (
+              ) : quiz ? (
                 <>
-                  <button
-                    className="flex flex-col w-full btn items-center"
-                    onClick={checkUserPaidOrNot}
-                    disabled={loadingQuizInfo}
-                  >
-                    {loadingQuizInfo ? "Loading..." : "Start Quiz"}
-                  </button>
+                  <div className="flex flex-col gap-4 w-full">
+                    {Object.values(quizCategory).map((level) => {
+                      const isDisabled =
+                        loadingQuizInfo || level !== user?.current_quiz_level;
+
+                      return (
+                        <button
+                          key={level}
+                          onClick={() => handleLevelSelection(level)}
+                          disabled={isDisabled}
+                          className={`flex flex-col w-full btn items-center p-4 transition-all 
+                          ${
+                            isDisabled
+                              ? "opacity-40 cursor-not-allowed grayscale"
+                              : "opacity-100"
+                          }
+                        `}
+                        >
+                          <span className="font-semibold">
+                            {getLevelButtonText(level)}
+                          </span>
+                          <span className="text-xs opacity-80 mt-1">
+                            {getLevelDescription(level)}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
                   <div className="grid grid-cols-1 gap-6 mb-8 animate-fade-in">
                     <div className="flex gap-2">
                       <PromoBanner
@@ -176,10 +225,7 @@ function Home() {
                         variant="accent"
                       />
                     </div>
-                    <div
-                      className="flex gap-2
-                    "
-                    >
+                    <div className="flex gap-2">
                       <PromoBanner
                         icon="brain"
                         title="NATIONAL ROBOTICS & AI MISSION"

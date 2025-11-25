@@ -5,22 +5,14 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import type { Quiz } from "../utils/types/quiz";
+import type { Quiz, QuizContextType } from "../utils/types/quiz";
 import { useApi } from "../hooks/useApi";
-import { getAllQuiz, getQuizInfoByID } from "../services/quiz";
+import { getQuizInfoByID } from "../services/quiz";
 import { useAuth } from "../context/AuthContext";
-
-
-interface QuizContextType {
-  quiz: Quiz | null;
-  setQuiz: (quiz: Quiz) => void;
-  isLoading: boolean;
-}
 
 const QuizContext = createContext<QuizContextType | undefined>(undefined);
 
 export const QuizProvider = ({ children }: { children: ReactNode }) => {
-  const { callApi: callGetAllQuiz } = useApi(getAllQuiz);
   const { callApi: callGetQuizInfoByID } = useApi(getQuizInfoByID);
   const { user } = useAuth();
 
@@ -32,14 +24,7 @@ export const QuizProvider = ({ children }: { children: ReactNode }) => {
       if (!user?.id) return;
 
       try {
-        const quizResponse = await callGetAllQuiz();
-        const firstQuizID = quizResponse?.quizzes?.[0]?._id;
-        if (!firstQuizID) {
-          setIsLoading(false);
-          return;
-        }
-
-        const quizData = await callGetQuizInfoByID(firstQuizID);
+        const quizData = await callGetQuizInfoByID(user.current_quiz_level);
         if (quizData?.quiz) {
           setQuiz(quizData.quiz);
         }

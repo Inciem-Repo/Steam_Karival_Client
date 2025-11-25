@@ -6,7 +6,7 @@ import {
   type ReactNode,
 } from "react";
 import { showError } from "../utils/toast";
-import { loginService } from "../services/auth";
+import { loginService, getProfileService } from "../services/auth";
 import { getAuthDetails, getAuthToken } from "../utils/helper";
 import type { AuthContextType, User } from "../utils/types/user";
 
@@ -18,53 +18,53 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const handleTokenChange = () => {
+    const init = async () => {
       const savedToken = getAuthToken();
-      setToken(savedToken);
-    };
-
-    window.addEventListener("auth-token-updated", handleTokenChange);
-    return () => {
-      window.removeEventListener("auth-token-updated", handleTokenChange);
-    };
-  }, []);
-
-  /** Initialize user/token on app load */
-  useEffect(() => {
-    const savedToken = getAuthToken();
-
-    if (savedToken) {
+      if (!savedToken) {
+        setLoading(false);
+        return;
+      }
       setToken(savedToken);
       const decoded = getAuthDetails();
-      if (decoded) {
-        const userFromToken: User = {
-          id: decoded.user_id,
-          name: decoded.name,
-          email: decoded.email,
-          role: decoded.role,
-          phone: decoded.phone,
-          school: decoded.school,
-          username: decoded.name,
-          isPaid: decoded?.isPaid,
-        };
-        setUser(userFromToken);
+      if (!decoded?.user_id) {
+        setLoading(false);
+        return;
       }
-    }
 
-    setLoading(false);
-  }, [token]);
+      try {
+        const profile = await getProfileService(decoded.user_id);
+        const userData: User = {
+          id: profile.user._id,
+          name: profile.user.name,
+          email: profile.user.email,
+          role: profile.user.role,
+          phone: profile.user.phone,
+          school: profile.user.school,
+          username: profile.user.name,
+          isPaid: profile.user.isPaid,
+          current_quiz_level: profile.user.current_quiz_level,
+        };
+        setUser(userData);
+      } catch (err) {
+        console.log("Profile load error:", err);
+        setUser(null);
+      }
 
-  /** Login and save token (user derived from response or decoded) */
+      setLoading(false);
+    };
+
+    init();
+  }, []);
+
   const login = async (email: string, password: string) => {
     try {
       const data = await loginService({ email, password });
-      if (!data?.token) {
-        throw new Error("Invalid login");
-      }
+
+      if (!data?.token) throw new Error("Invalid login");
 
       localStorage.setItem("token", data.token);
       setToken(data.token);
-      const userInfo = {
+      const u: User = {
         id: data.user.user_id,
         name: data.user.name,
         email: data.user.email,
@@ -73,17 +73,17 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
         school: data.user.school,
         username: data.user.name,
         isPaid: data.user.isPaid,
+        current_quiz_level: data.user.current_quiz_level,
       };
 
-      if (userInfo) setUser(userInfo);
-      return userInfo;
+      setUser(u);
+      return u;
     } catch (err) {
       showError(err);
       throw err;
     }
   };
 
-  /**Logout and clear storage */
   const logout = () => {
     localStorage.removeItem("token");
     setToken(null);
@@ -97,7 +97,6 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-/** Custom hook */
 export const useAuth = () => {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error("useAuth must be used within an AuthProvider");

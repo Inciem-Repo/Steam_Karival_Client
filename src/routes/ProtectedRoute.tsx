@@ -1,5 +1,6 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { quizCategory } from "../utils/constants/values";
 
 type RouteProps = {
   children: React.ReactNode;
@@ -18,7 +19,11 @@ export const ProtectedRoute = ({
   if (roles && !roles.includes(user.role)) {
     return <Navigate to="/login" replace />;
   }
-  if (requiresPayment && !user.isPaid) {
+  if (
+    requiresPayment &&
+    user.current_quiz_level !== quizCategory.SCHOOL_LEVEL &&
+    !user.isPaid
+  ) {
     return <Navigate to="/payment" replace />;
   }
   return <>{children}</>;

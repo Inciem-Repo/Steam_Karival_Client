@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { quizQuestions } from "../../utils/constants/quizzData";
 import ResultCard from "../../components/common/ResultCard";
 import { useAuth } from "../../context/AuthContext";
 import { getProfileService } from "../../services/auth";
@@ -30,32 +29,9 @@ const Profile = () => {
         setScore(total_correct);
       }
     };
-
     fetchProfile();
-
-    const savedAnswers = localStorage.getItem("quizAnswers");
-    if (savedAnswers) {
-      const userAnswers: (number | null)[] = JSON.parse(savedAnswers);
-
-      let correct = 0;
-      let wrong = 0;
-      userAnswers.forEach((answer, index) => {
-        if (answer === quizQuestions[index].correctAnswer) {
-          correct++;
-        } else if (answer !== null) {
-          wrong++;
-        } else {
-          wrong++;
-        }
-      });
-
-      setCorrectCount(correct);
-      setWrongCount(wrong);
-      setScore(correct);
-    }
   }, []);
 
-  // Calculate values based on userProfile or local state
   const totalScore = userProfile?.stats?.total_correct || score;
   const totalQuestions =
     userProfile?.stats?.total_questions || correctCount + wrongCount;
