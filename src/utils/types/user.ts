@@ -8,6 +8,7 @@ export interface AuthUser {
   exp: number;
   iat: number;
   isPaid?: boolean;
+  current_quiz_level?: string;
 }
 export interface RazorpayOptions {
   key: string;
@@ -72,7 +73,8 @@ export interface User {
   user_id?: string;
   username?: string;
   [key: string]: any;
-  isPaid?: boolean;
+  paid_levels?: string[];
+  current_quiz_level?: string;
 }
 
 export interface AuthContextType {
@@ -81,6 +83,9 @@ export interface AuthContextType {
   loading: boolean;
   login: (email: string, password: string) => Promise<User | null>;
   logout: () => void;
+  userLevels: UserLevels | null;
+  refreshUser: () => void;
+  isUserLoggedIn: boolean;
 }
 
 export interface Question {
@@ -116,4 +121,18 @@ export interface QuizResponse {
   message: string;
   quizzes: Quiz[];
   user_info: UserInfo;
+}
+
+export interface LevelStats {
+  correct: number;
+  total: number;
+  percentage: number;
+  attempted: boolean;
+}
+
+export interface UserLevels {
+  school_level: LevelStats;
+  state_level: LevelStats;
+  national_level: LevelStats;
+  global_level: LevelStats;
 }

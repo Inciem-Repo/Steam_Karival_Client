@@ -22,7 +22,6 @@ export function renderRoute({
   component: Component,
   protected: isProtected,
   roles,
-  requiresPayment,
 }: AppRoute) {
   const isAuthPage = ["/login", "/register"].includes(path);
   if (children && Layout) {
@@ -32,7 +31,7 @@ export function renderRoute({
         path={path}
         element={
           isProtected ? (
-            <ProtectedRoute roles={roles} requiresPayment={requiresPayment}>
+            <ProtectedRoute roles={roles}>
               <Layout>
                 <Outlet />
               </Layout>
@@ -74,9 +73,7 @@ export function renderRoute({
         path={path}
         element={
           isProtected ? (
-            <ProtectedRoute roles={roles} requiresPayment={requiresPayment}>
-              {element}
-            </ProtectedRoute>
+            <ProtectedRoute roles={roles}>{element}</ProtectedRoute>
           ) : isAuthPage ? (
             <PublicRoute>{element}</PublicRoute>
           ) : (

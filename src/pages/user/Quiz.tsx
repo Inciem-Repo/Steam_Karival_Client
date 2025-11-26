@@ -1,4 +1,4 @@
-import { useState, useEffect,} from "react";
+import { useState, useEffect } from "react";
 import { useQuiz } from "../../context/QuizContext";
 import { submitQuiz } from "../../services/quiz";
 import { useApi } from "../../hooks/useApi";
@@ -30,7 +30,7 @@ const Quiz = () => {
   const [responses, setResponses] = useState<QuestionResponse[]>([]);
   const [timeLeft, setTimeLeft] = useState(QUESTION_TIME);
   const [startTime, setStartTime] = useState<number>(Date.now());
-  const [isSubmitting, setIsSubmitting] = useState(false); // Add submission lock
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { quiz } = useQuiz();
   const { callApi: callsubmitQuiz, loading: quizAddLoader } =
     useApi(submitQuiz);
@@ -73,11 +73,23 @@ const Quiz = () => {
 
   useEffect(() => {
     const checkQuizAccess = async () => {
-      const profileResponse = await callGetProfile(user?.id);
-      const hasAttempted =
-        profileResponse?.user?.stats?.is_quiz_attempted || false;
-      if (hasAttempted) {
+      if (!user?.id) return;
+
+      const profileResponse = await callGetProfile(user.id);
+      const currentLevel = profileResponse?.user?.current_quiz_level;
+      const levelStats = profileResponse?.user?.levels?.[currentLevel];
+      const paidLevels = profileResponse?.user?.paid_levels || [];
+
+      const hasPlayedCurrentLevel = levelStats?.attempted === true;
+      const hasPaidForCurrentLevel = paidLevels.includes(currentLevel);
+
+      if (hasPlayedCurrentLevel) {
         navigate("/home");
+        return;
+      }
+      if (!hasPaidForCurrentLevel && currentLevel !== "school_level") {
+        navigate(`/payment?level=${currentLevel}`);
+        return;
       }
     };
     checkQuizAccess();
@@ -96,7 +108,6 @@ const Quiz = () => {
   }, [currentQuestion, responses, timeLeft, startTime, quizStateLoaded]);
 
   useEffect(() => {
-    // Don't run timer if submitting or quiz finished
     if (isSubmitting || currentQuestion >= TOTAL_QUESTIONS) {
       return;
     }
@@ -111,7 +122,7 @@ const Quiz = () => {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [timeLeft, currentQuestion, isSubmitting]); // Add isSubmitting to dependencies
+  }, [timeLeft, currentQuestion, isSubmitting]);
 
   const handleOptionSelect = (optionIndex: number) => {
     setSelectedOption(optionIndex);
@@ -137,7 +148,6 @@ const Quiz = () => {
   };
 
   const handleNext = async () => {
-    // Prevent multiple submissions
     if (isSubmitting) {
       return;
     }
@@ -174,7 +184,7 @@ const Quiz = () => {
         updatedResponses[nextQuestion]?.selectedOptionIndex || null
       );
       setTimeLeft(QUESTION_TIME);
-      setIsSubmitting(false); // Reset submission lock for next question
+      setIsSubmitting(false);
     } else {
       const endTime = Date.now();
       const totalTimeTaken = Math.round((endTime - startTime) / 1000);
@@ -288,7 +298,7 @@ const Quiz = () => {
 
         <button
           onClick={handleNext}
-          disabled={quizAddLoader || isSubmitting} // Add isSubmitting to disabled condition
+          disabled={quizAddLoader || isSubmitting}
           className={`flex items-center justify-center gap-2 px-6 py-3 relative self-end btn 
     ${quizAddLoader || isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
         >

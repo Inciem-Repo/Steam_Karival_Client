@@ -1,5 +1,7 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import SpinnerLoader from "../components/ui/SpinnerLoader";
+// import { quizCategory } from "../utils/constants/values";
 
 type RouteProps = {
   children: React.ReactNode;
@@ -7,29 +9,34 @@ type RouteProps = {
   requiresPayment?: boolean;
 };
 
-export const ProtectedRoute = ({
-  children,
-  roles,
-  requiresPayment,
-}: RouteProps) => {
-  const { user } = useAuth();
-  if (!user) return <Navigate to="/login" replace />;
+export const ProtectedRoute = ({ children, roles }: RouteProps) => {
+  const { user, isUserLoggedIn, loading } = useAuth();
 
-  if (roles && !roles.includes(user.role)) {
+  if (loading)
+    return (
+      <div>
+        <SpinnerLoader />
+      </div>
+    );
+
+  if (!isUserLoggedIn) return <Navigate to="/login" replace />;
+
+  if (roles && user && !roles.includes(user.role)) {
     return <Navigate to="/login" replace />;
   }
-  if (requiresPayment && !user.isPaid) {
-    return <Navigate to="/payment" replace />;
-  }
+
   return <>{children}</>;
 };
 
 export const PublicRoute = ({ children }: RouteProps) => {
-  const { user } = useAuth();
+  const { user, isUserLoggedIn, loading } = useAuth();
 
-  if (user) {
-    if (user.role === "admin")
+  if (loading) return <div>Loading...</div>;
+
+  if (isUserLoggedIn) {
+    if (user?.role === "admin") {
       return <Navigate to="/admin/dashboard" replace />;
+    }
     return <Navigate to="/home" replace />;
   }
 

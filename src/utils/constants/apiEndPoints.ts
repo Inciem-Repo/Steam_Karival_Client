@@ -6,13 +6,16 @@ export const api = {
   user: {
     getProfile: (userId: string) => `/user/${userId}`,
     getAllUser: (page?: number, limit?: number) => `/users?${page}&${limit}`,
-    getPaidUser: (page?: number, limit?: number) => `/paid-users?${page}&${limit}`,
-    getChatUser: (page: number, limit: number) => `/whatsapp_chats?${page}&${limit}`,
+    getPaidUser: (page?: number, limit?: number) =>
+      `/paid-users?${page}&${limit}`,
+    getChatUser: (page: number, limit: number) =>
+      `/whatsapp_chats?${page}&${limit}`,
     getUserQuizInfo: (userId: string) => `/quiz_info/${userId}`,
   },
   quiz: {
     getAllQuiz: "/quizzes/all",
-    getQuizInfoByID: (quizId: string) => `/quiz/${quizId}`,
+    getAllQizMeta: "/quiz/meta",
+    getQuizInfoByID: (category: string) => `/quiz/category/${category}`,
     submitQuiz: (quizId: string) => `/quiz/${quizId}/submit`,
     createQuiz: "/quiz",
     updateQuiz: (quizID: string) => `/quiz/${quizID}`,
@@ -22,8 +25,8 @@ export const api = {
   },
   admin: {
     getDashboardInfo: "/dashboard",
-    getLeaderboard: (page?: number, limit?: number) =>
-      `/leaderboard?${page}&${limit}`,
+    getLeaderboard: (page?: number, limit?: number, category?: string) =>
+      `/leaderboard?${page}&${limit}&category=${category}`,
   },
   payment: {
     order: "/order",

@@ -30,7 +30,9 @@ export function objectToFormData(
 
   return formData;
 }
-
+export const setToLocalStorage = (key: string, value: string) => {
+  localStorage.setItem(key, value);
+};
 export const getAuthToken = (): string | null => {
   try {
     const token = localStorage.getItem("token");
@@ -41,7 +43,6 @@ export const getAuthToken = (): string | null => {
     return null;
   }
 };
-
 export const getAuthDetails = (): AuthUser | null => {
   try {
     const token = getAuthToken();
@@ -68,4 +69,18 @@ export const replaceAuthToken = (newToken: string): void => {
   } catch (err) {
     console.error("Error replacing auth token:", err);
   }
+};
+export const setUserInfo = (userInfo: any) => {
+  const userDetails = {
+    id: userInfo.user_id,
+    name: userInfo.name,
+    email: userInfo.email,
+    role: userInfo.role,
+    phone: userInfo.phone,
+    school: userInfo.school,
+    username: userInfo.name,
+    isPaid: userInfo?.isPaid,
+    current_quiz_level: userInfo?.current_quiz_level,
+  };
+  return userDetails;
 };
