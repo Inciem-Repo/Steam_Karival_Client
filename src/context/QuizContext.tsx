@@ -1,10 +1,4 @@
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  type ReactNode,
-} from "react";
+import { createContext, useContext, useState, type ReactNode } from "react";
 import type { Quiz, QuizContextType } from "../utils/types/quiz";
 import { useApi } from "../hooks/useApi";
 import { getQuizInfoByID } from "../services/quiz";
@@ -19,27 +13,23 @@ export const QuizProvider = ({ children }: { children: ReactNode }) => {
   const [quiz, setQuiz] = useState<Quiz | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  useEffect(() => {
-    const fetchQuiz = async () => {
-      if (!user?.id) return;
+  const fetchQuiz = async () => {
+    if (!user?.id) return;
 
-      try {
-        const quizData = await callGetQuizInfoByID(user.current_quiz_level);
-        if (quizData?.quiz) {
-          setQuiz(quizData.quiz);
-        }
-      } catch (err) {
-        console.error("Error fetching quiz:", err);
-      } finally {
-        setIsLoading(false);
+    try {
+      const quizData = await callGetQuizInfoByID(user.current_quiz_level);
+      if (quizData?.quiz) {
+        setQuiz(quizData.quiz);
       }
-    };
-
-    fetchQuiz();
-  }, [user?.id]);
+    } catch (err) {
+      console.error("Error fetching quiz:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
-    <QuizContext.Provider value={{ quiz, setQuiz, isLoading }}>
+    <QuizContext.Provider value={{ quiz, setQuiz, fetchQuiz, isLoading }}>
       {children}
     </QuizContext.Provider>
   );

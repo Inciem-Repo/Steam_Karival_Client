@@ -8,52 +8,64 @@ import {
 import { showError } from "../utils/toast";
 import { loginService, getProfileService } from "../services/auth";
 import { getAuthDetails, getAuthToken } from "../utils/helper";
-import type { AuthContextType, User } from "../utils/types/user";
+import type { AuthContextType, User, UserLevels } from "../utils/types/user";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [isUserLoggedIn, setIsUserLoggedIn] = useState<boolean>(false);
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [userLevels, setUserLevels] = useState<UserLevels | null>(null);
+
+  const refreshUser = async () => {
+    const savedToken = getAuthToken();
+    if (!savedToken) {
+      setIsUserLoggedIn(false);
+      setLoading(false);
+      return;
+    }
+
+    setToken(savedToken);
+
+    const decoded = getAuthDetails();
+    if (!decoded?.user_id) {
+      setIsUserLoggedIn(false);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const profile = await getProfileService(decoded.user_id);
+
+      const userData: User = {
+        id: profile.user._id,
+        name: profile.user.name,
+        email: profile.user.email,
+        role: profile.user.role,
+        phone: profile.user.phone,
+        school: profile.user.school,
+        username: profile.user.name,
+        paid_levels: profile.user?.paid_levels,
+        current_quiz_level: profile.user.current_quiz_level,
+      };
+
+      setUser(userData);
+      setUserLevels(profile.user.levels);
+      setIsUserLoggedIn(true);
+    } catch (err) {
+      console.log("Profile load error:", err);
+
+      setUser(null);
+      setIsUserLoggedIn(false);
+    }
+
+    setLoading(false);
+  };
 
   useEffect(() => {
-    const init = async () => {
-      const savedToken = getAuthToken();
-      if (!savedToken) {
-        setLoading(false);
-        return;
-      }
-      setToken(savedToken);
-      const decoded = getAuthDetails();
-      if (!decoded?.user_id) {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const profile = await getProfileService(decoded.user_id);
-        const userData: User = {
-          id: profile.user._id,
-          name: profile.user.name,
-          email: profile.user.email,
-          role: profile.user.role,
-          phone: profile.user.phone,
-          school: profile.user.school,
-          username: profile.user.name,
-          isPaid: profile.user.isPaid,
-          current_quiz_level: profile.user.current_quiz_level,
-        };
-        setUser(userData);
-      } catch (err) {
-        console.log("Profile load error:", err);
-        setUser(null);
-      }
-
-      setLoading(false);
-    };
-
-    init();
+    refreshUser();
   }, []);
 
   const login = async (email: string, password: string) => {
@@ -63,7 +75,9 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (!data?.token) throw new Error("Invalid login");
 
       localStorage.setItem("token", data.token);
+
       setToken(data.token);
+
       const u: User = {
         id: data.user.user_id,
         name: data.user.name,
@@ -72,11 +86,19 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
         phone: data.user.phone,
         school: data.user.school,
         username: data.user.name,
-        isPaid: data.user.isPaid,
+        paid_levels: data.user?.paid_levels,
         current_quiz_level: data.user.current_quiz_level,
       };
 
       setUser(u);
+
+      if (data.user.levels) {
+        setUserLevels(data.user.levels);
+      }
+
+      // 👉 User logged in
+      setIsUserLoggedIn(true);
+
       return u;
     } catch (err) {
       showError(err);
@@ -88,10 +110,22 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.removeItem("token");
     setToken(null);
     setUser(null);
+    setIsUserLoggedIn(false);
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, logout }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        token,
+        loading,
+        login,
+        userLevels,
+        logout,
+        refreshUser,
+        isUserLoggedIn,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

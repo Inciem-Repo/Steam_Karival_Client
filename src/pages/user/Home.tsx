@@ -1,81 +1,94 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import home from "../../assets/images/home.png";
-import { useApi } from "../../hooks/useApi";
-import { getQuizInfoByID } from "../../services/quiz";
-import { getProfileService } from "../../services/auth";
 import { useAuth } from "../../context/AuthContext";
 import { useQuiz } from "../../context/QuizContext";
 import { PromoBanner } from "../../components/common/PromoBanner";
 import { quizCategory } from "../../utils/constants/values";
+import { getAllQuizDetails } from "../../services/quiz";
+import { useApi } from "../../hooks/useApi";
+import type { QuizMeta } from "../../utils/types/quiz";
 
 function Home() {
   const [countdown, setCountdown] = useState<number | null>(null);
   const navigate = useNavigate();
-  const { callApi: callGetProfile } = useApi(getProfileService);
-  const { callApi: callGetQuizInfoByID, loading: loadingQuizInfo } =
-    useApi(getQuizInfoByID);
-  const { user, loading: authLoading } = useAuth();
-  const [isUserAttendedQuiz, setIsUserAttendedQuiz] = useState<boolean>(false);
-  const { quiz, setQuiz } = useQuiz();
-  const [dataLoading, setDataLoading] = useState<boolean>(true);
+  const { user, loading: authLoading, userLevels, refreshUser } = useAuth();
+  const { fetchQuiz } = useQuiz();
   const [selectedLevel, setSelectedLevel] = useState<string | null>(null);
+  const { callApi: callGetAllQuizDetails } = useApi(getAllQuizDetails);
+  const [quizMeteData, setQuizMetaData] = useState<QuizMeta[]>([]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      if (!user?.id) return;
-      try {
-        setDataLoading(true);
-        const [profileResponse] = await Promise.all([callGetProfile(user.id)]);
-        setIsUserAttendedQuiz(
-          profileResponse?.user?.stats?.is_quiz_attempted || false
-        );
-      } catch (err) {
-        console.error("Error fetching data");
-        setIsUserAttendedQuiz(false);
-      } finally {
-        setDataLoading(false);
-      }
+    const getQuizMetaData = async () => {
+      const quizDataResponse = await callGetAllQuizDetails();
+      refreshUser();
+      setQuizMetaData(quizDataResponse.data);
     };
-
-    if (!authLoading && user?.id) {
-      fetchData();
-    } else if (!authLoading) {
-      setDataLoading(false);
-    }
-  }, [user, authLoading]);
+    getQuizMetaData();
+  }, []);
 
   const startCountdown = async (level: string) => {
     try {
       setSelectedLevel(level);
       setCountdown(3);
-      const quizData = await callGetQuizInfoByID(level);
-      if (quizData?.quiz) {
-        setQuiz(quizData.quiz);
-      } else {
-        navigate("/");
-      }
+      fetchQuiz();
     } catch (err) {
-      console.error("Error starting quiz:");
       navigate("/");
     }
   };
 
   const handleLevelSelection = async (level: string) => {
     if (!user) return;
-    if (level === quizCategory.SCHOOL_LEVEL) {
-      await startCountdown(level);
+
+    const isActive = getIsLevelActive(level);
+    if (!isActive) return;
+
+    const levelData = getUserLevelData(level);
+    if (levelData?.attempted) {
+      navigate("/profile", { state: { level } });
       return;
     }
 
-    if (user.isPaid) {
+    const quizData = quizMeteData.find((quiz) => quiz.category === level);
+    if (quizData?.is_free) {
+      await startCountdown(level);
+      return;
+    }
+    if (user?.paid_levels?.includes(level)) {
       await startCountdown(level);
     } else {
-      navigate("/payment");
+      navigate(`${"/payment?level="}${level}`);
     }
   };
 
+  const getUserLevelData = (level: string) => {
+    switch (level) {
+      case quizCategory.SCHOOL_LEVEL:
+        return userLevels?.school_level;
+      case quizCategory.STATE_LEVEL:
+        return userLevels?.state_level;
+      case quizCategory.NATIONAL_LEVEL:
+        return userLevels?.national_level;
+      case quizCategory.GLOBAL_LEVEL:
+        return userLevels?.global_level;
+      default:
+        return null;
+    }
+  };
+
+  // Check if a level is active based on quizMeteData
+  const getIsLevelActive = (level: string): boolean => {
+    const quizData = quizMeteData.find((quiz) => quiz.category === level);
+    return quizData ? quizData.is_active : false;
+  };
+
   const getLevelButtonText = (level: string) => {
+    const levelData = getUserLevelData(level);
+
+    if (levelData?.attempted) {
+      return "Download Certificate";
+    }
+
     switch (level) {
       case quizCategory.SCHOOL_LEVEL:
         return "School Level";
@@ -91,6 +104,17 @@ function Home() {
   };
 
   const getLevelDescription = (level: string) => {
+    const levelData = getUserLevelData(level);
+    const isActive = getIsLevelActive(level);
+
+    if (!isActive) {
+      return "Coming Soon";
+    }
+
+    if (levelData?.attempted) {
+      return `Score: ${levelData.correct}/${levelData.total} (${levelData.percentage}%)`;
+    }
+
     switch (level) {
       case quizCategory.SCHOOL_LEVEL:
         return "Begin your journey - Free";
@@ -105,6 +129,16 @@ function Home() {
     }
   };
 
+  const isLevelEnabled = (level: string) => {
+    const levelData = getUserLevelData(level);
+    const isActive = getIsLevelActive(level);
+
+    // Level is enabled if it's active AND (it's the user's current level OR it's been attempted)
+    return (
+      isActive && (level === user?.current_quiz_level || levelData?.attempted)
+    );
+  };
+
   useEffect(() => {
     if (countdown === null) return;
     if (countdown === 0) {
@@ -117,17 +151,10 @@ function Home() {
     return () => clearTimeout(timer);
   }, [countdown, navigate]);
 
-  if (authLoading || dataLoading) {
+  if (authLoading) {
     return (
       <div className="w-full min-h-screen flex items-center justify-center">
         <p>Loading...</p>
-      </div>
-    );
-  }
-  if (loadingQuizInfo && countdown === null) {
-    return (
-      <div className="w-full min-h-screen flex items-center justify-center">
-        <p>Preparing your quiz...</p>
       </div>
     );
   }
@@ -160,92 +187,156 @@ function Home() {
                   <br />
                   Steam Karnival
                 </h1>
-                {isUserAttendedQuiz ? (
-                  <p className="relative flex items-center justify-center self-stretch font-body-regular text-xs text-center tracking-[0] leading-[16px] px-4">
-                    Congratulations on completing your quiz. Consistent practice
-                    helps you grow — keep going to achieve excellence.
-                  </p>
-                ) : (
-                  <p className="relative flex items-center justify-center self-stretch font-body-regular text-xs text-center tracking-[0] leading-[16px] px-4">
-                    Welcome aboard! Choose your level and begin your STEAM
-                    journey.
-                  </p>
-                )}
+
+                <p className="relative flex items-center justify-center self-stretch font-body-regular text-xs text-center tracking-[0] leading-[16px] px-4">
+                  Welcome aboard! Choose your level and begin your STEAM
+                  journey.
+                </p>
               </div>
-              {isUserAttendedQuiz ? (
-                <button
-                  className="flex flex-col w-full btn items-center justify-center"
-                  onClick={() => navigate("/profile")}
-                >
-                  Go to Profile
-                </button>
-              ) : quiz ? (
-                <>
-                  <div className="flex flex-col gap-4 w-full">
-                    {Object.values(quizCategory).map((level) => {
-                      const isDisabled =
-                        loadingQuizInfo || level !== user?.current_quiz_level;
+              <div className="flex flex-col gap-4 w-full">
+                {Object.values(quizCategory).map((level) => {
+                  const isActive = getIsLevelActive(level);
+                  const isDisabled = !isLevelEnabled(level);
+                  const levelData = getUserLevelData(level);
 
-                      return (
-                        <button
-                          key={level}
-                          onClick={() => handleLevelSelection(level)}
-                          disabled={isDisabled}
-                          className={`flex flex-col w-full btn items-center p-4 transition-all 
-                          ${
-                            isDisabled
-                              ? "opacity-40 cursor-not-allowed grayscale"
-                              : "opacity-100"
-                          }
-                        `}
+                  return (
+                    <button
+                      key={level}
+                      onClick={() => handleLevelSelection(level)}
+                      disabled={isDisabled || !isActive}
+                      className={`flex items-center w-full btn p-4 transition-all relative
+                      ${
+                        (isDisabled || !isActive) && !levelData?.attempted
+                          ? "opacity-40 cursor-not-allowed grayscale"
+                          : "opacity-100"
+                      }
+                        ${
+                          levelData?.attempted
+                            ? "bg-green-50 border-green-200 hover:bg-green-100"
+                            : ""
+                        }
+                      `}
+                    >
+                      {levelData?.attempted && (
+                        <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                          <svg
+                            className="w-4 h-4 text-white"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={3}
+                              d="M5 13l4 4L19 7"
+                            />
+                          </svg>
+                        </div>
+                      )}
+
+                      {/* Show inactive indicator for non-active levels */}
+                      {!isActive && !levelData?.attempted && (
+                        <div className="w-6 h-6 bg-gray-400 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                          <svg
+                            className="w-4 h-4 text-white"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={3}
+                              d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                            />
+                          </svg>
+                        </div>
+                      )}
+
+                      <div className="flex flex-col items-start flex-1">
+                        <span
+                          className={`font-semibold text-left ${
+                            levelData?.attempted
+                              ? "text-green-800"
+                              : !isActive
+                              ? "text-gray-600"
+                              : ""
+                          }`}
                         >
-                          <span className="font-semibold">
-                            {getLevelButtonText(level)}
-                          </span>
-                          <span className="text-xs opacity-80 mt-1">
-                            {getLevelDescription(level)}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
+                          {getLevelButtonText(level)}
+                          {!isActive && " (Inactive)"}
+                        </span>
+                        <span
+                          className={`text-xs opacity-80 mt-1 text-left ${
+                            levelData?.attempted
+                              ? "text-green-700"
+                              : !isActive
+                              ? "text-gray-500"
+                              : ""
+                          }`}
+                        >
+                          {getLevelDescription(level)}
+                        </span>
+                      </div>
+                      {levelData?.attempted && (
+                        <div className="ml-3 flex-shrink-0">
+                          <svg
+                            className="w-5 h-5 text-green-600"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M14 5l7 7m0 0l-7 7m7-7H3"
+                            />
+                          </svg>
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+              <button
+                className="flex flex-col w-full btn items-center justify-center"
+                onClick={() => navigate("/profile")}
+              >
+                Go to Profile
+              </button>
 
-                  <div className="grid grid-cols-1 gap-6 mb-8 animate-fade-in">
-                    <div className="flex gap-2">
-                      <PromoBanner
-                        icon="rocket"
-                        title="WIN A TRIP TO NASA"
-                        subtitle="Top performers get to visit NASA!"
-                        variant="primary"
-                      />
-                      <PromoBanner
-                        icon="trophy"
-                        title="₹5 CRORE WORTH PRIZES"
-                        subtitle="For top 100 schools"
-                        variant="accent"
-                      />
-                    </div>
-                    <div className="flex gap-2">
-                      <PromoBanner
-                        icon="brain"
-                        title="NATIONAL ROBOTICS & AI MISSION"
-                        subtitle="Join the future of technology"
-                        variant="secondary"
-                      />
-                      <PromoBanner
-                        icon="brain"
-                        title="NaMo AI Mission"
-                        subtitle="Official national initiative for AI & Robotics."
-                        variant="secondary"
-                      />
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <div className="text-center text-gray-500 py-4">
-                  No Quiz Available Right Now
+              <div className="grid grid-cols-1 gap-6 mb-8 animate-fade-in">
+                <div className="flex gap-2">
+                  <PromoBanner
+                    icon="rocket"
+                    title="WIN A TRIP TO NASA"
+                    subtitle="Top performers get to visit NASA!"
+                    variant="primary"
+                  />
+                  <PromoBanner
+                    icon="trophy"
+                    title="₹5 CRORE WORTH PRIZES"
+                    subtitle="For top 100 schools"
+                    variant="accent"
+                  />
                 </div>
-              )}
+                <div className="flex gap-2">
+                  <PromoBanner
+                    icon="brain"
+                    title="NATIONAL ROBOTICS & AI MISSION"
+                    subtitle="Join the future of technology"
+                    variant="secondary"
+                  />
+                  <PromoBanner
+                    icon="brain"
+                    title="NaMo AI Mission"
+                    subtitle="Official national initiative for AI & Robotics."
+                    variant="secondary"
+                  />
+                </div>
+              </div>
             </>
           )}
         </div>

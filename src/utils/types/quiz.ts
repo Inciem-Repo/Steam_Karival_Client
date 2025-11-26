@@ -16,6 +16,9 @@ export interface Quiz {
   updated_at: string;
   updated_by: string;
   questions: Question[];
+  is_active?: boolean;
+  is_free?: boolean;
+  price?: number | undefined;
 }
 export interface QuizResponse {
   quiz: Quiz;
@@ -47,4 +50,13 @@ export interface QuizContextType {
   quiz: Quiz | null;
   setQuiz: (quiz: Quiz) => void;
   isLoading: boolean;
+  fetchQuiz: () => void;
+}
+export interface QuizMeta {
+  quiz_id: string;
+  title: string;
+  category: string;
+  is_active: boolean;
+  is_free: boolean;
+  price: number;
 }

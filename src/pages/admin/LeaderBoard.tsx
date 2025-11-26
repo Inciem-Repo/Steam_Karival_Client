@@ -37,6 +37,21 @@ interface LeaderboardResponse {
   pagination: PaginationInfo;
 }
 
+// Quiz Category Constants
+export const quizCategory = {
+  SCHOOL_LEVEL: "school_level",
+  STATE_LEVEL: "state_level",
+  NATIONAL_LEVEL: "national_level",
+  GLOBAL_LEVEL: "global_level",
+};
+
+const categoryOptions = [
+  { value: quizCategory.SCHOOL_LEVEL, label: "School Level" },
+  { value: quizCategory.STATE_LEVEL, label: "State Level" },
+  { value: quizCategory.NATIONAL_LEVEL, label: "National Level" },
+  { value: quizCategory.GLOBAL_LEVEL, label: "Global Level" },
+];
+
 // Custom Table Components
 const CustomTable = ({ children }: { children: React.ReactNode }) => (
   <div className="w-full overflow-auto">
@@ -88,18 +103,25 @@ const LeaderBoard = () => {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [selectedCategory, setSelectedCategory] = useState(
+    quizCategory.SCHOOL_LEVEL
+  );
   const { callApi: CallLeaderBoardInfo } = useApi(getLeaderboard);
   const [loading, setLoading] = useState(true);
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardUser[]>([]);
   const [pagination, setPagination] = useState<PaginationInfo | null>(null);
 
-  // Fetch leaderboard data
-  const fetchLeaderboardData = async (page: number, limit: number) => {
+  const fetchLeaderboardData = async (
+    page: number,
+    limit: number,
+    category: string
+  ) => {
     try {
       setLoading(true);
       const response = (await CallLeaderBoardInfo(
         page,
-        limit
+        limit,
+        category
       )) as LeaderboardResponse;
       if (response.status && response.leaderboard_preview) {
         setLeaderboardData(response.leaderboard_preview);
@@ -112,7 +134,6 @@ const LeaderBoard = () => {
     }
   };
 
-  // Pagination handlers
   const goToPage = (page: number) => {
     if (pagination) {
       setCurrentPage(Math.max(1, Math.min(page, pagination.total_pages)));
@@ -123,6 +144,12 @@ const LeaderBoard = () => {
   const goToLastPage = () => pagination && goToPage(pagination.total_pages);
   const goToNextPage = () => pagination && goToPage(currentPage + 1);
   const goToPreviousPage = () => goToPage(currentPage - 1);
+
+  // Handle category change
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategory(category);
+    setCurrentPage(1);
+  };
 
   // Format time from seconds to readable format
   const formatTime = (seconds: number) => {
@@ -146,8 +173,8 @@ const LeaderBoard = () => {
   };
 
   useEffect(() => {
-    fetchLeaderboardData(currentPage, itemsPerPage);
-  }, [currentPage, itemsPerPage]);
+    fetchLeaderboardData(currentPage, itemsPerPage, selectedCategory);
+  }, [currentPage, itemsPerPage, selectedCategory]);
 
   // Generate pagination buttons
   const renderPaginationButtons = () => {
@@ -240,6 +267,33 @@ const LeaderBoard = () => {
             </select>
             <span className="text-sm text-muted-foreground">entries</span>
           </div>
+
+          {/* Category Filter */}
+          <div className="flex items-center justify-center sm:justify-end space-x-2">
+            <span className="text-sm text-muted-foreground">Category</span>
+            <select
+              value={selectedCategory}
+              onChange={(e) => handleCategoryChange(e.target.value)}
+              className="h-8 rounded-md border border-input bg-background px-3 py-1 text-sm"
+            >
+              {categoryOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Current Category Display */}
+        <div className="bg-primary/10 border border-primary/20 rounded-lg px-4 py-2">
+          <p className="text-sm text-primary font-medium">
+            Showing leaderboard for:{" "}
+            {
+              categoryOptions.find((opt) => opt.value === selectedCategory)
+                ?.label
+            }
+          </p>
         </div>
 
         {/* Desktop Table View */}
@@ -358,7 +412,11 @@ const LeaderBoard = () => {
           ) : (
             <div className="flex items-center justify-center py-8">
               <p className="text-muted-foreground">
-                No leaderboard data available
+                No leaderboard data available for{" "}
+                {
+                  categoryOptions.find((opt) => opt.value === selectedCategory)
+                    ?.label
+                }
               </p>
             </div>
           )}
@@ -458,7 +516,11 @@ const LeaderBoard = () => {
           ) : (
             <div className="flex items-center justify-center py-8 rounded-lg border bg-card">
               <p className="text-muted-foreground">
-                No leaderboard data available
+                No leaderboard data available for{" "}
+                {
+                  categoryOptions.find((opt) => opt.value === selectedCategory)
+                    ?.label
+                }
               </p>
             </div>
           )}

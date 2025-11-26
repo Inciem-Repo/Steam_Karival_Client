@@ -6,6 +6,11 @@ export const getAllQuiz = async () => {
   const res = await apiClient.get(api.quiz.getAllQuiz);
   return res.data;
 };
+
+export const getAllQuizDetails = async () => {
+  const res = await apiClient.get(api.quiz.getAllQizMeta);
+  return res.data;
+};
 export const getQuizInfoByID = async (category: string) => {
   const res = await apiClient.get(api.quiz.getQuizInfoByID(category));
   return res.data;

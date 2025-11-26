@@ -14,6 +14,7 @@ export const api = {
   },
   quiz: {
     getAllQuiz: "/quizzes/all",
+    getAllQizMeta: "/quiz/meta",
     getQuizInfoByID: (category: string) => `/quiz/category/${category}`,
     submitQuiz: (quizId: string) => `/quiz/${quizId}/submit`,
     createQuiz: "/quiz",
@@ -24,8 +25,8 @@ export const api = {
   },
   admin: {
     getDashboardInfo: "/dashboard",
-    getLeaderboard: (page?: number, limit?: number) =>
-      `/leaderboard?${page}&${limit}`,
+    getLeaderboard: (page?: number, limit?: number, category?: string) =>
+      `/leaderboard?${page}&${limit}&category=${category}`,
   },
   payment: {
     order: "/order",

@@ -1,15 +1,16 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { useAuth } from "../../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { checkOutURL } from "../../utils/constants/env";
 import { useApi } from "../../hooks/useApi";
 import {
   orderPaymentService,
   verifyPaymentService,
 } from "../../services/payment";
-import { replaceAuthToken } from "../../utils/helper";
 import paymentSvg from "../../assets/svg/paymant.svg";
+import { getAllQuizDetails } from "../../services/quiz";
+import type { QuizMeta } from "../../utils/types/quiz";
 
 declare global {
   interface Window {
@@ -31,12 +32,37 @@ interface EasebuzzPaymentOptions {
 }
 
 const PaymentPage: React.FC = () => {
-  const [amount] = useState<number>(5000);
+  const [searchParams] = useSearchParams();
+  const level = searchParams.get("level");
+  const [amount, setAmount] = useState<number>(0);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const { user } = useAuth();
   const { callApi: callPaymentOrder } = useApi(orderPaymentService);
   const { callApi: callPaymentVerify } = useApi(verifyPaymentService);
   const navigate = useNavigate();
+  const { callApi: callGetAllQuizDetails } = useApi(getAllQuizDetails);
+
+  useEffect(() => {
+    const getQuizMetaData = async () => {
+      if (!level) return;
+
+      const quizDataResponse = await callGetAllQuizDetails();
+      if (quizDataResponse?.data) {
+        const allQuizzes = quizDataResponse.data;
+
+        const targetQuiz = allQuizzes.find(
+          (quiz: QuizMeta) => quiz.category === level
+        );
+
+        if (targetQuiz) {
+          const priceInPaise = (targetQuiz.price ?? 0) * 100;
+          setAmount(priceInPaise);
+        }
+      }
+    };
+
+    getQuizMetaData();
+  }, [level]);
 
   const loadEasebuzzScript = async (): Promise<boolean> => {
     if (window.EasebuzzCheckout) return true;
@@ -89,10 +115,12 @@ const PaymentPage: React.FC = () => {
         onResponse: async (response: any) => {
           if (response?.status) {
             try {
-              const verifyData = await callPaymentVerify(response);
+              const verifyData = await callPaymentVerify({
+                ...response,
+                level: user?.current_quiz_level,
+              });
               if (verifyData.status) {
                 toast.success("Payment Successful!");
-                replaceAuthToken(verifyData?.token);
                 navigate("/home");
               } else {
                 toast.error("Payment Verification Failed!");

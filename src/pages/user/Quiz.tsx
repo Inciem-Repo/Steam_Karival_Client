@@ -73,11 +73,23 @@ const Quiz = () => {
 
   useEffect(() => {
     const checkQuizAccess = async () => {
-      const profileResponse = await callGetProfile(user?.id);
-      const hasAttempted =
-        profileResponse?.user?.stats?.is_quiz_attempted || false;
-      if (hasAttempted) {
+      if (!user?.id) return;
+
+      const profileResponse = await callGetProfile(user.id);
+      const currentLevel = profileResponse?.user?.current_quiz_level;
+      const levelStats = profileResponse?.user?.levels?.[currentLevel];
+      const paidLevels = profileResponse?.user?.paid_levels || [];
+
+      const hasPlayedCurrentLevel = levelStats?.attempted === true;
+      const hasPaidForCurrentLevel = paidLevels.includes(currentLevel);
+
+      if (hasPlayedCurrentLevel) {
         navigate("/home");
+        return;
+      }
+      if (!hasPaidForCurrentLevel && currentLevel !== "school_level") {
+        navigate(`/payment?level=${currentLevel}`);
+        return;
       }
     };
     checkQuizAccess();
