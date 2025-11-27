@@ -31,7 +31,12 @@ export const ProtectedRoute = ({ children, roles }: RouteProps) => {
 export const PublicRoute = ({ children }: RouteProps) => {
   const { user, isUserLoggedIn, loading } = useAuth();
 
-  if (loading) return <div>Loading...</div>;
+  if (loading)
+    return (
+      <div>
+        <SpinnerLoader />
+      </div>
+    );
 
   if (isUserLoggedIn) {
     if (user?.role === "admin") {

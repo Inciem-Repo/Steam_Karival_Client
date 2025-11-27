@@ -33,7 +33,6 @@ const Results = () => {
           setHasAttempted(false);
         }
       } catch (error) {
-        console.error("Error fetching quiz results:", error);
         setHasAttempted(false);
       } finally {
         setLoading(false);

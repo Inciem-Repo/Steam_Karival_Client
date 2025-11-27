@@ -55,8 +55,6 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUserLevels(profile.user.levels);
       setIsUserLoggedIn(true);
     } catch (err) {
-      console.log("Profile load error:", err);
-
       setUser(null);
       setIsUserLoggedIn(false);
     }
@@ -95,8 +93,6 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (data.user.levels) {
         setUserLevels(data.user.levels);
       }
-
-      // 👉 User logged in
       setIsUserLoggedIn(true);
 
       return u;

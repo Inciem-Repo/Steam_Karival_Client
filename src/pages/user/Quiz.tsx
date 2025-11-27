@@ -226,7 +226,6 @@ const Quiz = () => {
           localStorage.removeItem("quizResults");
         }
       } catch (error) {
-        console.error("Submission error:", error);
         toast.error("Failed to submit quiz");
       } finally {
         setIsSubmitting(false);
