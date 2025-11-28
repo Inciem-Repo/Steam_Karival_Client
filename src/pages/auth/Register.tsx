@@ -133,177 +133,311 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 font-manrope">
-      <div className="w-full max-w-md">
-        <div className="flex items-center justify-between my-8">
-          <h1 className="text-2xl font-bold text-center text-black">
-            Register
+    <div className="min-h-screen bg-gradient-to-br from-[#0A1A2F] to-[#10263F] flex items-center justify-center px-4 py-10 font-manrope relative overflow-hidden">
+      {/* Background decorative glow */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute -top-24 -left-24 w-72 h-72 bg-[#1E88E5]/20 blur-3xl rounded-full"></div>
+        <div className="absolute bottom-0 right-0 w-80 h-80 bg-[#42A5F5]/20 blur-3xl rounded-full"></div>
+      </div>
+
+      {/* Registration Card */}
+      <div className="relative bg-white/10 backdrop-blur-xl border border-white/10 shadow-2xl rounded-2xl p-8 w-full max-w-lg">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-extrabold text-white tracking-wide">
+            Create Your Account
           </h1>
-          <img src={logo} alt="steam karnival" className="w-30 h-20" />
+          <p className="text-gray-300 text-sm mt-1">
+            Join the competition and start your journey
+          </p>
         </div>
 
-        <form className="space-y-4" onSubmit={handleSubmit} noValidate>
-          <div>
-            <label htmlFor="name" className="block mb-2 font-body-semibold">
-              Name
-            </label>
+        <form className="space-y-3" onSubmit={handleSubmit} noValidate>
+          {/* NAME */}
+          <div className="relative">
             <input
               id="name"
               name="name"
+              placeholder=" "
               type="text"
-              placeholder="Enter Your Name"
-              className={`w-full input ${
-                errors.name && touched.name ? "border-red-500" : ""
-              }`}
               value={formData.name}
               onChange={handleChange}
               onBlur={handleBlur}
+              className={`w-full bg-white/5 border 
+              ${
+                errors.name && touched.name
+                  ? "border-red-500"
+                  : "border-white/10"
+              }
+              text-white rounded-lg px-4 py-3 peer 
+              focus:outline-none focus:ring-2 focus:ring-[#42A5F5] 
+              placeholder-transparent`}
             />
+
+            <label
+              htmlFor="name"
+              className={`
+              absolute left-3 text-gray-300 transition-all duration-200 pointer-events-none
+              ${
+                formData.name
+                  ? "top-[-9px] text-xs px-1 text-[#90CAF9]"
+                  : "top-3 text-base"
+              }
+              peer-focus:top-[-9px] peer-focus:text-xs peer-focus:text-[#90CAF9] peer-focus:bg-[#0A1A2F] px-1
+            `}
+            >
+              Name
+            </label>
+
             {errors.name && touched.name && (
-              <p className="mt-1 text-sm text-red-600">{errors.name}</p>
+              <p className="text-sm text-red-400 mt-1">{errors.name}</p>
             )}
           </div>
 
-          <div>
-            <label htmlFor="email" className="block mb-2 font-body-semibold">
-              Email ID
-            </label>
+          {/* EMAIL */}
+          <div className="relative">
             <input
               id="email"
               name="email"
+              placeholder=" "
               type="email"
-              placeholder="Enter Your Email ID"
-              className={`w-full input ${
-                errors.email && touched.email ? "border-red-500" : ""
-              }`}
               value={formData.email}
               onChange={handleChange}
               onBlur={handleBlur}
+              className={`w-full bg-white/5 border 
+              ${
+                errors.email && touched.email
+                  ? "border-red-500"
+                  : "border-white/10"
+              }
+              text-white rounded-lg px-4 py-3 peer 
+              focus:outline-none focus:ring-2 focus:ring-[#42A5F5]
+              placeholder-transparent`}
             />
+
+            <label
+              htmlFor="email"
+              className={`
+              absolute left-3 text-gray-300 transition-all duration-200 pointer-events-none
+              ${
+                formData.email
+                  ? "top-[-9px] text-xs  px-1 text-[#90CAF9]"
+                  : "top-3 text-base"
+              }
+              peer-focus:top-[-9px] peer-focus:text-xs peer-focus:text-[#90CAF9] peer-focus:bg-[#0A1A2F]  px-1
+            `}
+            >
+              Email
+            </label>
+
             {errors.email && touched.email && (
-              <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+              <p className="text-sm text-red-400 mt-1">{errors.email}</p>
             )}
           </div>
 
-          <div>
-            <label htmlFor="phone" className="block mb-2 font-body-semibold">
-              Phone Number
-            </label>
-            <div className="flex gap-2">
-              <div className="flex items-center input">
-                <span className="text-sm text-gray-600">+91</span>
-              </div>
+          {/* PHONE NUMBER */}
+          <div className="flex gap-2">
+            {/* COUNTRY CODE */}
+            <div className="relative w-20">
+              <input
+                disabled
+                value="+91"
+                className="w-full bg-white/5 border border-white/10 text-gray-300 rounded-lg px-4 py-3"
+              />
+              <label className="absolute left-3 -top-2 text-xs text-gray-400  px-1">
+                Code
+              </label>
+            </div>
+
+            {/* MAIN PHONE FIELD */}
+            <div className="relative flex-1">
               <input
                 id="phone"
                 name="phone"
+                placeholder=" "
                 type="tel"
-                placeholder="Enter Your Phone Number"
-                className={`flex-1 input ${
-                  errors.phone && touched.phone ? "border-red-500" : ""
-                }`}
                 value={formData.phone}
                 onChange={handleChange}
                 onBlur={handleBlur}
+                className={`w-full bg-white/5 border 
+                ${
+                  errors.phone && touched.phone
+                    ? "border-red-500"
+                    : "border-white/10"
+                }
+                text-white rounded-lg px-4 py-3 peer 
+                focus:outline-none focus:ring-2 focus:ring-[#42A5F5]
+                placeholder-transparent`}
               />
+
+              <label
+                htmlFor="phone"
+                className={`
+                absolute left-3 text-gray-300 transition-all duration-200 pointer-events-none
+                ${
+                  formData.phone
+                    ? "top-[-9px] text-xs  px-1 text-[#90CAF9]"
+                    : "top-3 text-base"
+                }
+                peer-focus:top-[-9px] peer-focus:text-xs peer-focus:text-[#90CAF9] peer-focus:bg-[#0A1A2F]  px-1
+              `}
+              >
+                Phone Number
+              </label>
+
+              {errors.phone && touched.phone && (
+                <p className="text-sm text-red-400 mt-1">{errors.phone}</p>
+              )}
             </div>
-            {errors.phone && touched.phone && (
-              <p className="mt-1 text-sm text-red-600">{errors.phone}</p>
-            )}
           </div>
 
-          <div>
-            <label htmlFor="school" className="block mb-2 font-body-semibold">
-              School
-            </label>
+          {/* SCHOOL */}
+          <div className="relative">
             <input
               id="school"
               name="school"
+              placeholder=" "
               type="text"
-              placeholder="Enter Your School"
-              className={`w-full input ${
-                errors.school && touched.school ? "border-red-500" : ""
-              }`}
               value={formData.school}
               onChange={handleChange}
               onBlur={handleBlur}
-            />
-            {errors.school && touched.school && (
-              <p className="mt-1 text-sm text-red-600">{errors.school}</p>
-            )}
-          </div>
-
-          <div>
-            <label htmlFor="password" className="block mb-2 font-body-semibold">
-              Password
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              placeholder="Enter Your Password"
-              className={`w-full input ${
-                errors.password && touched.password ? "border-red-500" : ""
-              }`}
-              value={formData.password}
-              onChange={handleChange}
-              onBlur={handleBlur}
-            />
-            {errors.password && touched.password && (
-              <p className="mt-1 text-sm text-red-600">{errors.password}</p>
-            )}
-          </div>
-
-          <div>
-            <label
-              htmlFor="confirmPassword"
-              className="block mb-2 font-body-semibold"
-            >
-              Confirm Password
-            </label>
-            <input
-              id="confirmPassword"
-              name="confirmPassword"
-              type="password"
-              placeholder="Confirm Your Password"
-              className={`w-full input ${
-                errors.confirmPassword && touched.confirmPassword
+              className={`w-full bg-white/5 border 
+              ${
+                errors.school && touched.school
                   ? "border-red-500"
-                  : ""
-              }`}
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              onBlur={handleBlur}
+                  : "border-white/10"
+              }
+              text-white rounded-lg px-4 py-3 peer 
+              focus:outline-none focus:ring-2 focus:ring-[#42A5F5]
+              placeholder-transparent`}
             />
-            {errors.confirmPassword && touched.confirmPassword && (
-              <p className="mt-1 text-sm text-red-600">
-                {errors.confirmPassword}
-              </p>
+
+            <label
+              htmlFor="school"
+              className={`
+              absolute left-3 text-gray-300 transition-all duration-200 pointer-events-none
+              ${
+                formData.school
+                  ? "top-[-9px] text-xs  px-1 text-[#90CAF9]"
+                  : "top-3 text-base"
+              }
+              peer-focus:top-[-9px] peer-focus:text-xs peer-focus:text-[#90CAF9] peer-focus:bg-[#0A1A2F]  px-1
+            `}
+            >
+              School
+            </label>
+
+            {errors.school && touched.school && (
+              <p className="text-sm text-red-400 mt-1">{errors.school}</p>
             )}
           </div>
 
+          {/* PASSWORD + CONFIRM PASSWORD */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* PASSWORD */}
+            <div className="relative">
+              <input
+                id="password"
+                name="password"
+                placeholder=" "
+                type="password"
+                value={formData.password}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                className={`w-full bg-white/5 border 
+                ${
+                  errors.password && touched.password
+                    ? "border-red-500"
+                    : "border-white/10"
+                }
+                text-white rounded-lg px-4 py-3 peer 
+                focus:outline-none focus:ring-2 focus:ring-[#42A5F5]
+                placeholder-transparent`}
+              />
+
+              <label
+                htmlFor="password"
+                className={`
+                absolute left-3 text-gray-300 transition-all duration-200 pointer-events-none
+                ${
+                  formData.password
+                    ? "top-[-9px] text-xs  px-1 text-[#90CAF9]"
+                    : "top-3 text-base"
+                }
+                peer-focus:top-[-9px] peer-focus:text-xs peer-focus:text-[#90CAF9] peer-focus:bg-[#0A1A2F]  px-1
+              `}
+              >
+                Password
+              </label>
+
+              {errors.password && touched.password && (
+                <p className="text-sm text-red-400 mt-1">{errors.password}</p>
+              )}
+            </div>
+
+            {/* CONFIRM PASSWORD */}
+            <div className="relative">
+              <input
+                id="confirmPassword"
+                name="confirmPassword"
+                placeholder=" "
+                type="password"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                className={`w-full bg-white/5 border 
+                ${
+                  errors.confirmPassword && touched.confirmPassword
+                    ? "border-red-500"
+                    : "border-white/10"
+                }
+                text-white rounded-lg px-4 py-3 peer 
+                focus:outline-none focus:ring-2 focus:ring-[#42A5F5]
+                placeholder-transparent`}
+              />
+
+              <label
+                htmlFor="confirmPassword"
+                className={`
+                absolute left-3 text-gray-300 transition-all duration-200 pointer-events-none
+                ${
+                  formData.confirmPassword
+                    ? "top-[-9px] text-xs  px-1 text-[#90CAF9]"
+                    : "top-3 text-base"
+                }
+                peer-focus:top-[-9px] peer-focus:text-xs peer-focus:text-[#90CAF9] peer-focus:bg-[#0A1A2F]  px-1
+              `}
+              >
+                Confirm Password
+              </label>
+
+              {errors.confirmPassword && touched.confirmPassword && (
+                <p className="text-sm text-red-400 mt-1">
+                  {errors.confirmPassword}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* SUBMIT */}
           <button
             type="submit"
-            className="w-full btn flex justify-center items-center gap-2"
+            className="w-full bg-[#1E88E5] hover:bg-[#42A5F5] transition-all font-semibold text-white rounded-xl py-3 shadow-lg shadow-[#1E88E5]/20"
           >
-            {loading ? (
-              <>
-                <div className="w-4 h-4 border-2 border-t-transparent border-white rounded-full animate-spin"></div>
-                Registering...
-              </>
-            ) : (
-              "Register"
-            )}
+            Create Account
           </button>
         </form>
 
-        <div className="text-center mt-6 font-body-regular">
-          <span className="text-sm text-gray-600">
-            Already Have an Account?{" "}
-            <Link to={"/login"} className="font-semibold hover:underline">
-              Login
-            </Link>
-          </span>
-        </div>
+        {/* Footer */}
+        <p className="text-center text-gray-300 text-sm mt-6">
+          Already registered?{" "}
+          <a
+            href="/login"
+            className="text-[#90CAF9] font-semibold hover:underline"
+          >
+            Login
+          </a>
+        </p>
       </div>
     </div>
   );

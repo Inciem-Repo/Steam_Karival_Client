@@ -309,80 +309,112 @@ const Quiz = () => {
   }
 
   return (
-    <div className="w-full min-h-screen flex items-center justify-center">
-      <main className="flex h-auto w-[362px] max-w-full px-4 py-8 relative flex-col items-start gap-6">
-        <div className="flex flex-col items-start gap-4 relative self-stretch w-full">
-          <h2 className="font-h1-bold">Question : {currentQuestion + 1}</h2>
+    <div className="min-h-screen w-full bg-gradient-to-br from-[#0A1A2F] to-[#10263F] flex items-center justify-center px-4 py-10 relative font-manrope overflow-hidden">
+      {/* Background Glows */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute -top-20 -left-20 w-96 h-96 bg-[#1E88E5]/20 blur-[140px] rounded-full" />
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-[#42A5F5]/20 blur-[150px] rounded-full" />
+      </div>
 
-          <div className="flex items-center justify-between relative self-stretch w-full">
-            <span className="font-body-regular">{progress}</span>
-            <span className="font-body-regular">
-              0:{timeLeft.toString().padStart(2, "0")} sec
-            </span>
+      {/* Main Quiz Card */}
+      <main
+        className="
+        relative bg-white/10 backdrop-blur-xl border border-white/10 shadow-2xl 
+        rounded-2xl p-8 w-full max-w-lg 
+        md:max-w-3xl md:p-12 transition-all
+      "
+      >
+        {/* Header: Question + Timer */}
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
+          <h2 className="text-xl md:text-2xl font-bold text-white">
+            Question {currentQuestion + 1}
+          </h2>
+
+          <div className="flex items-center justify-between md:gap-6 text-gray-300 text-sm">
+            <span>{progress}</span>
+            <span>0:{timeLeft.toString().padStart(2, "0")} sec</span>
           </div>
-
-          <p className="font-h2-medium tracking-[0] leading-[20px]">
-            {question.question}
-          </p>
         </div>
 
-        <div className="flex flex-col items-start gap-4 relative self-stretch w-full">
+        {/* Question Text */}
+        <p className="text-white text-lg md:text-xl font-medium leading-relaxed mb-6">
+          {question.question}
+        </p>
+
+        {/* Options */}
+        <div className="flex flex-col gap-3">
           {question.options.map((option, index) => (
             <button
               key={index}
               onClick={() => handleOptionSelect(index)}
-              className={`flex items-center gap-3 px-4 py-3 relative self-stretch w-full rounded-[10px] border border-black transition-colors ${
-                selectedOption === index
-                  ? "bg-primary-light"
-                  : "bg-transparent hover:bg-black/5"
-              }`}
-            >
-              <div
-                className={`w-5 h-5 rounded-full flex items-center justify-center transition-all duration-200
-                 ${
-                   selectedOption === index
-                     ? "bg-primary-light border-[1.5px] border-black"
-                     : "bg-white border-[1.5px] border-black"
-                 }`}
-              >
-                {selectedOption === index && (
-                  <div className="w-3 h-3 rounded-full bg-primary" />
-                )}
-              </div>
+              className={`
+              w-full text-left px-5 py-4 rounded-xl border transition-all 
+              backdrop-blur-sm bg-white/5 text-gray-200
+              border-white/10 hover:bg-white/10 hover:border-[#1E88E5]/40
 
-              <span className="[font-family:'Manrope',Helvetica] font-normal text-black text-sm tracking-[0]">
-                {option}
-              </span>
+              ${
+                selectedOption === index
+                  ? "bg-[#1E88E5]/20 border-[#1E88E5] shadow-lg shadow-[#1E88E5]/20"
+                  : ""
+              }
+            `}
+            >
+              <div className="flex items-center gap-4">
+                {/* Custom Radio */}
+                <div
+                  className={`
+                  w-5 h-5 rounded-full border 
+                  flex items-center justify-center transition
+                  ${
+                    selectedOption === index
+                      ? "border-[#1E88E5] bg-[#1E88E5]"
+                      : "border-gray-400"
+                  }
+                `}
+                >
+                  {selectedOption === index && (
+                    <div className="w-2.5 h-2.5 bg-white rounded-full" />
+                  )}
+                </div>
+
+                <span className="text-sm md:text-base text-white">
+                  {option}
+                </span>
+              </div>
             </button>
           ))}
         </div>
 
-        <button
-          onClick={() => handleNext(false)}
-          disabled={quizAddLoader || isSubmitting}
-          className={`flex items-center justify-center gap-2 px-6 py-3 relative self-end btn 
-    ${quizAddLoader || isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
-        >
-          <span>
+        {/* Next Button */}
+        <div className="mt-8 flex justify-end">
+          <button
+            onClick={() => handleNext(false)}
+            disabled={quizAddLoader || isSubmitting}
+            className={`
+            px-8 py-3 rounded-xl text-white font-semibold flex items-center gap-2
+            bg-[#1E88E5] hover:bg-[#42A5F5] shadow-lg shadow-[#1E88E5]/30
+            transition disabled:opacity-50 disabled:cursor-not-allowed
+          `}
+          >
             {quizAddLoader || isSubmitting
               ? "Submitting..."
               : currentQuestion < TOTAL_QUESTIONS - 1
               ? "Next"
               : "Finish"}
-          </span>
 
-          {!(quizAddLoader || isSubmitting) && (
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path
-                d="M7.5 15L12.5 10L7.5 5"
-                stroke="black"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          )}
-        </button>
+            {!(quizAddLoader || isSubmitting) && (
+              <svg width="20" height="20" fill="none">
+                <path
+                  d="M7.5 15L12.5 10L7.5 5"
+                  stroke="white"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            )}
+          </button>
+        </div>
       </main>
     </div>
   );
