@@ -33,6 +33,7 @@ interface Quiz {
   time_taken: number;
   submitted_at: string;
   questions: Question[];
+  level_played: string; // Added this field
 }
 
 interface UserInfo {
@@ -75,6 +76,36 @@ interface ProfileUser {
     total_questions_attempted: number;
     total_quizzes_attempted: number;
   };
+  // Added fields from actual API response
+  current_quiz_level?: string;
+  has_attempted_any_quiz?: boolean;
+  levels?: {
+    global_level?: {
+      attempted: boolean;
+      correct: number;
+      percentage: number;
+      total: number;
+    };
+    national_level?: {
+      attempted: boolean;
+      correct: number;
+      percentage: number;
+      total: number;
+    };
+    school_level?: {
+      attempted: boolean;
+      correct: number;
+      percentage: number;
+      total: number;
+    };
+    state_level?: {
+      attempted: boolean;
+      correct: number;
+      percentage: number;
+      total: number;
+    };
+  };
+  paid_levels?: string[];
 }
 
 interface ProfileResponse {
@@ -130,12 +161,14 @@ const UserProfile = () => {
     return `${minutes}m ${remainingSeconds}s`;
   };
 
-  // Calculate overall statistics
+  // Calculate overall statistics from actual data
   const calculateOverallStats = () => {
     if (!quizData || !profileData) return null;
 
     const totalQuizzes = quizData.user_info.total_quizzes_attempted;
     const attemptedQuizzes = totalQuizzes;
+
+    // Calculate average score from quizzes
     const averageScore =
       quizData.quizzes.length > 0
         ? quizData.quizzes.reduce(
@@ -144,17 +177,46 @@ const UserProfile = () => {
           ) / quizData.quizzes.length
         : 0;
 
+    // Calculate total time spent
     const totalTimeSpent = quizData.quizzes.reduce(
       (sum, quiz) => sum + quiz.time_taken,
       0
     );
+
+    // Calculate rank based on levels performance or use a default
+    const calculateRank = () => {
+      if (!profileData.user.levels) return 0;
+
+      const levels = profileData.user.levels;
+      let totalPercentage = 0;
+      let levelCount = 0;
+
+      if (levels.global_level?.percentage) {
+        totalPercentage += levels.global_level.percentage;
+        levelCount++;
+      }
+      if (levels.national_level?.percentage) {
+        totalPercentage += levels.national_level.percentage;
+        levelCount++;
+      }
+      if (levels.school_level?.percentage) {
+        totalPercentage += levels.school_level.percentage;
+        levelCount++;
+      }
+      if (levels.state_level?.percentage) {
+        totalPercentage += levels.state_level.percentage;
+        levelCount++;
+      }
+
+      return levelCount > 0 ? Math.round(totalPercentage / levelCount) : 0;
+    };
 
     return {
       totalQuizzes,
       attemptedQuizzes,
       averageScore: Math.round(averageScore),
       totalTimeSpent: formatTime(totalTimeSpent),
-      rank: profileData.user.rank || 0,
+      rank: calculateRank(),
     };
   };
 
@@ -175,8 +237,6 @@ const UserProfile = () => {
       </div>
     );
   }
-
-
 
   return (
     <div className="h-screen overflow-auto p-4 md:p-6">
@@ -230,26 +290,6 @@ const UserProfile = () => {
                     {profileData?.user?.school}
                   </span>
                 </div>
-                <div className="flex items-center gap-3">
-                  <CheckCircle
-                    className={`h-4 w-4 flex-shrink-0 ${
-                      profileData?.user?.stats?.is_quiz_attempted
-                        ? "text-green-600"
-                        : "text-gray-400"
-                    }`}
-                  />
-                  <span
-                    className={`text-sm md:text-base ${
-                      profileData?.user?.stats?.is_quiz_attempted
-                        ? "text-green-600"
-                        : "text-gray-600"
-                    }`}
-                  >
-                    {profileData?.user?.stats?.is_quiz_attempted
-                      ? "Quiz Attempted"
-                      : "Not Attempted Quiz"}
-                  </span>
-                </div>
               </div>
             </div>
           </div>
@@ -299,11 +339,11 @@ const UserProfile = () => {
                   <div className="flex items-center gap-2">
                     <Award className="h-4 w-4 text-yellow-600 flex-shrink-0" />
                     <span className="text-xs md:text-sm text-muted-foreground">
-                      Overall Rank
+                      Average Score
                     </span>
                   </div>
                   <p className="text-xl md:text-2xl font-bold">
-                    #{profileData?.user?.stats?.rank}
+                    {overallStats.averageScore}%
                   </p>
                 </div>
               </div>
@@ -314,6 +354,149 @@ const UserProfile = () => {
             )}
           </div>
         </div>
+
+        {/* Level Performance */}
+        {profileData.user.levels && (
+          <div className="rounded-lg border bg-primary-light bg-card p-4 md:p-6">
+            <h2 className="text-xl md:text-2xl font-bold mb-4">
+              Level Performance
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {profileData.user.levels.global_level && (
+                <div className="space-y-2 p-4 border rounded-lg">
+                  <h3 className="font-semibold text-lg">Global Level</h3>
+                  <div className="flex justify-between">
+                    <span>Score:</span>
+                    <span className="font-bold">
+                      {profileData.user.levels.global_level.percentage}%
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Correct:</span>
+                    <span className="font-bold">
+                      {profileData.user.levels.global_level.correct}/
+                      {profileData.user.levels.global_level.total}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Status:</span>
+                    <span
+                      className={`font-bold ${
+                        profileData.user.levels.global_level.attempted
+                          ? "text-green-600"
+                          : "text-gray-600"
+                      }`}
+                    >
+                      {profileData.user.levels.global_level.attempted
+                        ? "Completed"
+                        : "Not Attempted"}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {profileData.user.levels.national_level && (
+                <div className="space-y-2 p-4 border rounded-lg">
+                  <h3 className="font-semibold text-lg">National Level</h3>
+                  <div className="flex justify-between">
+                    <span>Score:</span>
+                    <span className="font-bold">
+                      {profileData.user.levels.national_level.percentage}%
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Correct:</span>
+                    <span className="font-bold">
+                      {profileData.user.levels.national_level.correct}/
+                      {profileData.user.levels.national_level.total}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Status:</span>
+                    <span
+                      className={`font-bold ${
+                        profileData.user.levels.national_level.attempted
+                          ? "text-green-600"
+                          : "text-gray-600"
+                      }`}
+                    >
+                      {profileData.user.levels.national_level.attempted
+                        ? "Completed"
+                        : "Not Attempted"}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {profileData.user.levels.state_level && (
+                <div className="space-y-2 p-4 border rounded-lg">
+                  <h3 className="font-semibold text-lg">State Level</h3>
+                  <div className="flex justify-between">
+                    <span>Score:</span>
+                    <span className="font-bold">
+                      {profileData.user.levels.state_level.percentage}%
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Correct:</span>
+                    <span className="font-bold">
+                      {profileData.user.levels.state_level.correct}/
+                      {profileData.user.levels.state_level.total}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Status:</span>
+                    <span
+                      className={`font-bold ${
+                        profileData.user.levels.state_level.attempted
+                          ? "text-green-600"
+                          : "text-gray-600"
+                      }`}
+                    >
+                      {profileData.user.levels.state_level.attempted
+                        ? "Completed"
+                        : "Not Attempted"}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {profileData.user.levels.school_level && (
+                <div className="space-y-2 p-4 border rounded-lg">
+                  <h3 className="font-semibold text-lg">School Level</h3>
+                  <div className="flex justify-between">
+                    <span>Score:</span>
+                    <span className="font-bold">
+                      {profileData.user.levels.school_level.percentage}%
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Correct:</span>
+                    <span className="font-bold">
+                      {profileData.user.levels.school_level.correct}/
+                      {profileData.user.levels.school_level.total}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Status:</span>
+                    <span
+                      className={`font-bold ${
+                        profileData.user.levels.school_level.attempted
+                          ? "text-green-600"
+                          : "text-gray-600"
+                      }`}
+                    >
+                      {profileData.user.levels.school_level.attempted
+                        ? "Completed"
+                        : "Not Attempted"}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         <div className="space-y-4 md:space-y-6">
           <h2 className="text-xl md:text-2xl font-bold">Quiz Attempts</h2>
 
@@ -333,7 +516,7 @@ const UserProfile = () => {
                           {quiz.quiz_title}
                         </h4>
                         <p className="text-xs md:text-sm text-muted-foreground mt-1">
-                          {quiz.quiz_description}
+                          Level: {quiz.level_played} • {quiz.quiz_description}
                         </p>
                         <div className="flex flex-wrap items-center gap-3 md:gap-4 mt-2 text-xs md:text-sm text-muted-foreground">
                           <span className="whitespace-nowrap">

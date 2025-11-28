@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuiz } from "../../context/QuizContext";
 import { submitQuiz } from "../../services/quiz";
 import { useApi } from "../../hooks/useApi";
@@ -31,6 +31,10 @@ const Quiz = () => {
   const [timeLeft, setTimeLeft] = useState(QUESTION_TIME);
   const [startTime, setStartTime] = useState<number>(Date.now());
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const timerRef = useRef<any | null>(null);
+  const hasAutoSubmittedRef = useRef(false);
+
   const { quiz } = useQuiz();
   const { callApi: callsubmitQuiz, loading: quizAddLoader } =
     useApi(submitQuiz);
@@ -54,7 +58,6 @@ const Quiz = () => {
     }
     setQuizStateLoaded(true);
   }, []);
-
   useEffect(() => {
     if (!quiz || !quizStateLoaded) return;
     if (TOTAL_QUESTIONS > 0 && responses.length === 0) {
@@ -107,22 +110,62 @@ const Quiz = () => {
     }
   }, [currentQuestion, responses, timeLeft, startTime, quizStateLoaded]);
 
+  // Clean up timer on unmount
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, []);
+
   useEffect(() => {
     if (isSubmitting || currentQuestion >= TOTAL_QUESTIONS) {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
       return;
     }
 
-    if (timeLeft === 0) {
-      handleNext();
-      return;
+    // Reset auto-submit flag when question changes
+    hasAutoSubmittedRef.current = false;
+
+    // Clear any existing timer
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
     }
 
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => prev - 1);
+    timerRef.current = setInterval(() => {
+      setTimeLeft((prev) => {
+        const newTime = prev - 1;
+
+        if (newTime <= 0) {
+          // Clear timer first
+          if (timerRef.current) {
+            clearInterval(timerRef.current);
+            timerRef.current = null;
+          }
+
+          // Auto-submit only if not already submitted
+          if (!hasAutoSubmittedRef.current && !isSubmitting) {
+            hasAutoSubmittedRef.current = true;
+            handleNext(true);
+          }
+          return 0;
+        }
+
+        return newTime;
+      });
     }, 1000);
 
-    return () => clearInterval(timer);
-  }, [timeLeft, currentQuestion, isSubmitting]);
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, [currentQuestion, isSubmitting, TOTAL_QUESTIONS]);
 
   const handleOptionSelect = (optionIndex: number) => {
     setSelectedOption(optionIndex);
@@ -147,33 +190,50 @@ const Quiz = () => {
     setResponses(newResponses);
   };
 
-  const handleNext = async () => {
+  const handleNext = async (isAutoSubmit = false) => {
     if (isSubmitting) {
       return;
     }
+
     setIsSubmitting(true);
 
     const timeSpentOnQuestion = QUESTION_TIME - timeLeft;
     const updatedResponses = [...responses];
     const currentQuestionData: any = quiz?.questions?.[currentQuestion];
 
-    updatedResponses[currentQuestion] = {
-      ...updatedResponses[currentQuestion],
-      questionId:
-        updatedResponses[currentQuestion]?.questionId ||
-        currentQuestionData?._id ||
-        currentQuestionData?.question_id ||
-        "",
-      timeTaken: timeSpentOnQuestion,
-      selectedOption:
-        updatedResponses[currentQuestion]?.selectedOption ||
-        (selectedOption !== null
-          ? currentQuestionData?.options[selectedOption] || null
-          : null),
-      selectedOptionIndex:
-        updatedResponses[currentQuestion]?.selectedOptionIndex ||
-        selectedOption,
-    };
+    // Only update if the response hasn't been set yet (for auto-submit)
+    if (isAutoSubmit && !updatedResponses[currentQuestion]?.selectedOption) {
+      updatedResponses[currentQuestion] = {
+        ...updatedResponses[currentQuestion],
+        questionId:
+          updatedResponses[currentQuestion]?.questionId ||
+          currentQuestionData?._id ||
+          currentQuestionData?.question_id ||
+          "",
+        timeTaken: timeSpentOnQuestion,
+        selectedOption: null,
+        selectedOptionIndex: null,
+      };
+    } else if (!isAutoSubmit) {
+      // Normal case - user interaction
+      updatedResponses[currentQuestion] = {
+        ...updatedResponses[currentQuestion],
+        questionId:
+          updatedResponses[currentQuestion]?.questionId ||
+          currentQuestionData?._id ||
+          currentQuestionData?.question_id ||
+          "",
+        timeTaken: timeSpentOnQuestion,
+        selectedOption:
+          updatedResponses[currentQuestion]?.selectedOption ||
+          (selectedOption !== null
+            ? currentQuestionData?.options[selectedOption] || null
+            : null),
+        selectedOptionIndex:
+          updatedResponses[currentQuestion]?.selectedOptionIndex ||
+          selectedOption,
+      };
+    }
 
     setResponses(updatedResponses);
 
@@ -184,8 +244,10 @@ const Quiz = () => {
         updatedResponses[nextQuestion]?.selectedOptionIndex || null
       );
       setTimeLeft(QUESTION_TIME);
+      setStartTime(Date.now());
       setIsSubmitting(false);
     } else {
+      // Final submission logic
       const endTime = Date.now();
       const totalTimeTaken = Math.round((endTime - startTime) / 1000);
 
@@ -296,7 +358,7 @@ const Quiz = () => {
         </div>
 
         <button
-          onClick={handleNext}
+          onClick={() => handleNext(false)}
           disabled={quizAddLoader || isSubmitting}
           className={`flex items-center justify-center gap-2 px-6 py-3 relative self-end btn 
     ${quizAddLoader || isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
