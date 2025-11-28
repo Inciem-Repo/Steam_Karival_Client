@@ -6,34 +6,11 @@ import { useApi } from "../../hooks/useApi";
 import { useNavigate } from "react-router-dom";
 import ConfirmModal from "../../components/common/ConfirmModal";
 import { downloadCertificateAsPDF } from "../../utils/downloadCertificate";
-
-interface LevelStats {
-  attempted: boolean;
-  correct: number;
-  percentage: number;
-  total: number;
-}
-interface UserLevels {
-  school_level: LevelStats;
-  state_level: LevelStats;
-  national_level: LevelStats;
-  global_level: LevelStats;
-}
-interface UserProfile {
-  _id: string;
-  current_quiz_level: string;
-  email: string;
-  has_attempted_any_quiz: boolean;
-  levels: UserLevels;
-  name: string;
-  paid_levels: string[];
-  phone: string;
-  role: string;
-  school: string;
-}
+import type { User } from "../../utils/types/user";
+import { quizCategory } from "../../utils/constants/values";
 
 const Profile = () => {
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [userProfile, setUserProfile] = useState<User | null>(null);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [loadingCertificates, setLoadingCertificates] = useState<{
     [key: string]: boolean;
@@ -72,13 +49,6 @@ const Profile = () => {
     };
     return levelNames[level] || level;
   };
-
-  const levelKeys = [
-    "school_level",
-    "state_level",
-    "national_level",
-    "global_level",
-  ] as const;
 
   return (
     <div className="w-full min-h-screen py-8">
@@ -160,7 +130,7 @@ const Profile = () => {
                 {userProfile?.name
                   ? userProfile.name
                       .split(" ")
-                      .map((word) => word.charAt(0))
+                      .map((word: string) => word.charAt(0))
                       .join("")
                       .toUpperCase()
                       .slice(0, 2)
@@ -195,7 +165,11 @@ const Profile = () => {
                 <span className="text-sm font-medium text-gray-500">Email</span>
               </div>
               <p className="text-gray-900 font-medium pl-11">
-                {userProfile?.email || "Not provided"}
+                {userProfile?.email
+                  ? userProfile.email.length <= 17
+                    ? userProfile.email
+                    : userProfile.email.substring(0, 15) + "..."
+                  : "Not provided"}
               </p>
             </div>
             <div className="flex flex-col">
@@ -285,9 +259,8 @@ const Profile = () => {
           </p>
         </div>
 
-        {/* Level Cards */}
         <div className="space-y-4">
-          {levelKeys.map((levelKey) => {
+          {Object.values(quizCategory)?.map((levelKey) => {
             const levelData = userProfile?.levels[levelKey];
             const isAttempted = levelData?.attempted || false;
             const correctCount = levelData?.correct || 0;

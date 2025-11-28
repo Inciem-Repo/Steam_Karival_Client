@@ -107,6 +107,7 @@ export interface Quiz {
   time_taken: number;
   submitted_at: string;
   questions: Question[];
+  level_played: string;
 }
 
 export interface UserInfo {
@@ -136,3 +137,4 @@ export interface UserLevels {
   national_level: LevelStats;
   global_level: LevelStats;
 }
+

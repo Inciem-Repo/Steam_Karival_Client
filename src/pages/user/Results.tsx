@@ -4,9 +4,7 @@ import { useApi } from "../../hooks/useApi";
 import { getUserQuizInfo } from "../../services/auth";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import type { Quiz, QuizResponse } from "../../utils/types/user";
-
-
+import type { Quiz } from "../../utils/types/user";
 
 const Results = () => {
   const [latestQuiz, setLatestQuiz] = useState<Quiz | null>(null);
@@ -25,9 +23,10 @@ const Results = () => {
 
       try {
         setLoading(true);
-        const response = (await callGetUserQuizInfo(user.id)) as QuizResponse;
+        const response = await callGetUserQuizInfo(user.id);
         if (response.status && response.quizzes.length > 0) {
-          setLatestQuiz(response.quizzes[0]);
+          const latestAttempt = response.quizzes[0];
+          setLatestQuiz(latestAttempt);
           setHasAttempted(true);
         } else {
           setHasAttempted(false);
@@ -145,8 +144,9 @@ const Results = () => {
     );
   }
 
-  const { correct_answers, total_questions } = latestQuiz;
-  const wrongCount = total_questions - correct_answers;
+  const questionCount = latestQuiz.questions.length;
+  const correctCount = latestQuiz.correct_answers;
+  const wrongCount = questionCount - correctCount;
 
   return (
     <div className="w-full h-[100vh] flex justify-center">
@@ -216,9 +216,9 @@ const Results = () => {
             </h1>
           </div>
           <ResultCard
-            score={correct_answers}
-            total={total_questions}
-            correctCount={correct_answers}
+            score={correctCount}
+            total={questionCount}
+            correctCount={correctCount}
             wrongCount={wrongCount}
           />
           <button className="btn w-full" onClick={() => navigator("/profile")}>
