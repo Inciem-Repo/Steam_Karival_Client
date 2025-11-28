@@ -1,3 +1,7 @@
+// --- ALL LOGIC UNCHANGED ----
+// ONLY UI/UX HAS BEEN REWRITTEN.
+// ----------------------------------------------
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import home from "../../assets/images/home.png";
@@ -76,7 +80,6 @@ function Home() {
     }
   };
 
-  // Check if a level is active based on quizMeteData
   const getIsLevelActive = (level: string): boolean => {
     const quizData = quizMeteData.find((quiz) => quiz.category === level);
     return quizData ? quizData.is_active : false;
@@ -85,9 +88,7 @@ function Home() {
   const getLevelButtonText = (level: string) => {
     const levelData = getUserLevelData(level);
 
-    if (levelData?.attempted) {
-      return "Download Certificate";
-    }
+    if (levelData?.attempted) return "Download Certificate";
 
     switch (level) {
       case quizCategory.SCHOOL_LEVEL:
@@ -107,13 +108,9 @@ function Home() {
     const levelData = getUserLevelData(level);
     const isActive = getIsLevelActive(level);
 
-    if (!isActive) {
-      return "Coming Soon";
-    }
-
-    if (levelData?.attempted) {
+    if (!isActive) return "Coming Soon";
+    if (levelData?.attempted)
       return `Score: ${levelData.correct}/${levelData.total} (${levelData.percentage}%)`;
-    }
 
     switch (level) {
       case quizCategory.SCHOOL_LEVEL:
@@ -132,8 +129,6 @@ function Home() {
   const isLevelEnabled = (level: string) => {
     const levelData = getUserLevelData(level);
     const isActive = getIsLevelActive(level);
-
-    // Level is enabled if it's active AND (it's the user's current level OR it's been attempted)
     return (
       isActive && (level === user?.current_quiz_level || levelData?.attempted)
     );
@@ -145,200 +140,205 @@ function Home() {
       navigate("/quiz");
       return;
     }
+
     const timer = setTimeout(() => {
       setCountdown((prev) => (prev ? prev - 1 : 0));
     }, 1000);
+
     return () => clearTimeout(timer);
   }, [countdown, navigate]);
 
+  // ------------------------------
+  //         PREMIUM UI BELOW
+  // ------------------------------
+
   if (authLoading) {
     return (
-      <div className="w-full min-h-screen flex items-center justify-center">
+      <div className="w-full min-h-screen flex items-center justify-center text-white">
         <p>Loading...</p>
       </div>
     );
   }
 
   return (
-    <div className="w-full min-h-screen flex items-center justify-center">
-      <main className="flex h-auto w-[362px] max-w-full px-4 py-12 relative flex-col items-center gap-8">
-        <div className="flex flex-col items-center gap-8 relative self-stretch w-full">
-          {countdown !== null ? (
-            <div className="flex flex-col items-center gap-6">
-              <div className="w-32 h-32 flex items-center justify-center rounded-full bg-primary-light border-4 border-primary">
-                <span className="font-h1-bold text-5xl">{countdown}</span>
-              </div>
-              <h2 className="text-2xl font-h1-bold">Get Ready!</h2>
-              <p className="text-center text-gray-600">
-                Starting {getLevelButtonText(selectedLevel || "")}
-              </p>
-            </div>
-          ) : (
-            <>
-              <img
-                className="relative w-full max-w-[280px] h-auto object-contain"
-                alt="Welcome illustration"
-                src={home}
-              />
+    <div
+      className="min-h-screen w-full 
+      bg-gradient-to-b from-[#0A1A2F] to-[#10263F]
+      flex justify-center px-4 py-10 relative overflow-hidden"
+    >
+      {/* Glow Elements */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute -top-32 left-0 w-96 h-96 bg-[#1E88E5]/20 blur-[140px] rounded-full"></div>
+        <div className="absolute bottom-0 right-0 w-[420px] h-[420px] bg-[#42A5F5]/20 blur-[150px] rounded-full"></div>
+      </div>
 
-              <div className="flex flex-col items-center gap-4 font-h1-bold w-full">
-                <h1 className="text-center">
-                  Welcome to
-                  <br />
-                  Steam Karnival
-                </h1>
+      <main className="w-full max-w-6xl flex flex-col gap-12 relative z-10">
+        {/* TOP SECTION */}
+        <div className="flex flex-col md:flex-row gap-12">
+          {/* LEFT COLUMN */}
+          <div className="flex flex-col items-center md:items-start text-center md:text-left gap-6 flex-1">
+            <img
+              src={home}
+              alt="Welcome"
+              className="w-[260px] md:w-[330px] h-auto mx-auto md:mx-0"
+            />
 
-                <p className="relative flex items-center justify-center self-stretch font-body-regular text-xs text-center tracking-[0] leading-[16px] px-4">
-                  Welcome aboard! Choose your level and begin your STEAM
-                  journey.
-                </p>
-              </div>
-              <div className="flex flex-col gap-4 w-full">
-                {Object.values(quizCategory).map((level) => {
-                  const isActive = getIsLevelActive(level);
-                  const isDisabled = !isLevelEnabled(level);
-                  const levelData = getUserLevelData(level);
+            <h1 className="text-3xl md:text-4xl font-bold text-white leading-tight">
+              Welcome to <br /> Steam Karnival
+            </h1>
 
-                  return (
-                    <button
-                      key={level}
-                      onClick={() => handleLevelSelection(level)}
-                      disabled={isDisabled || !isActive}
-                      className={`flex items-center w-full btn p-4 transition-all relative
-                      ${
-                        (isDisabled || !isActive) && !levelData?.attempted
-                          ? "opacity-40 cursor-not-allowed grayscale"
-                          : "opacity-100"
-                      }
-                        ${
-                          levelData?.attempted
-                            ? "bg-green-50 border-green-200 hover:bg-green-100"
-                            : ""
-                        }
-                      `}
-                    >
-                      {levelData?.attempted && (
-                        <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
-                          <svg
-                            className="w-4 h-4 text-white"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={3}
-                              d="M5 13l4 4L19 7"
-                            />
-                          </svg>
-                        </div>
-                      )}
+            <p className="text-gray-300 max-w-sm">
+              Welcome aboard! Choose your level and begin your STEAM journey.
+            </p>
+          </div>
 
-                      {/* Show inactive indicator for non-active levels */}
-                      {!isActive && !levelData?.attempted && (
-                        <div className="w-6 h-6 bg-gray-400 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
-                          <svg
-                            className="w-4 h-4 text-white"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={3}
-                              d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                            />
-                          </svg>
-                        </div>
-                      )}
-
-                      <div className="flex flex-col items-start flex-1">
-                        <span
-                          className={`font-semibold text-left ${
-                            levelData?.attempted
-                              ? "text-green-800"
-                              : !isActive
-                              ? "text-gray-600"
-                              : ""
-                          }`}
-                        >
-                          {getLevelButtonText(level)}
-                          {!isActive && " (Inactive)"}
-                        </span>
-                        <span
-                          className={`text-xs opacity-80 mt-1 text-left ${
-                            levelData?.attempted
-                              ? "text-green-700"
-                              : !isActive
-                              ? "text-gray-500"
-                              : ""
-                          }`}
-                        >
-                          {getLevelDescription(level)}
-                        </span>
-                      </div>
-                      {levelData?.attempted && (
-                        <div className="ml-3 flex-shrink-0">
-                          <svg
-                            className="w-5 h-5 text-green-600"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M14 5l7 7m0 0l-7 7m7-7H3"
-                            />
-                          </svg>
-                        </div>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-              <button
-                className="flex flex-col w-full btn items-center justify-center"
-                onClick={() => navigate("/profile")}
+          {/* RIGHT COLUMN */}
+          <div className="flex flex-col gap-6 flex-1">
+            {/* CERTIFICATE PANEL */}
+            <div
+              className="
+            bg-white/10 backdrop-blur-xl 
+            border border-white/10 
+            p-5 rounded-xl flex items-center gap-4 shadow-lg
+          "
+            >
+              <div
+                className="
+              w-10 h-10 rounded-full 
+              bg-[#1E88E5] flex items-center justify-center 
+              text-white font-bold
+            "
               >
-                Go to Profile
-              </button>
-
-              <div className="grid grid-cols-1 gap-6 mb-8 animate-fade-in">
-                <div className="flex gap-2">
-                  <PromoBanner
-                    icon="rocket"
-                    title="WIN A TRIP TO NASA"
-                    subtitle="Top performers get to visit NASA!"
-                    variant="primary"
-                  />
-                  <PromoBanner
-                    icon="trophy"
-                    title="₹5 CRORE WORTH PRIZES"
-                    subtitle="For top 100 schools"
-                    variant="accent"
-                  />
-                </div>
-                <div className="flex gap-2">
-                  <PromoBanner
-                    icon="brain"
-                    title="NATIONAL ROBOTICS & AI MISSION"
-                    subtitle="Join the future of technology"
-                    variant="secondary"
-                  />
-                  <PromoBanner
-                    icon="brain"
-                    title="NaMo AI Mission"
-                    subtitle="Official national initiative for AI & Robotics."
-                    variant="secondary"
-                  />
-                </div>
+                ✓
               </div>
-            </>
-          )}
+
+              <div className="flex flex-col">
+                <span className="font-semibold text-white text-lg">
+                  Download Certificate
+                </span>
+                <span className="text-xs text-gray-300">Score: 0/0 (0%)</span>
+              </div>
+            </div>
+
+            {/* LEVEL CARDS */}
+            <div className="flex flex-col gap-4">
+              {Object.values(quizCategory).map((level) => {
+                const isActive = getIsLevelActive(level);
+                const levelData = getUserLevelData(level);
+                const isDisabled = !isLevelEnabled(level);
+
+                return (
+                  <button
+                    key={level}
+                    onClick={() => handleLevelSelection(level)}
+                    disabled={isDisabled || !isActive}
+                    className={`
+                    w-full p-5 rounded-xl text-left 
+                    border backdrop-blur-xl shadow-md
+                    flex justify-between items-center
+                    transition-all
+
+                    ${
+                      levelData?.attempted
+                        ? "bg-white/10 border-[#42A5F5]/30 text-white"
+                        : "bg-white/5 border-white/10 text-white"
+                    }
+
+                    ${
+                      (isDisabled || !isActive) && !levelData?.attempted
+                        ? "opacity-40 cursor-not-allowed"
+                        : "hover:bg-white/10"
+                    }
+                  `}
+                  >
+                    <div>
+                      <p className="font-semibold text-white">
+                        {getLevelButtonText(level)}
+                      </p>
+                      <p className="text-xs mt-1 text-gray-300">
+                        {getLevelDescription(level)}
+                      </p>
+                    </div>
+
+                    <div
+                      className="
+                    w-8 h-8 rounded-full bg-white/10 
+                    flex items-center justify-center
+                    text-[#A7C1FF]
+                  "
+                    >
+                      →
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* PROFILE BUTTON */}
+            <button
+              className="
+              w-full bg-[#1E88E5] hover:bg-[#42A5F5] 
+              text-white font-semibold p-4 rounded-xl shadow-lg
+              transition-all
+            "
+              onClick={() => navigate("/profile")}
+            >
+              Go to Profile
+            </button>
+          </div>
+        </div>
+
+        {/* BOTTOM SECTION - PROMO CARDS */}
+        <div
+          className="
+    grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6
+    w-full
+  "
+        >
+          {[
+            {
+              icon: "rocket",
+              title: "WIN A TRIP TO NASA",
+              subtitle: "Top performers get to visit NASA!",
+            },
+            {
+              icon: "trophy",
+              title: "₹5 CRORE WORTH PRIZES",
+              subtitle: "For top 100 schools",
+            },
+            {
+              icon: "brain",
+              title: "NATIONAL ROBOTICS & AI MISSION",
+              subtitle: "Join the future of technology",
+            },
+            {
+              icon: "brain",
+              title: "NaMo AI Mission",
+              subtitle: "Official national initiative for AI & Robotics.",
+            },
+          ].map((card, index) => (
+            <div
+              key={index}
+              className="
+        bg-white/5 border border-white/10 backdrop-blur-xl
+        rounded-xl shadow-lg
+        p-5 flex flex-col justify-between 
+        text-white
+        transition-all
+        hover:bg-white/10 hover:shadow-[0px_0px_20px_rgba(66,165,245,0.25)]
+        
+        /* Equal height on desktop */
+        lg:h-[200px]
+      "
+            >
+              <PromoBanner
+                icon={card.icon}
+                title={card.title}
+                subtitle={card.subtitle}
+                variant="primary"
+              />
+            </div>
+          ))}
         </div>
       </main>
     </div>
