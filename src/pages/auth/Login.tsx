@@ -166,7 +166,7 @@ function Login() {
                  peer-focus:px-2 peer-focus:py-[2px] peer-focus:rounded-md peer-focus:bg-[#0A1A2F]
               `}
             >
-              Email
+              Email ID
             </label>
 
             {errors.username && touched.username && (
