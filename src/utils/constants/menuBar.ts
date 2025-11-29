@@ -1,6 +1,5 @@
 import {
   BookOpen,
-  Bot,
   Coins,
   LayoutDashboard,
   Trophy,

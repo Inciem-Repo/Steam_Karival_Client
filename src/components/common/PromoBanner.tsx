@@ -1,7 +1,7 @@
 import { Rocket, Trophy, Brain } from "lucide-react";
 
 interface PromoBannerProps {
-  icon: "rocket" | "trophy" | "brain";
+  icon: any;
   title: string;
   subtitle?: string;
 }
@@ -13,12 +13,10 @@ const iconMap = {
 };
 
 export function PromoBanner({ icon, title, subtitle }: PromoBannerProps) {
-  const Icon = iconMap[icon];
+  const Icon = iconMap[icon as keyof typeof iconMap] ?? Rocket;
 
   return (
-    <div
-     
-    >
+    <div>
       {/* Icon */}
       <div
         className="
@@ -39,9 +37,7 @@ export function PromoBanner({ icon, title, subtitle }: PromoBannerProps) {
         </h3>
 
         {subtitle && (
-          <p className="text-sm text-gray-300 mt-1 leading-snug">
-            {subtitle}
-          </p>
+          <p className="text-sm text-gray-300 mt-1 leading-snug">{subtitle}</p>
         )}
       </div>
     </div>

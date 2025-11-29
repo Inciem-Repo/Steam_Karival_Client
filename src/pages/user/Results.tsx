@@ -144,9 +144,9 @@ const Results = () => {
     );
   }
 
-  const questionCount = latestQuiz.questions.length;
-  const correctCount = latestQuiz.correct_answers;
-  const wrongCount = questionCount - correctCount;
+  // const questionCount = latestQuiz.questions.length;
+  // const correctCount = latestQuiz.correct_answers;
+  // const wrongCount = questionCount - correctCount;
 
   return (
   <div className="min-h-screen w-full bg-gradient-to-br from-[#0A1A2F] to-[#10263F] flex items-center justify-center px-4 py-10 relative font-manrope overflow-hidden">
