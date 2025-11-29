@@ -144,13 +144,17 @@ const PaymentPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen from-slate-50 to-slate-100 flex items-center justify-center p-4">
+    <div
+      className="min-h-screen w-full 
+      bg-gradient-to-b from-[#0A1A2F] to-[#10263F]
+      flex justify-center px-4 py-10 relative overflow-hidden"
+    >
       <div className="max-w-md  w-[362px] border-slate-200 overflow-hidden">
         <div className="pt-8 pb-8 px-6 space-y-8">
           <div className="flex justify-center">
             <img src={paymentSvg} alt="payment svg" />
           </div>
-          <div className="space-y-2 text-center">
+          <div className="space-y-2 text-center text-white">
             <p className=" font-h1-bold ">Unlock Your Quiz Adventure</p>
             <div className="relative"></div>
             <p className="text-sm text-slate-500 px-2">
@@ -164,7 +168,11 @@ const PaymentPage: React.FC = () => {
             <button
               onClick={handlePayment}
               disabled={isProcessing}
-              className="btn w-full flex items-center justify-center"
+              className="
+              w-full bg-[#1E88E5] hover:bg-[#42A5F5] 
+              text-white font-semibold p-4 rounded-xl shadow-lg
+              transition-all flex items-center justify-center
+            "
             >
               {isProcessing ? (
                 <>
