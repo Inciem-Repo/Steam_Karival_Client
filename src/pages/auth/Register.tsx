@@ -1,10 +1,9 @@
 import { useState } from "react";
 import { z } from "zod";
-import logo from "../../assets/images/logo.png";
 import { useApi } from "../../hooks/useApi";
 import { registerService } from "../../services/auth";
 import { toast } from "react-toastify";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 // Define the validation schema with Zod
 const registerSchema = z
@@ -54,7 +53,7 @@ const Register = () => {
   const [touched, setTouched] = useState<
     Partial<Record<keyof RegisterFormData, boolean>>
   >({});
-  const { callApi, loading } = useApi(registerService);
+  const { callApi } = useApi(registerService);
   const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
