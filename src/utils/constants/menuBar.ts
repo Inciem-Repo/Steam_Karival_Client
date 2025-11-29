@@ -1,10 +1,15 @@
-import { BookOpen, Bot, Coins, LayoutDashboard, Trophy, Users } from "lucide-react";
+import {
+  BookOpen,
+  Coins,
+  LayoutDashboard,
+  Trophy,
+  Users,
+} from "lucide-react";
 
 export const items = [
   { title: "Dashboard", url: "/admin/dashboard", icon: LayoutDashboard },
   { title: "Quizzes", url: "/admin/quizz-manger", icon: BookOpen },
   { title: "Leaderboard", url: "/admin/leaderboard", icon: Trophy },
   { title: "Users", url: "/admin/users", icon: Users },
-  { title: "Paid Users", url: "/admin/paid-users", icon:Coins },
-  { title: "WhatApp User", url: "/admin/chat-users", icon:Bot },
+  { title: "Paid Users", url: "/admin/paid-users", icon: Coins },
 ];

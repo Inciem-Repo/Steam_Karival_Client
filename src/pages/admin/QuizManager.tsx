@@ -11,30 +11,15 @@ import {
 } from "../../services/quiz";
 import Loader from "../../components/ui/Loader";
 import ConfirmModal from "../../components/common/ConfirmModal";
+import type { ApiQuizResponse, Question, Quiz } from "../../utils/types/quiz";
+import { quizCategory } from "../../utils/constants/values";
 
-interface Question {
-  question_id: string;
-  question: string;
-  options: string[];
-  correct_answer: string;
-}
-
-interface Quiz {
-  _id: string;
-  title: string;
-  questions: Question[];
-  total_questions: number;
-  created_at: string;
-  created_by: string;
-  updated_at?: string;
-  updated_by?: string;
-}
-
-interface ApiQuizResponse {
-  quizzes: Quiz[];
-  status: boolean;
-  total: number;
-}
+const categoryOptions = [
+  { value: quizCategory.SCHOOL_LEVEL, label: "School Level" },
+  { value: quizCategory.STATE_LEVEL, label: "State Level" },
+  { value: quizCategory.NATIONAL_LEVEL, label: "National Level" },
+  { value: quizCategory.GLOBAL_LEVEL, label: "Global level" },
+];
 
 const QuizManager = () => {
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
@@ -55,8 +40,12 @@ const QuizManager = () => {
     >
   >({
     title: "",
+    category: "school_level",
     questions: [],
     total_questions: 0,
+    is_active: true,
+    price: 0,
+    is_free: true,
   });
   const [currentQuestion, setCurrentQuestion] = useState<Question>({
     question_id: "",
@@ -64,6 +53,18 @@ const QuizManager = () => {
     options: ["", "", "", ""],
     correct_answer: "",
   });
+
+  const getUsedCategories = () => {
+    const usedCategories = new Set(quizzes.map((quiz) => quiz.category));
+    return usedCategories;
+  };
+
+  const isCategoryUsed = (category: string) => {
+    if (editingQuiz && editingQuiz.category === category) {
+      return false;
+    }
+    return getUsedCategories().has(category);
+  };
 
   const generateQuestionId = () => {
     return Math.random().toString(36).substr(2, 9);
@@ -151,7 +152,6 @@ const QuizManager = () => {
 
   const updateOption = (index: number, value: string, questionId?: string) => {
     if (editingQuiz && questionId) {
-      // Update option in editing quiz
       const updatedQuestions = editingQuiz.questions.map((q) => {
         if (q.question_id === questionId) {
           const newOptions = [...q.options];
@@ -168,7 +168,6 @@ const QuizManager = () => {
         prev ? { ...prev, questions: updatedQuestions } : null
       );
     } else {
-      // Update option in new question
       const newOptions = [...currentQuestion.options];
       newOptions[index] = value;
       setCurrentQuestion((prev) => ({
@@ -211,9 +210,58 @@ const QuizManager = () => {
     }
   };
 
+  const handlePriceTypeChange = (isFree: boolean) => {
+    if (editingQuiz) {
+      setEditingQuiz((prev) =>
+        prev
+          ? {
+              ...prev,
+              is_free: isFree,
+              price: isFree ? 0 : prev.price,
+            }
+          : null
+      );
+    } else {
+      setCurrentQuiz((prev) => ({
+        ...prev,
+        is_free: isFree,
+        price: isFree ? 0 : prev.price,
+      }));
+    }
+  };
+
+  const handlePriceChange = (price: number) => {
+    if (editingQuiz) {
+      setEditingQuiz((prev) => (prev ? { ...prev, price: price } : null));
+    } else {
+      setCurrentQuiz((prev) => ({
+        ...prev,
+        price: price,
+      }));
+    }
+  };
+
+  const handleStatusChange = (isActive: boolean) => {
+    if (editingQuiz) {
+      setEditingQuiz((prev) =>
+        prev ? { ...prev, is_active: isActive } : null
+      );
+    } else {
+      setCurrentQuiz((prev) => ({
+        ...prev,
+        is_active: isActive,
+      }));
+    }
+  };
+
   const saveQuiz = async () => {
     if (!currentQuiz.title.trim()) {
       toast.error("Please enter a quiz title");
+      return;
+    }
+
+    if (!currentQuiz.category) {
+      toast.error("Please select a category");
       return;
     }
 
@@ -222,13 +270,19 @@ const QuizManager = () => {
       return;
     }
 
+   
+
     const payload = {
       title: currentQuiz.title,
+      category: currentQuiz.category,
       questions: currentQuiz.questions.map((q) => ({
         question: q.question,
         options: q.options,
         correct_answer: q.correct_answer,
       })),
+      is_active: currentQuiz.is_active,
+      is_free: currentQuiz.is_free,
+      price: currentQuiz.price,
     };
 
     const response = await callApi(payload);
@@ -239,8 +293,12 @@ const QuizManager = () => {
       setShowAddQuiz(false);
       setCurrentQuiz({
         title: "",
+        category: "school_level",
         questions: [],
         total_questions: 0,
+        is_active: true,
+        price: 0,
+        is_free: true,
       });
     }
   };
@@ -248,8 +306,12 @@ const QuizManager = () => {
   const cancelQuiz = () => {
     setCurrentQuiz({
       title: "",
+      category: "school_level",
       questions: [],
       total_questions: 0,
+      is_active: true,
+      price: 0,
+      is_free: true,
     });
     setCurrentQuestion({
       question_id: "",
@@ -260,25 +322,44 @@ const QuizManager = () => {
     setShowAddQuiz(false);
     setEditingQuiz(null);
   };
+
   const handleViewDetails = (quiz: Quiz) => {
     setEditingQuiz(quiz);
     setShowAddQuiz(false);
   };
+
   const handleUpdateQuiz = async () => {
     if (!editingQuiz) return;
-
     try {
       const originalQuiz = quizzes.find((quiz) => quiz._id === editingQuiz._id);
-
       if (!originalQuiz) {
         toast.error("Original quiz data not found");
         return;
       }
 
+      if (!editingQuiz.is_free && (editingQuiz.price ?? 0) <= 0) {
+        toast.error("Please enter a valid price for paid quiz");
+        return;
+      }
+
       const payload: any = {};
+
       if (editingQuiz.title !== originalQuiz.title) {
         payload.title = editingQuiz.title;
       }
+      if (editingQuiz.category !== originalQuiz.category) {
+        payload.category = editingQuiz.category;
+      }
+      if (editingQuiz.is_active !== originalQuiz.is_active) {
+        payload.is_active = editingQuiz.is_active;
+      }
+      if (editingQuiz.is_free !== originalQuiz.is_free) {
+        payload.is_free = editingQuiz.is_free;
+      }
+      if (editingQuiz.price !== originalQuiz.price) {
+        payload.price = editingQuiz.price;
+      }
+
       const updatedQuestions = editingQuiz.questions
         .map((updatedQ) => {
           const originalQ = originalQuiz.questions.find(
@@ -308,13 +389,16 @@ const QuizManager = () => {
           return null;
         })
         .filter((q) => q !== null);
+
       if (updatedQuestions.length > 0) {
         payload.questions = updatedQuestions;
       }
+
       if (Object.keys(payload).length === 0) {
         toast.info("No changes detected");
         return;
       }
+
       const response = await callUpdateQuiz(editingQuiz._id, payload);
 
       if (response?.status) {
@@ -332,6 +416,7 @@ const QuizManager = () => {
       toast.error("Something went wrong. Please try again later.");
     }
   };
+
   const handleDeleteQuiz = async (quizID: string) => {
     const response = await callDeleteQuizID(quizID);
     toast.success(response.message);
@@ -395,6 +480,7 @@ const QuizManager = () => {
 
   const fetchQuizzes = async () => {
     const quizResponse: ApiQuizResponse = await callGetAllQuiz();
+    console.log({ quizResponse });
     if (quizResponse.status && quizResponse.quizzes) {
       setQuizzes(quizResponse.quizzes);
     }
@@ -403,6 +489,33 @@ const QuizManager = () => {
   useEffect(() => {
     fetchQuizzes();
   }, [isQuizDeleted]);
+
+  const getCategoryLabel = (categoryValue: string) => {
+    const category = categoryOptions.find((opt) => opt.value === categoryValue);
+    return category ? category.label : categoryValue;
+  };
+
+  const getStatusBadge = (quiz: Quiz) => {
+    if (!quiz.is_active) {
+      return (
+        <span className="inline-block px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full">
+          Disabled
+        </span>
+      );
+    }
+    if (quiz.is_free) {
+      return (
+        <span className="inline-block px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
+          Free
+        </span>
+      );
+    }
+    return (
+      <span className="inline-block px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
+        Paid: ₹{quiz.price}
+      </span>
+    );
+  };
 
   return (
     <div className="h-screen overflow-auto p-6">
@@ -417,19 +530,7 @@ const QuizManager = () => {
           </div>
         ) : (
           <>
-            {/* // multiple Quizzz */}
-            {/* {!showAddQuiz && !editingQuiz && (
-              <div className="flex justify-center">
-                <button
-                  onClick={() => setShowAddQuiz(true)}
-                  className="btn flex items-center gap-2"
-                >
-                  <Plus className="h-5 w-5" />
-                  Add New Quiz
-                </button>
-              </div>
-            )} */}
-            {!showAddQuiz && !editingQuiz && quizzes.length === 0 && (
+            {!showAddQuiz && !editingQuiz && (
               <div className="flex justify-center">
                 <button
                   onClick={() => setShowAddQuiz(true)}
@@ -445,26 +546,187 @@ const QuizManager = () => {
               <div className="space-y-6">
                 <div className="rounded-lg border bg-card p-6">
                   <div className="space-y-4 mb-6">
-                    <label className="text-sm font-medium">Quiz Title</label>
-                    <input
-                      type="text"
-                      value={
-                        editingQuiz ? editingQuiz.title : currentQuiz.title
-                      }
-                      onChange={(e) =>
-                        editingQuiz
-                          ? setEditingQuiz((prev) =>
-                              prev ? { ...prev, title: e.target.value } : null
-                            )
-                          : setCurrentQuiz((prev) => ({
-                              ...prev,
-                              title: e.target.value,
-                            }))
-                      }
-                      placeholder="Enter quiz title (e.g., Science, Math, History)"
-                      className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                    />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm font-medium">
+                          Quiz Title
+                        </label>
+                        <input
+                          type="text"
+                          value={
+                            editingQuiz ? editingQuiz.title : currentQuiz.title
+                          }
+                          onChange={(e) =>
+                            editingQuiz
+                              ? setEditingQuiz((prev) =>
+                                  prev
+                                    ? { ...prev, title: e.target.value }
+                                    : null
+                                )
+                              : setCurrentQuiz((prev) => ({
+                                  ...prev,
+                                  title: e.target.value,
+                                }))
+                          }
+                          placeholder="Enter quiz title (e.g., Science, Math, History)"
+                          className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium">Category</label>
+                        <select
+                          value={
+                            editingQuiz
+                              ? editingQuiz.category
+                              : currentQuiz.category
+                          }
+                          onChange={(e) =>
+                            editingQuiz
+                              ? setEditingQuiz((prev) =>
+                                  prev
+                                    ? {
+                                        ...prev,
+                                        category: e.target.value as string,
+                                      }
+                                    : null
+                                )
+                              : setCurrentQuiz((prev) => ({
+                                  ...prev,
+                                  category: e.target.value as string,
+                                }))
+                          }
+                          className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                        >
+                          <option value="">Select Category</option>
+                          {categoryOptions.map((option) => (
+                            <option
+                              key={option.value}
+                              value={option.value}
+                              disabled={isCategoryUsed(option.value)}
+                              className={
+                                isCategoryUsed(option.value)
+                                  ? "text-gray-400 bg-gray-100"
+                                  : ""
+                              }
+                            >
+                              {option.label}
+                              {isCategoryUsed(option.value) &&
+                                " (Already exists)"}
+                            </option>
+                          ))}
+                        </select>
+                        {!editingQuiz && (
+                          <p className="text-xs text-gray-500 mt-1">
+                            Note: Each category can only have one quiz
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Status and Price Section */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm font-medium">Status</label>
+                        <div className="flex gap-4 mt-2">
+                          <label className="flex items-center gap-2">
+                            <input
+                              type="radio"
+                              name="status"
+                              checked={
+                                editingQuiz
+                                  ? editingQuiz.is_active
+                                  : currentQuiz.is_active
+                              }
+                              onChange={() => handleStatusChange(true)}
+                              className="h-4 w-4"
+                            />
+                            <span className="flex items-center gap-1">
+                              Enabled
+                            </span>
+                          </label>
+                          <label className="flex items-center gap-2">
+                            <input
+                              type="radio"
+                              name="status"
+                              checked={
+                                editingQuiz
+                                  ? !editingQuiz.is_active
+                                  : !currentQuiz.is_active
+                              }
+                              onChange={() => handleStatusChange(false)}
+                              className="h-4 w-4"
+                            />
+                            <span className="flex items-center gap-1">
+                              Disabled
+                            </span>
+                          </label>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="text-sm font-medium">
+                          Price Type
+                        </label>
+                        <div className="flex gap-4 mt-2">
+                          <label className="flex items-center gap-2">
+                            <input
+                              type="radio"
+                              name="priceType"
+                              checked={
+                                editingQuiz
+                                  ? editingQuiz.is_free
+                                  : currentQuiz.is_free
+                              }
+                              onChange={() => handlePriceTypeChange(true)}
+                              className="h-4 w-4"
+                            />
+                            <span>Free</span>
+                          </label>
+                          <label className="flex items-center gap-2">
+                            <input
+                              type="radio"
+                              name="priceType"
+                              checked={
+                                editingQuiz
+                                  ? !editingQuiz.is_free
+                                  : !currentQuiz.is_free
+                              }
+                              onChange={() => handlePriceTypeChange(false)}
+                              className="h-4 w-4"
+                            />
+                            <span>Paid</span>
+                          </label>
+                        </div>
+
+                        {((editingQuiz && !editingQuiz.is_free) ||
+                          (!editingQuiz && !currentQuiz.is_free)) && (
+                          <div className="mt-3">
+                            <label className="text-sm font-medium">
+                              Price (₹)
+                            </label>
+                            <input
+                              type="number"
+                              min="0"
+                              step="0.01"
+                              value={
+                                editingQuiz
+                                  ? editingQuiz.price
+                                  : currentQuiz.price
+                              }
+                              onChange={(e) =>
+                                handlePriceChange(
+                                  parseFloat(e.target.value) || 0
+                                )
+                              }
+                              placeholder="Enter price"
+                              className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary mt-1"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
+
                   <div className="space-y-4 mb-6 p-4 border rounded-lg">
                     <h3 className="text-lg font-semibold">Add New Question</h3>
                     <div className="space-y-2">
@@ -520,6 +782,7 @@ const QuizManager = () => {
                       Add Question
                     </button>
                   </div>
+
                   {(currentQuiz.questions.length > 0 ||
                     (editingQuiz && editingQuiz.questions.length > 0)) && (
                     <div className="space-y-4">
@@ -622,9 +885,19 @@ const QuizManager = () => {
                       className="btn flex items-center gap-2"
                       disabled={
                         loading ||
+          
                         (editingQuiz
-                          ? editingQuiz.questions.length === 0
-                          : currentQuiz.questions.length === 0)
+                          ? (editingQuiz.questions?.length ?? 0) === 0
+                          : (currentQuiz.questions?.length ?? 0) === 0) ||
+               
+                        (!editingQuiz &&
+                          isCategoryUsed(currentQuiz.category)) ||
+                        (!(editingQuiz
+                          ? editingQuiz.is_free ?? false
+                          : currentQuiz.is_free ?? false) &&
+                          (editingQuiz
+                            ? editingQuiz.price ?? 0
+                            : currentQuiz.price ?? 0) <= 0)
                       }
                     >
                       {loading ? (
@@ -648,8 +921,7 @@ const QuizManager = () => {
               <div className="space-y-4">
                 <h2 className="text-2xl font-bold">Existing Quizzes</h2>
                 <div className="grid gap-4">
-                  {/* multiple quizz */}
-                  {/* {quizzes.map((quiz) => (
+                  {quizzes.map((quiz) => (
                     <div
                       key={quiz._id}
                       className="p-4 border rounded-lg bg-card"
@@ -659,14 +931,15 @@ const QuizManager = () => {
                           <h3 className="text-lg font-semibold">
                             {quiz.title}
                           </h3>
-                          <p className="text-muted-foreground">
-                            {quiz.total_questions} questions
-                          </p>
-                          <p className="text-sm text-gray-500">
-                            Created:{" "}
-                            {new Date(quiz.created_at).toLocaleDateString()} by{" "}
-                            {quiz.created_by}
-                          </p>
+                          <div className="flex items-center gap-4 mt-1">
+                            <p className="text-muted-foreground">
+                              {quiz.total_questions} questions
+                            </p>
+                            <span className="inline-block px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
+                              {getCategoryLabel(quiz.category)}
+                            </span>
+                            {getStatusBadge(quiz)}
+                          </div>
                         </div>
                         <button
                           className="btn-outline flex items-center gap-2"
@@ -677,41 +950,7 @@ const QuizManager = () => {
                         </button>
                       </div>
                     </div>
-                  ))} */}
-                  {quizzes.length > 0 && (
-                    <div
-                      key={quizzes[0]._id}
-                      className="p-4 border rounded-lg bg-card"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h3 className="text-lg font-semibold">
-                            {quizzes[0].title}
-                          </h3>
-                          <p className="text-muted-foreground">
-                            {quizzes[0].total_questions} questions
-                          </p>
-                        </div>
-                        <div className="flex gap-1">
-                          <button
-                            className="btn-outline flex items-center gap-2"
-                            onClick={() => handleViewDetails(quizzes[0])}
-                          >
-                            <Edit className="h-4 w-4" />
-                            <span className="md:block hidden">
-                              View Details
-                            </span>
-                          </button>
-                          {/* <button
-                            className="btn-outline flex items-center text-red-600 gap-2"
-                            onClick={() => setConfirmDelete(quizzes[0]._id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button> */}
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                  ))}
                 </div>
               </div>
             )}

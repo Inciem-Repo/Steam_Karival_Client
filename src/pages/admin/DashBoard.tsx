@@ -322,7 +322,7 @@ const Dashboard = () => {
                   key={user.user_id}
                   className="rounded-lg border bg-card p-3 sm:p-4 space-y-3"
                 >
-                  {/* Header with Rank and Name */}
+        
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3 flex-1 min-w-0">
                       <span
