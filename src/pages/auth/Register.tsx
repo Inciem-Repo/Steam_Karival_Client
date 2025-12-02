@@ -4,7 +4,7 @@ import { useApi } from "../../hooks/useApi";
 import { registerService } from "../../services/auth";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import { Eye, EyeOff } from "lucide-react"; // Import eye icons
+import { Eye, EyeOff } from "lucide-react";
 
 const registerSchema = z
   .object({
@@ -66,7 +66,7 @@ const Register = () => {
   >({});
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const { callApi } = useApi(registerService);
+  const { callApi, loading } = useApi(registerService);
   const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -154,15 +154,11 @@ const Register = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0A1A2F] to-[#10263F] flex items-center justify-center px-4 py-10 font-manrope relative overflow-hidden">
-      {/* Background decorative glow */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute -top-24 -left-24 w-72 h-72 bg-[#1E88E5]/20 blur-3xl rounded-full"></div>
         <div className="absolute bottom-0 right-0 w-80 h-80 bg-[#42A5F5]/20 blur-3xl rounded-full"></div>
       </div>
-
-      {/* Registration Card */}
       <div className="relative bg-white/10 backdrop-blur-xl border border-white/10 shadow-2xl rounded-2xl p-8 w-full max-w-lg">
-        {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-extrabold text-white tracking-wide">
             Create Your Account
@@ -462,9 +458,16 @@ const Register = () => {
           {/* SUBMIT */}
           <button
             type="submit"
-            className="w-full bg-[#1E88E5] hover:bg-[#42A5F5] transition-all font-semibold text-white rounded-xl py-3 shadow-lg shadow-[#1E88E5]/20"
+            className="w-full bg-[#1E88E5] flex items-center justify-center gap-3 hover:bg-[#42A5F5] transition-all font-semibold text-white rounded-xl py-3 shadow-lg shadow-[#1E88E5]/20"
           >
-            Create Account
+            {loading ? (
+              <>
+                <div className="w-4 h-4 border-2 border-t-transparent border-white rounded-full animate-spin"></div>
+                Please Wait...
+              </>
+            ) : (
+              "Create Account"
+            )}
           </button>
         </form>
 
