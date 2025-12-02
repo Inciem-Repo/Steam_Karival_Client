@@ -6,7 +6,10 @@ const AboutSection = () => {
   return (
     <section className="py-20 bg-background">
       <div className="container mx-auto px-4">
-        <div className="w-full flex justify-center items-center gap-3 mb-12">
+        <div
+          className="w-full flex justify-center md:flex-row flex-col 
+         items-center gap-3 mb-12"
+        >
           <p className="text-[#0a0f6b] text-xl md:text-3xl font-thin  tracking-wide uppercase m-0">
             WIN A TRIP TO NASA & GET ATTRACTIVE PRIZES
           </p>

@@ -18,7 +18,7 @@ export interface Quiz {
   questions: Question[];
   is_active?: boolean;
   is_free?: boolean;
-  price?: number | undefined;
+  price?: number| null;
 }
 export interface QuizResponse {
   quiz: Quiz;

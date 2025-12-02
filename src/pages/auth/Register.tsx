@@ -4,22 +4,25 @@ import { useApi } from "../../hooks/useApi";
 import { registerService } from "../../services/auth";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import { Eye, EyeOff } from "lucide-react"; // Import eye icons
 
-// Define the validation schema with Zod
 const registerSchema = z
   .object({
     name: z
       .string()
       .min(1, "Name is required")
       .regex(/^[A-Za-z\s]+$/, "Name can only contain letters and spaces"),
+
     email: z
       .string()
       .min(1, "Email is required")
       .email("Invalid email address"),
+
     phone: z
       .string()
       .min(1, "Phone number is required")
       .regex(/^\d{10}$/, "Phone number must be 10 digits"),
+
     school: z
       .string()
       .min(1, "School is required")
@@ -28,8 +31,16 @@ const registerSchema = z
         /^[A-Za-z\s'&\-.(),]+$/,
         "School name can only contain letters and allowed special characters"
       ),
-    password: z.string().min(1, "Password is required"),
-    confirmPassword: z.string().min(1, "Confirm password is required"),
+
+    password: z
+      .string()
+      .min(1, "Password is required")
+      .regex(/^\S+$/, "Password cannot contain spaces"),
+
+    confirmPassword: z
+      .string()
+      .min(1, "Confirm password is required")
+      .regex(/^\S+$/, "Password cannot contain spaces"),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
@@ -53,6 +64,8 @@ const Register = () => {
   const [touched, setTouched] = useState<
     Partial<Record<keyof RegisterFormData, boolean>>
   >({});
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { callApi } = useApi(registerService);
   const navigate = useNavigate();
 
@@ -129,6 +142,14 @@ const Register = () => {
       toast.success("Registration successful!");
       navigate("/login");
     } catch {}
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword);
   };
 
   return (
@@ -339,7 +360,7 @@ const Register = () => {
                 id="password"
                 name="password"
                 placeholder=" "
-                type="password"
+                type={showPassword ? "text" : "password"}
                 value={formData.password}
                 onChange={handleChange}
                 onBlur={handleBlur}
@@ -351,7 +372,7 @@ const Register = () => {
                 }
                 text-white rounded-lg px-4 py-3 peer 
                 focus:outline-none focus:ring-2 focus:ring-[#42A5F5]
-                placeholder-transparent`}
+                placeholder-transparent pr-10`}
               />
 
               <label
@@ -369,6 +390,15 @@ const Register = () => {
                 Password
               </label>
 
+              <button
+                type="button"
+                onClick={togglePasswordVisibility}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+
               {errors.password && touched.password && (
                 <p className="text-sm text-red-400 mt-1">{errors.password}</p>
               )}
@@ -380,7 +410,7 @@ const Register = () => {
                 id="confirmPassword"
                 name="confirmPassword"
                 placeholder=" "
-                type="password"
+                type={showConfirmPassword ? "text" : "password"}
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 onBlur={handleBlur}
@@ -392,7 +422,7 @@ const Register = () => {
                 }
                 text-white rounded-lg px-4 py-3 peer 
                 focus:outline-none focus:ring-2 focus:ring-[#42A5F5]
-                placeholder-transparent`}
+                placeholder-transparent pr-10`}
               />
 
               <label
@@ -409,6 +439,17 @@ const Register = () => {
               >
                 Confirm Password
               </label>
+
+              <button
+                type="button"
+                onClick={toggleConfirmPasswordVisibility}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                aria-label={
+                  showConfirmPassword ? "Hide password" : "Show password"
+                }
+              >
+                {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
 
               {errors.confirmPassword && touched.confirmPassword && (
                 <p className="text-sm text-red-400 mt-1">
