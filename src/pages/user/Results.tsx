@@ -149,110 +149,146 @@ const Results = () => {
   // const wrongCount = questionCount - correctCount;
 
   return (
-  <div className="min-h-screen w-full bg-gradient-to-br from-[#0A1A2F] to-[#10263F] flex items-center justify-center px-4 py-10 relative font-manrope overflow-hidden">
-
-    {/* Background Glows */}
-    <div className="absolute inset-0 pointer-events-none">
-      <div className="absolute -top-28 -left-20 w-96 h-96 bg-[#1E88E5]/20 blur-[140px] rounded-full" />
-      <div className="absolute bottom-0 right-0 w-[420px] h-[420px] bg-[#42A5F5]/20 blur-[150px] rounded-full" />
-    </div>
-
-    {/* LOADING */}
-    {loading && (
-      <div className="relative bg-white/10 backdrop-blur-xl border border-white/10 shadow-2xl rounded-2xl p-8 w-full max-w-lg md:max-w-2xl text-center text-gray-200">
-        <p className="text-lg animate-pulse">Loading results...</p>
+    <div className="min-h-screen w-full bg-gradient-to-br from-[#0A1A2F] to-[#10263F] flex items-center justify-center px-4 py-10 relative font-manrope overflow-hidden">
+      {/* Background Glows */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute -top-28 -left-20 w-96 h-96 bg-[#1E88E5]/20 blur-[140px] rounded-full" />
+        <div className="absolute bottom-0 right-0 w-[420px] h-[420px] bg-[#42A5F5]/20 blur-[150px] rounded-full" />
       </div>
-    )}
 
-    {/* NO ATTEMPTS */}
-    {!loading && (!hasAttempted || !latestQuiz) && (
-      <main className="relative bg-white/10 backdrop-blur-xl border border-white/10 shadow-2xl rounded-2xl p-8 w-full max-w-lg md:max-w-2xl">
-
-        {/* Header Row */}
-        <div className="flex items-center justify-between mb-8">
-          <button onClick={handleBackToHome} className="text-white opacity-70 hover:opacity-100 transition">
-            <svg width="34" height="34" fill="none" stroke="white" strokeWidth="2">
-              <path d="M20 28 L10 18 L20 8" />
-            </svg>
-          </button>
-
-          <button onClick={() => navigator("/profile")} className="text-white opacity-70 hover:opacity-100">
-            <svg width="34" height="34" stroke="white" strokeWidth="1.5" fill="none">
-              <circle cx="17" cy="17" r="14" />
-              <circle cx="17" cy="13" r="4" />
-              <path d="M7,27 Q17,19 27,27" />
-            </svg>
-          </button>
+      {/* LOADING */}
+      {loading && (
+        <div className="relative bg-white/10 backdrop-blur-xl border border-white/10 shadow-2xl rounded-2xl p-8 w-full max-w-lg md:max-w-2xl text-center text-gray-200">
+          <p className="text-lg animate-pulse">Loading results...</p>
         </div>
+      )}
 
-        {/* Content */}
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-white mb-6">Quiz Result</h1>
-
-          <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-xl p-6 text-center shadow-lg">
-            <h3 className="text-xl text-white font-semibold mb-2">No Quiz Attempts</h3>
-            <p className="text-gray-300 mb-4">
-              You haven't attempted any quizzes yet.
-            </p>
+      {/* NO ATTEMPTS */}
+      {!loading && (!hasAttempted || !latestQuiz) && (
+        <main className="relative bg-white/10 backdrop-blur-xl border border-white/10 shadow-2xl rounded-2xl p-8 w-full max-w-lg md:max-w-2xl">
+          {/* Header Row */}
+          <div className="flex items-center justify-between mb-8">
+            <button
+              onClick={handleBackToHome}
+              className="text-white opacity-70 hover:opacity-100 transition"
+            >
+              <svg
+                width="34"
+                height="34"
+                fill="none"
+                stroke="white"
+                strokeWidth="2"
+              >
+                <path d="M20 28 L10 18 L20 8" />
+              </svg>
+            </button>
 
             <button
-              onClick={() => navigator("/")}
-              className="bg-[#1E88E5] hover:bg-[#42A5F5] text-white font-medium rounded-xl px-6 py-3 shadow-lg shadow-[#1E88E5]/30 transition"
+              onClick={() => navigator("/profile")}
+              className="text-white opacity-70 hover:opacity-100"
             >
-              Take a Quiz
+              <svg
+                width="34"
+                height="34"
+                stroke="white"
+                strokeWidth="1.5"
+                fill="none"
+              >
+                <circle cx="17" cy="17" r="14" />
+                <circle cx="17" cy="13" r="4" />
+                <path d="M7,27 Q17,19 27,27" />
+              </svg>
             </button>
           </div>
-        </div>
-      </main>
-    )}
 
-    {/* SUCCESSFUL RESULT */}
-    {!loading && hasAttempted && latestQuiz && (
-      <main className="relative bg-white/10 backdrop-blur-xl border border-white/10 shadow-2xl rounded-2xl p-8 w-full max-w-lg md:max-w-2xl">
+          {/* Content */}
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-white mb-6">Quiz Result</h1>
 
-        {/* Header Row */}
-        <div className="flex items-center justify-between mb-8">
-          <button onClick={handleBackToHome} className="text-white opacity-70 hover:opacity-100 transition">
-            <svg width="34" height="34" fill="none" stroke="white" strokeWidth="2">
-              <path d="M20 28 L10 18 L20 8" />
-            </svg>
-          </button>
+            <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-xl p-6 text-center shadow-lg">
+              <h3 className="text-xl text-white font-semibold mb-2">
+                No Quiz Attempts
+              </h3>
+              <p className="text-gray-300 mb-4">
+                You haven't attempted any quizzes yet.
+              </p>
 
-          <button onClick={() => navigator("/profile")} className="text-white opacity-70 hover:opacity-100 transition">
-            <svg width="34" height="34" stroke="white" strokeWidth="1.5" fill="none">
-              <circle cx="17" cy="17" r="14" />
-              <circle cx="17" cy="13" r="4" />
-              <path d="M7,27 Q17,19 27,27" />
-            </svg>
-          </button>
-        </div>
+              <button
+                onClick={() => navigator("/")}
+                className="bg-[#1E88E5] hover:bg-[#42A5F5] text-white font-medium rounded-xl px-6 py-3 shadow-lg shadow-[#1E88E5]/30 transition"
+              >
+                Take a Quiz
+              </button>
+            </div>
+          </div>
+        </main>
+      )}
 
-        <div className="flex flex-col items-center gap-6">
-          <h1 className="text-2xl md:text-3xl font-bold text-white">Quiz Result</h1>
+      {/* SUCCESSFUL RESULT */}
+      {!loading && hasAttempted && latestQuiz && (
+        <main className="relative bg-white/10 backdrop-blur-xl border border-white/10 shadow-2xl rounded-2xl p-8 w-full max-w-lg md:max-w-2xl">
+          {/* Header Row */}
+          <div className="flex items-center justify-between mb-8">
+            <button
+              onClick={handleBackToHome}
+              className="text-white opacity-70 hover:opacity-100 transition"
+            >
+              <svg
+                width="34"
+                height="34"
+                fill="none"
+                stroke="white"
+                strokeWidth="2"
+              >
+                <path d="M20 28 L10 18 L20 8" />
+              </svg>
+            </button>
 
-          {/* Result Card */}
-          <div className="w-full bg-white/10 backdrop-blur-xl border border-white/10 rounded-xl p-6 shadow-xl">
+            <button
+              onClick={() => navigator("/profile")}
+              className="text-white opacity-70 hover:opacity-100 transition"
+            >
+              <svg
+                width="34"
+                height="34"
+                stroke="white"
+                strokeWidth="1.5"
+                fill="none"
+              >
+                <circle cx="17" cy="17" r="14" />
+                <circle cx="17" cy="13" r="4" />
+                <path d="M7,27 Q17,19 27,27" />
+              </svg>
+            </button>
+          </div>
+
+          <div className="flex flex-col items-center gap-6">
+            <h1 className="text-2xl md:text-3xl font-bold text-white">
+              Quiz Result
+            </h1>
+
+            {/* Result Card */}
+
             <ResultCard
               score={latestQuiz.correct_answers}
               total={latestQuiz.questions.length}
               correctCount={latestQuiz.correct_answers}
-              wrongCount={latestQuiz.questions.length - latestQuiz.correct_answers}
+              wrongCount={
+                latestQuiz.questions.length - latestQuiz.correct_answers
+              }
             />
+
+            {/* View Profile */}
+            <button
+              onClick={() => navigator("/profile")}
+              className="w-full bg-[#1E88E5] hover:bg-[#42A5F5] text-white font-semibold rounded-xl py-3 shadow-lg shadow-[#1E88E5]/30 transition"
+            >
+              View Profile
+            </button>
           </div>
-
-          {/* View Profile */}
-          <button
-            onClick={() => navigator("/profile")}
-            className="w-full bg-[#1E88E5] hover:bg-[#42A5F5] text-white font-semibold rounded-xl py-3 shadow-lg shadow-[#1E88E5]/30 transition"
-          >
-            View Profile
-          </button>
-        </div>
-      </main>
-    )}
-
-  </div>
-);
-
+        </main>
+      )}
+    </div>
+  );
 };
 export default Results;

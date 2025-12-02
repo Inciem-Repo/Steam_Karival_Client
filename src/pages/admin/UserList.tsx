@@ -134,12 +134,10 @@ const UserList = () => {
       const leaderboard = leaderboardData.leaderboard_preview || [];
       const paidUsers = paidUsersData.users || [];
 
-      // helper finders
       const findQuiz = (id: string) =>
         leaderboard.find((q: any) => q.user_id === id);
       const findPaid = (id: string) => paidUsers.find((p: any) => p._id === id);
 
-      // Combine all user info
       const rows = users.map((u: any) => {
         const quiz = findQuiz(u._id);
         const paid = findPaid(u._id);

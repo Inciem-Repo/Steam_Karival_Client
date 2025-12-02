@@ -11,6 +11,7 @@ import {
 import paymentSvg from "../../assets/svg/paymant.svg";
 import { getAllQuizDetails } from "../../services/quiz";
 import type { QuizMeta } from "../../utils/types/quiz";
+import SkeletonLoader from "../../components/ui/SkeletonLoader";
 
 declare global {
   interface Window {
@@ -41,23 +42,29 @@ const PaymentPage: React.FC = () => {
   const { callApi: callPaymentVerify } = useApi(verifyPaymentService);
   const navigate = useNavigate();
   const { callApi: callGetAllQuizDetails } = useApi(getAllQuizDetails);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const getQuizMetaData = async () => {
       if (!level) return;
 
-      const quizDataResponse = await callGetAllQuizDetails();
-      if (quizDataResponse?.data) {
-        const allQuizzes = quizDataResponse.data;
+      setLoading(true);
+      try {
+        const quizDataResponse = await callGetAllQuizDetails();
+        if (quizDataResponse?.data) {
+          const allQuizzes = quizDataResponse.data;
 
-        const targetQuiz = allQuizzes.find(
-          (quiz: QuizMeta) => quiz.category === level
-        );
+          const targetQuiz = allQuizzes.find(
+            (quiz: QuizMeta) => quiz.category === level
+          );
 
-        if (targetQuiz) {
-          const priceInPaise = (targetQuiz.price ?? 0) * 100;
-          setAmount(priceInPaise);
+          if (targetQuiz) {
+            const priceInPaise = (targetQuiz.price ?? 0) * 100;
+            setAmount(priceInPaise);
+          }
         }
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -149,53 +156,66 @@ const PaymentPage: React.FC = () => {
       bg-gradient-to-b from-[#0A1A2F] to-[#10263F]
       flex justify-center px-4 py-10 relative overflow-hidden"
     >
-      <div className="max-w-md  w-[362px] border-slate-200 overflow-hidden">
-        <div className="pt-8 pb-8 px-6 space-y-8">
-          <div className="flex justify-center">
-            <img src={paymentSvg} alt="payment svg" />
-          </div>
-          <div className="space-y-2 text-center text-white">
-            <p className=" font-h1-bold ">Unlock Your Quiz Adventure</p>
-            <div className="relative"></div>
-            <p className="text-sm text-slate-500 px-2">
-              You’re just one step away from joining the fun! Complete your
-              payment and get ready to challenge your mind, earn rewards, and
-              climb the leaderboard.
-            </p>
-          </div>
+      {loading ? (
+        <div className="space-y-8 p-6">
+          <SkeletonLoader variant="image" width={300} height={180} />
+          <SkeletonLoader variant="text" lines={3} />
+          <SkeletonLoader variant="text" lines={2} />
+          <SkeletonLoader variant="card" />
+        </div>
+      ) : (
+        <div className="max-w-md  w-[362px] border-slate-200 overflow-hidden">
+          <div className="pt-8 pb-8 px-6 space-y-8">
+            <div className="flex justify-center">
+              <img src={paymentSvg} alt="payment svg" />
+            </div>
+            <div className="space-y-2 text-center text-white">
+              <p className=" font-h1-bold ">Unlock Your Quiz Adventure</p>
+              <div className="relative"></div>
+              <p className="text-sm text-slate-500 px-2">
+                You’re just one step away from joining the fun! Complete your
+                payment and get ready to challenge your mind, earn rewards, and
+                climb the leaderboard.
+              </p>
+            </div>
 
-          <div className="space-y-3">
-            <button
-              onClick={handlePayment}
-              disabled={isProcessing}
-              className="
+            <div className="space-y-3">
+              <button
+                onClick={handlePayment}
+                disabled={isProcessing}
+                className="
               w-full bg-[#1E88E5] hover:bg-[#42A5F5] 
               text-white font-semibold p-4 rounded-xl shadow-lg
               transition-all flex items-center justify-center
             "
-            >
-              {isProcessing ? (
-                <>
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-3"></div>
-                  Processing Payment...
-                </>
-              ) : (
-                `Pay ₹${(amount / 100).toFixed(2)}`
-              )}
-            </button>
-            <div className="flex items-center justify-center space-x-2 text-slate-500">
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  fillRule="evenodd"
-                  d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              <p className="text-xs">Secure encrypted connection</p>
+              >
+                {isProcessing ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-3"></div>
+                    Processing Payment...
+                  </>
+                ) : (
+                  `Pay ₹${(amount / 100).toFixed(2)}`
+                )}
+              </button>
+              <div className="flex items-center justify-center space-x-2 text-slate-500">
+                <svg
+                  className="w-4 h-4"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                <p className="text-xs">Secure encrypted connection</p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

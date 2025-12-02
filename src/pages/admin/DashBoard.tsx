@@ -111,7 +111,7 @@ const Dashboard = () => {
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight">
             Dashboard
           </h1>
-          <p className="text-muted-foreground mt-1 lg:mt-2 text-xs sm:text-sm lg:text-base">
+          <p className="text-muted-foreground mt-4 lg:mt-2 text-xs sm:text-sm lg:text-base">
             Overview of platform statistics and user performance
           </p>
         </div>
@@ -322,7 +322,6 @@ const Dashboard = () => {
                   key={user.user_id}
                   className="rounded-lg border bg-card p-3 sm:p-4 space-y-3"
                 >
-        
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3 flex-1 min-w-0">
                       <span

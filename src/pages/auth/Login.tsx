@@ -5,6 +5,7 @@ import { useAuth } from "../../context/AuthContext";
 import { toast } from "react-toastify";
 import { Link, useNavigate } from "react-router-dom";
 import { roleName } from "../../utils/constants/env";
+import { Eye, EyeOff } from "lucide-react"; // Import eye icons
 
 const loginSchema = z.object({
   username: z
@@ -29,6 +30,7 @@ function Login() {
   const [touched, setTouched] = useState<
     Partial<Record<keyof LoginFormData, boolean>>
   >({});
+  const [showPassword, setShowPassword] = useState(false);
   const { login } = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -108,6 +110,10 @@ function Login() {
     }
   };
 
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#0A1A2F] to-[#10263F] flex items-center justify-center px-4 py-10 font-manrope relative overflow-hidden">
       {/* Glow Effects */}
@@ -183,7 +189,7 @@ function Login() {
               value={formData.password}
               onChange={handleChange}
               onBlur={handleBlur}
-              type="password"
+              type={showPassword ? "text" : "password"}
               className={`w-full bg-white/5 border 
                 ${
                   errors.password && touched.password
@@ -192,7 +198,7 @@ function Login() {
                 }
                 text-white rounded-md px-4 py-3 peer
                 focus:outline-none focus:ring-2 focus:ring-[#42A5F5]
-                placeholder-transparent`}
+                placeholder-transparent pr-10`}
             />
 
             <label
@@ -211,6 +217,16 @@ function Login() {
               Password
             </label>
 
+            {/* Eye Toggle Button */}
+            <button
+              type="button"
+              onClick={togglePasswordVisibility}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
+
             {errors.password && touched.password && (
               <p className="text-sm text-red-400 mt-1">{errors.password}</p>
             )}
@@ -225,6 +241,7 @@ function Login() {
               rounded-xl py-3 shadow-lg shadow-[#1E88E5]/30 
               flex justify-center items-center gap-2
             "
+            disabled={loading}
           >
             {loading ? (
               <>
