@@ -26,7 +26,7 @@ export const api = {
   admin: {
     getDashboardInfo: "/dashboard",
     getLeaderboard: (page?: number, limit?: number, category?: string) =>
-      `/leaderboard?${page}&${limit}&category=${category}`,
+      `/leaderboard?page=${page}&limit=${limit}&category=${category}`,
   },
   payment: {
     order: "/order",
