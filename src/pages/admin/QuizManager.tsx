@@ -230,13 +230,19 @@ const QuizManager = () => {
     }
   };
 
-  const handlePriceChange = (price: number) => {
+  const handlePriceChange = (value: string) => {
+    let parsed: number | null = null;
+
+    if (value !== "") {
+      parsed = Number(value);
+    }
+
     if (editingQuiz) {
-      setEditingQuiz((prev) => (prev ? { ...prev, price: price } : null));
+      setEditingQuiz((prev) => (prev ? { ...prev, price: parsed } : null));
     } else {
       setCurrentQuiz((prev) => ({
         ...prev,
-        price: price,
+        price: parsed,
       }));
     }
   };
@@ -269,8 +275,6 @@ const QuizManager = () => {
       toast.error("Please add at least one question");
       return;
     }
-
-   
 
     const payload = {
       title: currentQuiz.title,
@@ -321,6 +325,7 @@ const QuizManager = () => {
     });
     setShowAddQuiz(false);
     setEditingQuiz(null);
+    fetchQuizzes();
   };
 
   const handleViewDetails = (quiz: Quiz) => {
@@ -518,10 +523,12 @@ const QuizManager = () => {
   };
 
   return (
-    <div className="h-screen overflow-auto p-6">
-      <div className="space-y-8 p-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Quiz Manager</h1>
+    <div className="h-screen overflow-auto md:p-6 p-2">
+      <div className="space-y-8 md:p-6 p-2">
+        <div className="text-center lg:text-left">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight">
+            Quiz Manager
+          </h1>
         </div>
 
         {loadingQuizzes ? (
@@ -710,13 +717,11 @@ const QuizManager = () => {
                               step="0.01"
                               value={
                                 editingQuiz
-                                  ? editingQuiz.price
-                                  : currentQuiz.price
+                                  ? editingQuiz.price ?? ""
+                                  : currentQuiz.price ?? ""
                               }
                               onChange={(e) =>
-                                handlePriceChange(
-                                  parseFloat(e.target.value) || 0
-                                )
+                                handlePriceChange(e.target.value)
                               }
                               placeholder="Enter price"
                               className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary mt-1"
@@ -885,11 +890,9 @@ const QuizManager = () => {
                       className="btn flex items-center gap-2"
                       disabled={
                         loading ||
-          
                         (editingQuiz
                           ? (editingQuiz.questions?.length ?? 0) === 0
                           : (currentQuiz.questions?.length ?? 0) === 0) ||
-               
                         (!editingQuiz &&
                           isCategoryUsed(currentQuiz.category)) ||
                         (!(editingQuiz
@@ -924,9 +927,9 @@ const QuizManager = () => {
                   {quizzes.map((quiz) => (
                     <div
                       key={quiz._id}
-                      className="p-4 border rounded-lg bg-card"
+                      className="md:p-4 p-2  border rounded-lg bg-card"
                     >
-                      <div className="flex items-center justify-between">
+                      <div className="flex md:flex-row flex-col gap-4 items-center justify-between">
                         <div>
                           <h3 className="text-lg font-semibold">
                             {quiz.title}

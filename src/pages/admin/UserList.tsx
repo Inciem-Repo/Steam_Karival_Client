@@ -13,7 +13,6 @@ import { useApi } from "../../hooks/useApi";
 import { getAllPaidUser, getAllUser } from "../../services/auth";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
-import { getLeaderboard } from "../../services/admin";
 
 // Custom Table Components
 const CustomTable = ({ children }: { children: React.ReactNode }) => (
@@ -98,7 +97,7 @@ const UserList = () => {
   const [isloading, IssetLoading] = useState(false);
   const { callApi: callGetAllUser } = useApi(getAllUser);
   const { callApi: callGetAllPaidUser } = useApi(getAllPaidUser);
-  const { callApi: CallLeaderBoardInfo } = useApi(getLeaderboard);
+  // const { callApi: CallLeaderBoardInfo } = useApi(getLeaderboard);
 
   useEffect(() => {
     const fetchGetAllUser = async () => {
@@ -128,20 +127,12 @@ const UserList = () => {
       IssetLoading(true);
       const usersData = await callGetAllUser();
       const paidUsersData = await callGetAllPaidUser();
-      const leaderboardData = await CallLeaderBoardInfo();
-
       const users = usersData.users || [];
-      const leaderboard = leaderboardData.leaderboard_preview || [];
       const paidUsers = paidUsersData.users || [];
 
-      // helper finders
-      const findQuiz = (id: string) =>
-        leaderboard.find((q: any) => q.user_id === id);
       const findPaid = (id: string) => paidUsers.find((p: any) => p._id === id);
 
-      // Combine all user info
       const rows = users.map((u: any) => {
-        const quiz = findQuiz(u._id);
         const paid = findPaid(u._id);
         return {
           Name: u.name,
@@ -153,11 +144,6 @@ const UserList = () => {
           Payment_Mode: paid?.last_payment?.mode || "N/A",
           Payment_Status: paid?.last_payment?.status || "N/A",
           Payment_Date: paid?.last_payment?.addedon || "N/A",
-          Quiz_Attempted: u.is_quiz_attempted ? "Yes" : "No",
-          Rank: quiz?.rank || "N/A",
-          Total_Correct: quiz?.total_correct || "N/A",
-          Attempted_Questions: quiz?.attempted_questions || "N/A",
-          Time_Taken: quiz?.time_taken || "N/A",
         };
       });
 
@@ -183,7 +169,6 @@ const UserList = () => {
     }
   };
 
-  // Pagination handlers
   const goToPage = (page: number) => {
     if (pagination) {
       setCurrentPage(Math.max(1, Math.min(page, pagination.total_pages)));
@@ -194,8 +179,6 @@ const UserList = () => {
   const goToLastPage = () => pagination && goToPage(pagination.total_pages);
   const goToNextPage = () => pagination && goToPage(currentPage + 1);
   const goToPreviousPage = () => goToPage(currentPage - 1);
-
-  // Calculate display indices
   const startIndex = pagination ? (currentPage - 1) * itemsPerPage + 1 : 0;
   const endIndex = pagination
     ? Math.min(currentPage * itemsPerPage, pagination.total_items)
@@ -276,9 +259,9 @@ const UserList = () => {
   }
 
   return (
-    <div className="min-h-screen h-screen overflow-auto p-4 md:p-6 lg:p-8">
+    <div className="min-h-screen h-screen overflow-auto p-2 md:p-6 lg:p-8">
       <div className="space-y-6 md:space-y-8 md:mt-0 mt-10">
-        <div>
+        <div className="flex md:items-start items-center flex-col">
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
             Users
           </h1>
@@ -287,7 +270,7 @@ const UserList = () => {
             attempted quiz • {notAttemptedCount} not attempted
           </p>
         </div>
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex flex-col sm:flex-row items-center sm:justify-between gap-2">
           <div className="flex items-center space-x-2">
             <span className="text-sm text-muted-foreground">Show</span>
             <select
@@ -296,7 +279,7 @@ const UserList = () => {
                 setItemsPerPage(Number(e.target.value));
                 setCurrentPage(1);
               }}
-              className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm"
+              className="h-9 rounded-md border border-input bg-background md:px-3 py-1 text-sm"
             >
               <option value={5}>5</option>
               <option value={10}>10</option>
@@ -305,10 +288,7 @@ const UserList = () => {
             </select>
             <span className="text-sm text-muted-foreground">entries</span>
           </div>
-          <button
-            onClick={handleExportExcel}
-            className="px-4 py-2 border border-1 btn text-sm rounded-md transition"
-          >
+          <button onClick={handleExportExcel} className="btn w-32">
             {isloading ? "Downloading..." : "Export Excel"}
           </button>
         </div>

@@ -1,4 +1,4 @@
-import { Users, CheckCircle, Target, Eye } from "lucide-react";
+import { Users, Target, Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useApi } from "../../hooks/useApi";
 import { getDashboardInfo } from "../../services/admin";
@@ -15,6 +15,7 @@ interface LeaderboardUser {
   time_taken: number;
   total_correct: number;
   total_questions: number;
+  level_played: string;
 }
 
 interface PaginationInfo {
@@ -54,11 +55,12 @@ const Dashboard = () => {
       try {
         setLoading(true);
         const response = (await CallgetDashboard()) as DashboardResponse;
+        console.log("Dashboard API Response:", response); // Debug log
         if (response.status && response.data) {
           setDashboardData(response.data);
         }
       } catch (error) {
-        console.error("Error fetching dashboard data");
+        console.error("Error fetching dashboard data:", error);
       } finally {
         setLoading(false);
       }
@@ -77,10 +79,26 @@ const Dashboard = () => {
     return `${minutes}m ${remainingSeconds}s`;
   };
 
-  const calculateCompletionRate = () => {
-    if (!dashboardData) return 0;
-    return Math.round(
-      (dashboardData.users_attended_quiz / dashboardData.total_users) * 100
+  const getLevelBadge = (level: string) => {
+    const levelConfig = {
+      school_level: { color: "bg-blue-100 text-blue-800", label: "School" },
+      state_level: { color: "bg-green-100 text-green-800", label: "State" },
+      national_level: {
+        color: "bg-purple-100 text-purple-800",
+        label: "National",
+      },
+      global_level: { color: "bg-yellow-100 text-yellow-800", label: "Global" },
+    };
+
+    const config = levelConfig[level as keyof typeof levelConfig] || {
+      color: "bg-gray-100 text-gray-800",
+      label: level,
+    };
+
+    return (
+      <span className={`text-xs px-2 py-1 rounded-full ${config.color}`}>
+        {config.label}
+      </span>
     );
   };
 
@@ -111,36 +129,22 @@ const Dashboard = () => {
           <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight">
             Dashboard
           </h1>
-          <p className="text-muted-foreground mt-1 lg:mt-2 text-xs sm:text-sm lg:text-base">
+          <p className="text-muted-foreground mt-4 lg:mt-2 text-xs sm:text-sm lg:text-base">
             Overview of platform statistics and user performance
           </p>
         </div>
-
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-3 lg:gap-4">
           <StatCard
             title="Total Users"
-            value={dashboardData.total_users.toString()}
+            value={dashboardData.total_users?.toString()}
             icon={Users}
-            description="Registered users"
+            description={`${dashboardData.users_not_attended} users not attempted`}
           />
           <StatCard
             title="Quiz Attempts"
-            value={dashboardData.users_attended_quiz.toString()}
+            value={dashboardData.users_attended_quiz?.toString()}
             icon={Target}
             description="Users who attempted quizzes"
-          />
-          <StatCard
-            title="Quiz Completions"
-            value={`${calculateCompletionRate() || 0}%`}
-            icon={CheckCircle}
-            description="Completion rate"
-          />
-          <StatCard
-            title="Questions Attempted"
-            value={dashboardData.total_attempted_questions.toString()}
-            icon={CheckCircle}
-            description="Total questions answered"
           />
         </div>
 
@@ -149,11 +153,8 @@ const Dashboard = () => {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
             <div className="text-center sm:text-left">
               <h2 className="text-lg sm:text-xl lg:text-2xl font-bold tracking-tight">
-                Top 10 Leaderboard
+                Top {dashboardData.leaderboard_preview.length} Leaderboard
               </h2>
-              <p className="text-muted-foreground mt-0.5 sm:mt-1 text-xs sm:text-sm">
-                Based on quiz performance and ranking
-              </p>
             </div>
             <button
               className="w-full sm:w-auto px-3 sm:px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors text-xs sm:text-sm lg:text-base whitespace-nowrap"
@@ -169,14 +170,14 @@ const Dashboard = () => {
               <table className="w-full text-sm">
                 <thead className="bg-muted/50">
                   <tr className="border-b">
-                    <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground w-[80px]">
-                      Rank
-                    </th>
                     <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground min-w-[120px]">
                       Name
                     </th>
                     <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground min-w-[160px]">
                       Email
+                    </th>
+                    <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground min-w-[100px]">
+                      Level
                     </th>
                     <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground min-w-[100px]">
                       Questions
@@ -209,28 +210,6 @@ const Dashboard = () => {
                         key={user.user_id}
                         className="border-b transition-colors hover:bg-muted/30"
                       >
-                        <td className="p-4 align-middle">
-                          <span
-                            className={`relative inline-flex items-center justify-center w-10 h-10 rounded-full font-semibold text-sm border-2 shadow-sm ${
-                              user.rank === 1
-                                ? "bg-gradient-to-br from-yellow-400 to-yellow-600 text-white border-yellow-500"
-                                : user.rank === 2
-                                ? "bg-gradient-to-br from-gray-400 to-gray-600 text-white border-gray-500"
-                                : user.rank === 3
-                                ? "bg-gradient-to-br from-amber-600 to-amber-800 text-white border-amber-700"
-                                : "bg-primary/10 text-primary border-primary/20"
-                            }`}
-                          >
-                            {user.rank <= 3 && (
-                              <span className="absolute -top-3 -right-2">
-                                <span className="text-white text-lg drop-shadow">
-                                  👑
-                                </span>
-                              </span>
-                            )}
-                            {user.rank}
-                          </span>
-                        </td>
                         <td className="p-4 align-middle font-medium text-sm">
                           <div
                             className="truncate max-w-[120px]"
@@ -248,6 +227,9 @@ const Dashboard = () => {
                           </div>
                         </td>
                         <td className="p-4 align-middle">
+                          {getLevelBadge(user.level_played)}
+                        </td>
+                        <td className="p-4 align-middle">
                           <div className="flex flex-col">
                             <span className="font-medium text-sm">
                               {user.attempted_questions}
@@ -263,7 +245,7 @@ const Dashboard = () => {
                               {user.total_correct}
                             </span>
                             <span className="text-xs text-muted-foreground">
-                              correct
+                              correct answers
                             </span>
                           </div>
                         </td>
@@ -283,9 +265,18 @@ const Dashboard = () => {
                             >
                               {scorePercentage}%
                             </span>
-                            <span className="text-xs text-muted-foreground">
-                              {user.total_correct}/{user.total_questions}
-                            </span>
+                            <div className="w-full bg-gray-200 rounded-full h-1.5 mt-1">
+                              <div
+                                className={`h-1.5 rounded-full ${
+                                  scorePercentage >= 80
+                                    ? "bg-green-600"
+                                    : scorePercentage >= 60
+                                    ? "bg-yellow-600"
+                                    : "bg-red-600"
+                                }`}
+                                style={{ width: `${scorePercentage}%` }}
+                              ></div>
+                            </div>
                           </div>
                         </td>
                         <td className="p-4 align-middle">
@@ -322,7 +313,6 @@ const Dashboard = () => {
                   key={user.user_id}
                   className="rounded-lg border bg-card p-3 sm:p-4 space-y-3"
                 >
-        
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3 flex-1 min-w-0">
                       <span
@@ -339,7 +329,11 @@ const Dashboard = () => {
                         {user.rank <= 3 && (
                           <span className="absolute -top-2 -right-2">
                             <span className="text-white text-lg drop-shadow">
-                              👑
+                              {user.rank === 1
+                                ? "🥇"
+                                : user.rank === 2
+                                ? "🥈"
+                                : "🥉"}
                             </span>
                           </span>
                         )}
@@ -351,6 +345,9 @@ const Dashboard = () => {
                         </div>
                         <div className="text-xs text-muted-foreground truncate">
                           {user.email}
+                        </div>
+                        <div className="mt-1">
+                          {getLevelBadge(user.level_played)}
                         </div>
                       </div>
                     </div>
@@ -406,6 +403,26 @@ const Dashboard = () => {
                       >
                         {scorePercentage}%
                       </div>
+                    </div>
+                  </div>
+
+                  {/* Score Progress Bar for Mobile */}
+                  <div className="pt-2">
+                    <div className="flex justify-between text-xs mb-1">
+                      <span className="text-muted-foreground">Score</span>
+                      <span className="font-medium">{scorePercentage}%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-1.5">
+                      <div
+                        className={`h-1.5 rounded-full ${
+                          scorePercentage >= 80
+                            ? "bg-green-600"
+                            : scorePercentage >= 60
+                            ? "bg-yellow-600"
+                            : "bg-red-600"
+                        }`}
+                        style={{ width: `${scorePercentage}%` }}
+                      ></div>
                     </div>
                   </div>
                 </div>

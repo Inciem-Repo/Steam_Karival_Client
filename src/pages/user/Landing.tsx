@@ -19,10 +19,12 @@ function Landing() {
       <OpportunitiesSection />
       <Footer />
 
-      <div className="fixed bottom-0 left-0 w-full bg-[#b11e3a] text-white text-center py-3 font-semibold tracking-wide uppercase md:hidden z-50">
-        <button className="w-full" onClick={() => navigate("/register")}>
-          Register Now
-        </button>
+      <div className="fixed bottom-2 left-4 right-4 md:hidden z-50">
+        <div className="w-full bg-[#b11e3a] text-white text-center py-3 font-semibold tracking-wide uppercase rounded-full">
+          <button className="w-full px-4" onClick={() => navigate("/register")}>
+            Register Now
+          </button>
+        </div>
       </div>
     </>
   );
