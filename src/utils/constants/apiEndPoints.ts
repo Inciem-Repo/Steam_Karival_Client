@@ -2,6 +2,9 @@ export const api = {
   auth: {
     login: "/login",
     register: "/register",
+    sendOTP: "/send-otp",
+    verifyOTP: "/verify-otp",
+    updatePassword: "/update-password",
   },
   user: {
     getProfile: (userId: string) => `/user/${userId}`,

@@ -9,6 +9,21 @@ export const loginService = async (userData: any) => {
   const res = await apiClient.post(api.auth.login, userData);
   return res.data;
 };
+export const forgetPasswordSendOTP = async (email: any) => {
+  const res = await apiClient.post(api.auth.sendOTP, email);
+  return res.data;
+};
+export const verifySendOTP = async (email: string, otp: string) => {
+  const res = await apiClient.post(api.auth.verifyOTP, { email, otp });
+  return res.data;
+};
+export const updatePassword = async (userData: {
+  email: string;
+  new_password: string;
+}) => {
+  const res = await apiClient.post(api.auth.updatePassword, userData);
+  return res.data;
+};
 
 export const getProfileService = async (userId: string) => {
   const res = await apiClient.get(api.user.getProfile(userId));

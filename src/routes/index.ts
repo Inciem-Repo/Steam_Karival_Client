@@ -1,5 +1,6 @@
 import { lazy } from "react";
 import { roleName } from "../utils/constants/env";
+import ForgotPassword from "../pages/user/ForgotPassword";
 const AdminLayout = lazy(() => import("../components/admin/AdminLayout"));
 const ChatBotAccessList = lazy(
   () => import("../pages/admin/ChatBotAccessList")
@@ -74,6 +75,14 @@ export const routes: AppRoute[] = [
     protected: true,
     roles: [roleName.user],
     requiresPayment: true,
+  },
+  {
+    id: "forgotPassword",
+    path: "/fogot-password",
+    component: ForgotPassword,
+    protected: false,
+    roles: [roleName.user],
+    requiresPayment: false,
   },
   {
     id: "quiz",
