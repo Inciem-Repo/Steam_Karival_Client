@@ -9,6 +9,8 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useApi } from "../../hooks/useApi";
 import { getLeaderboard } from "../../services/admin";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
 interface LeaderboardUser {
   user_id: string;
@@ -106,7 +108,8 @@ const LeaderBoard = () => {
   const [selectedCategory, setSelectedCategory] = useState(
     quizCategory.SCHOOL_LEVEL
   );
-  const { callApi: CallLeaderBoardInfo } = useApi(getLeaderboard);
+  const { callApi: CallLeaderBoardInfo, loading: leaderboardLoader } =
+    useApi(getLeaderboard);
   const [loading, setLoading] = useState(true);
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardUser[]>([]);
   const [pagination, setPagination] = useState<PaginationInfo | null>(null);
@@ -135,23 +138,40 @@ const LeaderBoard = () => {
   };
 
   const goToPage = (page: number) => {
-    if (pagination) {
-      setCurrentPage(Math.max(1, Math.min(page, pagination.total_pages)));
+    if (pagination && page >= 1 && page <= pagination.total_pages) {
+      setCurrentPage(page);
     }
   };
 
-  const goToFirstPage = () => goToPage(1);
-  const goToLastPage = () => pagination && goToPage(pagination.total_pages);
-  const goToNextPage = () => pagination && goToPage(currentPage + 1);
-  const goToPreviousPage = () => goToPage(currentPage - 1);
+  const goToFirstPage = () => {
+    if (pagination) {
+      setCurrentPage(1);
+    }
+  };
 
-  // Handle category change
+  const goToLastPage = () => {
+    if (pagination) {
+      setCurrentPage(pagination.total_pages);
+    }
+  };
+
+  const goToNextPage = () => {
+    if (pagination && currentPage < pagination.total_pages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const goToPreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
   const handleCategoryChange = (category: string) => {
     setSelectedCategory(category);
     setCurrentPage(1);
   };
 
-  // Format time from seconds to readable format
   const formatTime = (seconds: number) => {
     if (!seconds) return "0s";
     const minutes = Math.floor(seconds / 60);
@@ -171,12 +191,9 @@ const LeaderBoard = () => {
     if (totalQuestions === 0) return 0;
     return Math.round((totalCorrect / totalQuestions) * 100);
   };
-
   useEffect(() => {
     fetchLeaderboardData(currentPage, itemsPerPage, selectedCategory);
   }, [currentPage, itemsPerPage, selectedCategory]);
-
-  // Generate pagination buttons
   const renderPaginationButtons = () => {
     if (!pagination) return null;
 
@@ -185,7 +202,6 @@ const LeaderBoard = () => {
     const maxVisibleButtons = 5;
 
     if (totalPages <= maxVisibleButtons) {
-      // Show all pages if total pages are less than or equal to maxVisibleButtons
       for (let i = 1; i <= totalPages; i++) {
         buttons.push(i);
       }
@@ -217,16 +233,76 @@ const LeaderBoard = () => {
       <button
         key={index}
         onClick={() => typeof page === "number" && goToPage(page)}
-        disabled={typeof page !== "number"}
+        disabled={typeof page !== "number" || currentPage === page}
         className={`w-7 h-7 sm:w-8 sm:h-8 p-0 flex items-center justify-center rounded text-xs sm:text-sm ${
           currentPage === page
-            ? "bg-primary text-primary-foreground font-medium"
+            ? "bg-primary text-primary-foreground font-medium cursor-default"
             : "hover:bg-muted"
-        } ${typeof page !== "number" ? "cursor-default" : ""}`}
+        } ${
+          typeof page !== "number"
+            ? "cursor-default bg-transparent hover:bg-transparent"
+            : ""
+        }`}
       >
         {page}
       </button>
     ));
+  };
+
+  const handleExportLeaderboard = async () => {
+    try {
+      setLoading(true);
+
+      // Fetch ALL leaderboard data (no page, no limit → full list)
+      const response = (await CallLeaderBoardInfo(
+        undefined,
+        undefined,
+        undefined
+      )) as LeaderboardResponse;
+
+      if (!response.status || !response.leaderboard_preview) {
+        alert("Failed to fetch leaderboard data.");
+        setLoading(false);
+        return;
+      }
+
+      const leaderboard = response.leaderboard_preview || [];
+
+      // Prepare Excel rows
+      const rows = leaderboard.map((item: any) => ({
+        Rank: item.rank,
+        Name: item.name,
+        Email: item.email,
+        Phone: item.phone,
+        Category: item.category || "all",
+        Total_Correct: item.total_correct,
+        Total_Questions: item.total_questions,
+        Attempted_Questions: item.attempted_questions,
+        Time_Taken: item.time_taken,
+      }));
+
+      // Convert JSON → Excel
+      const worksheet = XLSX.utils.json_to_sheet(rows);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Leaderboard Report");
+
+      // Save file
+      const excelBuffer = XLSX.write(workbook, {
+        bookType: "xlsx",
+        type: "array",
+      });
+
+      saveAs(
+        new Blob([excelBuffer], { type: "application/octet-stream" }),
+        `Leaderboard_Report_"all"}.xlsx`
+      );
+
+      setLoading(false);
+    } catch (error) {
+      console.error("Error exporting leaderboard:", error);
+      setLoading(false);
+      alert("Leaderboard export failed.");
+    }
   };
 
   if (loading) {
@@ -256,7 +332,7 @@ const LeaderBoard = () => {
               value={itemsPerPage}
               onChange={(e) => {
                 setItemsPerPage(Number(e.target.value));
-                setCurrentPage(1);
+                setCurrentPage(1); // Reset to first page when items per page changes
               }}
               className="h-8 rounded-md border border-input bg-background px-3 py-1 text-sm"
             >
@@ -286,14 +362,21 @@ const LeaderBoard = () => {
         </div>
 
         {/* Current Category Display */}
-        <div className="bg-primary/10 border border-primary/20 rounded-lg px-4 py-2">
-          <p className="text-sm text-primary font-medium">
+        <div className="bg-primary/10 border border-primary/20  rounded-lg px-4 py-2 flex justify-between items-center md:flex-row gap-2 flex-col">
+          <p className="text-sm text-black font-medium">
             Showing leaderboard for:{" "}
             {
               categoryOptions.find((opt) => opt.value === selectedCategory)
                 ?.label
             }
           </p>
+          <button
+            onClick={handleExportLeaderboard}
+            disabled={leaderboardLoader}
+            className="btn"
+          >
+            {leaderboardLoader ? "Downloading..." : "Export Excel"}
+          </button>
         </div>
 
         {/* Desktop Table View */}
@@ -397,7 +480,7 @@ const LeaderBoard = () => {
                           onClick={() =>
                             navigate(`/admin/profile/user/${user.user_id}`)
                           }
-                          className="flex items-center gap-2 p-2 text-black hover:bg-primary rounded-md transition-colors"
+                          className="flex items-center gap-2 p-2 text-black hover:bg-primary/10 rounded-md transition-colors"
                           title="View User Profile"
                         >
                           <Eye className="h-4 w-4" />
@@ -556,7 +639,7 @@ const LeaderBoard = () => {
 
               <button
                 onClick={goToNextPage}
-                disabled={currentPage === pagination.total_pages}
+                disabled={!pagination.has_next_page}
                 className="p-1 sm:p-2 rounded hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ChevronRight className="h-3 w-3 sm:h-4 sm:w-4" />

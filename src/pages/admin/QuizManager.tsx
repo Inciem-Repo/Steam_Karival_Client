@@ -525,8 +525,10 @@ const QuizManager = () => {
   return (
     <div className="h-screen overflow-auto md:p-6 p-2">
       <div className="space-y-8 md:p-6 p-2">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Quiz Manager</h1>
+        <div className="text-center lg:text-left">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight">
+            Quiz Manager
+          </h1>
         </div>
 
         {loadingQuizzes ? (

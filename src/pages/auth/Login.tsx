@@ -5,7 +5,7 @@ import { useAuth } from "../../context/AuthContext";
 import { toast } from "react-toastify";
 import { Link, useNavigate } from "react-router-dom";
 import { roleName } from "../../utils/constants/env";
-import { Eye, EyeOff } from "lucide-react"; // Import eye icons
+import { Eye, EyeOff } from "lucide-react";
 
 const loginSchema = z.object({
   username: z
@@ -116,15 +116,11 @@ function Login() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#0A1A2F] to-[#10263F] flex items-center justify-center px-4 py-10 font-manrope relative overflow-hidden">
-      {/* Glow Effects */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute -top-28 -left-20 w-96 h-96 bg-[#1E88E5]/20 blur-[140px] rounded-full"></div>
         <div className="absolute bottom-0 right-0 w-[420px] h-[420px] bg-[#42A5F5]/20 blur-[150px] rounded-full"></div>
       </div>
-
-      {/* Login Card */}
       <div className="relative bg-white/10 backdrop-blur-2xl border border-white/10 shadow-2xl rounded-2xl px-8 py-10 w-full max-w-md">
-        {/* Header */}
         <div className="flex flex-col items-center mb-8">
           <img src={logo} alt="steam karnival" className="w-28 h-auto mb-4" />
 
@@ -138,7 +134,6 @@ function Login() {
         </div>
 
         <form className="space-y-6" onSubmit={handleSubmit} noValidate>
-          {/* USERNAME FLOATING LABEL */}
           <div className="relative">
             <input
               id="username"
@@ -179,9 +174,8 @@ function Login() {
               <p className="text-sm text-red-400 mt-1">{errors.username}</p>
             )}
           </div>
-
-          {/* PASSWORD FLOATING LABEL */}
           <div className="relative">
+            {/* INPUT */}
             <input
               id="password"
               name="password"
@@ -191,48 +185,58 @@ function Login() {
               onBlur={handleBlur}
               type={showPassword ? "text" : "password"}
               className={`w-full bg-white/5 border 
-                ${
-                  errors.password && touched.password
-                    ? "border-red-500"
-                    : "border-white/10"
-                }
-                text-white rounded-md px-4 py-3 peer
-                focus:outline-none focus:ring-2 focus:ring-[#42A5F5]
-                placeholder-transparent pr-10`}
+      ${
+        errors.password && touched.password
+          ? "border-red-500"
+          : "border-white/10"
+      }
+      text-white rounded-md px-4 py-3 peer
+      focus:outline-none focus:ring-2 focus:ring-[#42A5F5]
+      placeholder-transparent pr-10`}
             />
 
+            {/* LABEL */}
             <label
               htmlFor="password"
               className={`
-                absolute left-3 pointer-events-none transition-all duration-200
-                ${
-                  formData.password
-                    ? "top-[-14px] text-xs text-[#90CAF9] px-2 py-[5px] rounded-md"
-                    : "top-3 text-base text-gray-300"
-                }
-                peer-focus:top-[-14px] peer-focus:text-xs peer-focus:text-[#90CAF9]
-                peer-focus:bg-[#0A1A2F] peer-focus:px-2 peer-focus:py-[2px] peer-focus:rounded-md
-              `}
+      absolute left-3 pointer-events-none transition-all duration-200
+      ${
+        formData.password
+          ? "top-[-14px] text-xs text-[#90CAF9] px-2 py-[5px] rounded-md"
+          : "top-3 text-base text-gray-300"
+      }
+      peer-focus:top-[-14px] peer-focus:text-xs peer-focus:text-[#90CAF9]
+      peer-focus:bg-[#0A1A2F] peer-focus:px-2 peer-focus:py-[2px] peer-focus:rounded-md
+    `}
             >
               Password
             </label>
 
-            {/* Eye Toggle Button */}
+            {/* EYE BUTTON — NOW CORRECT */}
             <button
               type="button"
               onClick={togglePasswordVisibility}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+              className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-white transition-colors"
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
               {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
-
-            {errors.password && touched.password && (
-              <p className="text-sm text-red-400 mt-1">{errors.password}</p>
-            )}
           </div>
-
-          {/* SUBMIT BUTTON */}
+          {errors.password && touched.password && (
+            <p className="text-sm text-red-400 " style={{ margin: "0px" }}>
+              {errors.password}
+            </p>
+          )}
+          <div className="text-end">
+            <span className="text-sm text-gray-300">
+              <Link
+                to={"/fogot-password"}
+                className="text-[#42A5F5] font-semibold hover:underline"
+              >
+                Forgot Password
+              </Link>
+            </span>
+          </div>
           <button
             type="submit"
             className="

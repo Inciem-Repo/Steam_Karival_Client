@@ -1,7 +1,3 @@
-// --- ALL LOGIC UNCHANGED ----
-// ONLY UI/UX HAS BEEN REWRITTEN.
-// ----------------------------------------------
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import home from "../../assets/images/home.png";
@@ -13,6 +9,99 @@ import { getAllQuizDetails } from "../../services/quiz";
 import { useApi } from "../../hooks/useApi";
 import type { QuizMeta } from "../../utils/types/quiz";
 
+// Skeleton Loader Component
+const SkeletonLoader = ({
+  variant = "text",
+  lines = 3,
+  width = "full",
+  height = "auto",
+  circle = false,
+  animated = true,
+  className = "",
+}: {
+  variant?: "text" | "card" | "image";
+  lines?: number;
+  width?: string | number;
+  height?: string | number;
+  circle?: boolean;
+  animated?: boolean;
+  className?: string;
+}) => {
+  const getSkeletonContent = () => {
+    switch (variant) {
+      case "text":
+        return (
+          <div className="space-y-3 p-3">
+            {Array.from({ length: lines }).map((_, index) => (
+              <div
+                key={index}
+                className={`h-4 bg-gray-700 rounded ${
+                  index === lines - 1 ? "w-3/4" : "w-full"
+                }`}
+              />
+            ))}
+          </div>
+        );
+
+      case "card":
+        return (
+          <div className="border border-gray-700 rounded-lg p-4 space-y-4">
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 bg-gray-700 rounded-full" />
+              <div className="space-y-2 flex-1">
+                <div className="h-4 bg-gray-700 rounded w-3/4" />
+                <div className="h-3 bg-gray-700 rounded w-1/2" />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <div className="h-3 bg-gray-700 rounded w-full" />
+              <div className="h-3 bg-gray-700 rounded w-full" />
+              <div className="h-3 bg-gray-700 rounded w-2/3" />
+            </div>
+          </div>
+        );
+
+      case "image":
+        return (
+          <div className="space-y-3">
+            <div
+              className={`bg-gray-700 rounded ${
+                circle ? "rounded-full" : "rounded-lg"
+              }`}
+              style={{
+                width: circle ? width : "100%",
+                height: circle ? width : height,
+              }}
+            />
+            <div className="space-y-2">
+              <div className="h-4 bg-gray-700 rounded w-3/4" />
+              <div className="h-3 bg-gray-700 rounded w-1/2" />
+            </div>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  const skeletonStyle = {
+    width: typeof width === "number" ? `${width}px` : width,
+    height: typeof height === "number" ? `${height}px` : height,
+  };
+
+  return (
+    <div
+      className={`${animated ? "animate-pulse" : ""} ${className}`}
+      style={skeletonStyle}
+      role="status"
+      aria-label="Loading..."
+    >
+      {getSkeletonContent()}
+    </div>
+  );
+};
+
 function Home() {
   const [countdown, setCountdown] = useState<number | null>(null);
   const navigate = useNavigate();
@@ -20,13 +109,21 @@ function Home() {
   const { fetchQuiz } = useQuiz();
   const [selectedLevel, setSelectedLevel] = useState<string | null>(null);
   const { callApi: callGetAllQuizDetails } = useApi(getAllQuizDetails);
-  const [quizMeteData, setQuizMetaData] = useState<QuizMeta[]>([]);
+  const [quizMetaData, setQuizMetaData] = useState<QuizMeta[]>([]);
+  const [loadingQuizData, setLoadingQuizData] = useState(true);
 
   useEffect(() => {
     const getQuizMetaData = async () => {
-      const quizDataResponse = await callGetAllQuizDetails();
-      refreshUser();
-      setQuizMetaData(quizDataResponse.data);
+      setLoadingQuizData(true);
+      try {
+        const quizDataResponse = await callGetAllQuizDetails();
+        refreshUser();
+        setQuizMetaData(quizDataResponse.data);
+      } catch (error) {
+        console.error("Error fetching quiz data:", error);
+      } finally {
+        setLoadingQuizData(false);
+      }
     };
     getQuizMetaData();
   }, []);
@@ -53,7 +150,7 @@ function Home() {
       return;
     }
 
-    const quizData = quizMeteData.find((quiz) => quiz.category === level);
+    const quizData = quizMetaData.find((quiz) => quiz.category === level);
     if (quizData?.is_free) {
       await startCountdown(level);
       return;
@@ -81,7 +178,7 @@ function Home() {
   };
 
   const getIsLevelActive = (level: string): boolean => {
-    const quizData = quizMeteData.find((quiz) => quiz.category === level);
+    const quizData = quizMetaData.find((quiz) => quiz.category === level);
     return quizData ? quizData.is_active : false;
   };
 
@@ -148,14 +245,50 @@ function Home() {
     return () => clearTimeout(timer);
   }, [countdown, navigate]);
 
-  // ------------------------------
-  //         PREMIUM UI BELOW
-  // ------------------------------
-
-  if (authLoading) {
+  // Loading state
+  if (authLoading || loadingQuizData) {
     return (
-      <div className="w-full min-h-screen flex items-center justify-center text-white">
-        <p>Loading...</p>
+      <div className="min-h-screen w-full bg-gradient-to-b from-[#0A1A2F] to-[#10263F] flex justify-center px-4 py-10">
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute -top-32 left-0 w-96 h-96 bg-[#1E88E5]/20 blur-[140px] rounded-full"></div>
+          <div className="absolute bottom-0 right-0 w-[420px] h-[420px] bg-[#42A5F5]/20 blur-[150px] rounded-full"></div>
+        </div>
+
+        <main className="w-full max-w-6xl flex flex-col gap-12 relative z-10">
+          {/* TOP SECTION */}
+          <div className="flex flex-col md:flex-row gap-12">
+            <div className="flex flex-col items-center md:items-start text-center md:text-left gap-6 flex-1">
+              <SkeletonLoader
+                variant="image"
+                width={330}
+                height={200}
+                className="mx-auto md:mx-0"
+              />
+            </div>
+            <div className="flex flex-col gap-6 flex-1">
+              <SkeletonLoader className="bg-white/10 border border-white/10 rounded-xl" />
+              <div className="flex flex-col gap-4">
+                {[1, 2, 3, 4].map((item) => (
+                  <SkeletonLoader
+                    key={item}
+                    className="bg-white/5 border border-white/10 rounded-xl"
+                  />
+                ))}
+              </div>
+              <SkeletonLoader className="bg-white/10 border border-white/10 rounded-xl" />
+            </div>
+          </div>
+
+          {/* BOTTOM SECTION - PROMO CARDS SKELETONS */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-full">
+            {[1, 2, 3, 4].map((item) => (
+              <SkeletonLoader
+                key={item}
+                className="bg-white/5 border border-white/10 rounded-xl"
+              />
+            ))}
+          </div>
+        </main>
       </div>
     );
   }
